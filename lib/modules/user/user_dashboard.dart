@@ -1,170 +1,171 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'widgets/investment/investment.dart';
 import 'widgets/policy/policy.dart';
 import 'widgets/insurance/insurance.dart';
 import 'widgets/loan/loan.dart';
-import 'widgets/userdrawer.dart'; 
-import 'widgets/dashoard.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import '../user/widgets/bottomNavbarUser/bottomNav.dart';
+import '../vendor_Dashboard.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+import '/modules/notification/notification.dart';
+import '/modules/drawer/my_drawer.dart';
+import '/modules/drawer/drawer_sections.dart';
+import '/modules/settings/settings.dart';
+import '/modules/drawer/changepassword.dart';
+import '/modules/drawer/myprofile.dart';
+import '/consts/appColors.dart';
+
+class UserDashboardPage extends StatefulWidget {
+  const UserDashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Admin Panel',
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-        primaryColor: Color(0xFF751919),
-        scaffoldBackgroundColor: Colors.grey[100],
-      ),
-      home: const AdminPanel(),
-    );
+  State<UserDashboardPage> createState() => _UserDashboardPageState();
+}
+
+class _UserDashboardPageState extends State<UserDashboardPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
+  DrawerSections currentPage = DrawerSections.dashboard;
+
+  String? userToken;
+  bool loadingToken = true;
+
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
   }
-}
 
-class AdminPanel extends StatefulWidget {
-  const AdminPanel({super.key});
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('KEYTOKEN');
 
-  @override
-  State<AdminPanel> createState() => _AdminPanelState();
-}
+    setState(() {
+      userToken = token;
+      loadingToken = false;
 
-class _AdminPanelState extends State<AdminPanel> {
-  int currentIndex = 0;
+      _pages.clear();
+      _pages.addAll([
+        Dashboard(),
+        InsurancePage(),
+        InvestmentPage(token: token ?? ''), 
+        LoanPage(),
+        PolicyPage(),
+      ]);
+    });
+  }
 
-  Widget getCurrentScreen() {
-    switch (currentIndex) {
-      case 0:
-        return DashboardPage();
-      case 1:
-        return InvestmentPage();
-      case 2:
-        return PolicyPage();
-      case 3:
-        return InsurancePage();
-      case 4:
-        return LoanPage();
-      default:
-        return DashboardPage();
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void handleDrawerNavigation(DrawerSections section) {
+    setState(() {
+      currentPage = section;
+    });
+
+    switch (section) {
+      case DrawerSections.dashboard:
+        if (_selectedIndex != 0) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UserDashboardPage()),
+          );
+        }
+        break;
+      case DrawerSections.myprofile:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyProfilePage()),
+        );
+        break;
+      case DrawerSections.changepassword:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+        );
+        break;
+      case DrawerSections.settings:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsPage()),
+        );
+        break;
+      case DrawerSections.logout:
+        // Logout handled inside drawer
+        break;
     }
   }
 
-  Widget buildDrawer() {
-    return AdminDrawer(
-      currentIndex: currentIndex,
-      onTap: (index) {
-        setState(() {
-          currentIndex = index;
-        });
-        Navigator.pop(context); 
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        bool isLargeScreen = constraints.maxWidth >= 800;
+    if (loadingToken) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-        return Scaffold(
-          drawer: isLargeScreen ? null : buildDrawer(),
-          body: Row(
-            children: [
-              if (isLargeScreen)
-                SizedBox(
-                  width: 250,
-                  child: buildDrawer(),
-                ),
-              Expanded(
-                child: Column(
-                  children: [
-                    // Top AppBar
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFFA52A2A),
-                            Color(0xFFB35B4A),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (!isLargeScreen)
-                            Builder(
-                              builder: (context) => IconButton(
-                                icon: const Icon(Icons.menu, size: 30, color: Colors.white),
-                                onPressed: () {
-                                  Scaffold.of(context).openDrawer();
-                                },
-                              ),
-                            ),
-                          Row(
-                            children: [
-                              PopupMenuButton<String>(
-                                icon: const Icon(Icons.notifications, color: Colors.white),
-                                onSelected: (value) {
-                                  
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(value: "1", child: Text("New policy available")),
-                                  const PopupMenuItem(value: "2", child: Text("Loan update pending")),
-                                  const PopupMenuItem(value: "3", child: Text("Insurance expiring soon")),
-                                ],
-                              ),
-
-                              PopupMenuButton<String>(
-                                icon: const Icon(Icons.account_circle, color: Colors.white),
-                                onSelected: (value) {
-                                  switch (value) {
-                                    case 'admin':
-                                      
-                                      break;
-                                    case 'profile':
-                                      
-                                      break;
-                                    case 'password':
-                                      
-                                      break;
-                                    case 'logout':
-                                      
-                                      break;
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(value: 'admin', child: Text("Admin User")),
-                                  const PopupMenuItem(value: 'profile', child: Text("My Profile")),
-                                  const PopupMenuItem(value: 'password', child: Text("Change Password")),
-                                  const PopupMenuItem(value: 'logout', child: Text("Logout")),
-                                ],
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: getCurrentScreen(),
-                    ),
-                  ],
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: MyDrawer(
+        currentPage: currentPage,
+        onItemSelected: handleDrawerNavigation,
+      ),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.background,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            GestureDetector(
+              onTap: () => _scaffoldKey.currentState?.openDrawer(),
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage: AssetImage('assets/images/logo.png'),
+                  backgroundColor: Colors.transparent,
                 ),
               ),
-            ],
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'CONNECT INDIA ENTERPRISES',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              icon: const Icon(Icons.notifications, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationPage()),
+                );
+              },
+            ),
           ),
-        );
-      },
+        ],
+      ),
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavItemTapped,
+      ),
     );
   }
 }

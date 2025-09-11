@@ -5,14 +5,14 @@ import 'vendorCustomerDrawer.dart';
 import 'addNewCustomer.dart';
 import 'vendorcustomerIconbuttons.dart';
 
-class VendorTablePage extends StatefulWidget {
-  const VendorTablePage({super.key});
+class VendorCustomerPage extends StatefulWidget {
+  const VendorCustomerPage({super.key});
 
   @override
-  State<VendorTablePage> createState() => _VendorTablePageState();
+  State<VendorCustomerPage> createState() => _VendorCustomerPageState();
 }
 
-class _VendorTablePageState extends State<VendorTablePage> {
+class _VendorCustomerPageState extends State<VendorCustomerPage> {
   Map<String, bool> columnVisibility = {
     'ID': true,
     'Business name': true,

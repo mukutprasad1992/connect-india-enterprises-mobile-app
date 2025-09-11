@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'widgets/NewVendorpage.dart';
+import 'dart:convert';
+
+import '/services/userServices/getallvendor.dart';       
+import '/models/Vendor_model.dart';  
+ 
+import 'widgets/AddNewVendorpage.dart';
 import 'widgets/vendorSummaryCard.dart';
 import 'widgets/vendor_Searchbar.dart';
 
@@ -14,67 +18,81 @@ class VendorTablePage extends StatefulWidget {
 
 class _VendorTablePageState extends State<VendorTablePage> {
   final TextEditingController searchController = TextEditingController();
-  List<Map<String, String>> vendorData = [];
-  List<Map<String, String>> filteredData = [];
+  List<Vendor> vendorData = [];
+  List<Vendor> filteredData = [];
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadVendors();
+    _loadVendorsFromApi();
     searchController.addListener(_filterData);
   }
 
-  Future<void> _saveVendors() async {
-    final prefs = await SharedPreferences.getInstance();
-    final vendorJsonList =
-        vendorData.map((vendor) => jsonEncode(vendor)).toList();
-    await prefs.setStringList('vendors', vendorJsonList);
-  }
+  /// ✅ Fetch vendors from API
+  Future<void> _loadVendorsFromApi() async {
+    setState(() => isLoading = true);
+    try {
 
-  Future<void> _loadVendors() async {
-    final prefs = await SharedPreferences.getInstance();
-    final vendorJsonList = prefs.getStringList('vendors') ?? [];
-    setState(() {
-      vendorData = vendorJsonList
-          .map((vendorJson) => Map<String, String>.from(jsonDecode(vendorJson)))
-          .toList();
-      filteredData = List.from(vendorData); // Initially same
-    });
+      print("🚀 Fetching vendors from API...");
+      final vendors = await VendorApi.fetchVendors();
+      print("✅ Vendors received: ${vendors.length}");
+      for (var v in vendors) {
+        print("Vendor: ${v.businessName} (${v.email})");
+      }
+      //final vendors = await VendorApi.fetchVendors();
+
+      setState(() {
+        vendorData = vendors;
+        filteredData = List.from(vendors);
+        isLoading = false;
+      });
+
+      // (Optional) save to SharedPreferences for offline usage
+      
+      final prefs = await SharedPreferences.getInstance();
+      final vendorJsonList = vendors.map((v) => jsonEncode(v.toJson())).toList();
+      await prefs.setStringList('vendors', vendorJsonList);
+
+    } catch (e) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
   void _filterData() {
     String query = searchController.text.toLowerCase();
     setState(() {
       filteredData = vendorData.where((vendor) {
-        return vendor.values.any(
-          (value) => value.toLowerCase().contains(query),
-        );
+        return vendor.businessName.toLowerCase().contains(query) ||
+               vendor.businessRepresentative.toLowerCase().contains(query) ||
+               vendor.email.toLowerCase().contains(query) ||
+               vendor.mobileNo.toLowerCase().contains(query);
       }).toList();
     });
   }
 
-  void _addNewVendor(Map<String, String> newVendor) {
+  void _addNewVendor(Vendor newVendor) {
     setState(() {
       vendorData.add(newVendor);
       _filterData();
     });
-    _saveVendors();
   }
 
-  void _updateVendor(int index, Map<String, String> updatedVendor) {
+  void _updateVendor(int index, Vendor updatedVendor) {
     setState(() {
       vendorData[index] = updatedVendor;
       _filterData();
     });
-    _saveVendors();
   }
 
-  void _toggleVendorBlockStatus(int index, Map<String, String> updatedVendor) {
+  void _toggleVendorBlockStatus(int index, Vendor updatedVendor) {
     setState(() {
       vendorData[index] = updatedVendor;
       _filterData();
     });
-    _saveVendors();
   }
 
   void _deleteVendor(int index) {
@@ -82,7 +100,6 @@ class _VendorTablePageState extends State<VendorTablePage> {
       vendorData.removeAt(index);
       _filterData();
     });
-    _saveVendors();
   }
 
   @override
@@ -105,39 +122,52 @@ class _VendorTablePageState extends State<VendorTablePage> {
                   children: [
                     VendorSearchBar(
                       onChanged: (value) {},
-                      vendorData: vendorData,
+                      vendorData: vendorData.map((v) => v.toJson()).toList(),
                       onSearchResult: (filteredList) {
                         setState(() {
-                          filteredData = filteredList;
+                          filteredData = filteredList
+                              .map<Vendor>((row) => Vendor.fromJson(row))
+                              .toList();
                         });
                       },
                       onMicPressed: () {},
                       onSearchChanged: (searchText) {},
                     ),
                     const SizedBox(height: 10),
+
                     Expanded(
-                      child: filteredData.isEmpty
-                          ? const Center(
-                              child: Text('No vendor data available.'))
-                          : GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: isWideScreen ? 2 : 1,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: isWideScreen ? 2.2 : 1.9,
-                              ),
-                              itemCount: filteredData.length,
-                              itemBuilder: (context, index) {
-                                final row = filteredData[index];
-                                return VendorSummaryCard(
-                                  row: row,
-                                  index: index,
-                                  onUpdate: _updateVendor,
-                                  onBlockToggle: _toggleVendorBlockStatus,
-                                  onDelete: _deleteVendor,
-                                );
-                              },
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : RefreshIndicator(   // ✅ Pull-to-refresh added
+                              onRefresh: _loadVendorsFromApi,
+                              child: filteredData.isEmpty
+                                  ? ListView(   // ✅ Needed so RefreshIndicator still works
+                                      children: [
+                                        SizedBox(height: 200),
+                                        Center(child: Text('No vendor data available.')),
+                                      ],
+                                    )
+                                  : GridView.builder(
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: isWideScreen ? 2 : 1,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio: isWideScreen ? 2.2 : 1.9,
+                                      ),
+                                      itemCount: filteredData.length,
+                                      itemBuilder: (context, index) {
+                                        final vendor = filteredData[index];
+                                        return VendorSummaryCard(
+                                          row: vendor.toJson(),
+                                          index: index,
+                                          onUpdate: (i, updated) =>
+                                              _updateVendor(i, Vendor.fromJson(updated)),
+                                          onBlockToggle: (i, updated) =>
+                                              _toggleVendorBlockStatus(i, Vendor.fromJson(updated)),
+                                          onDelete: _deleteVendor,
+                                        );
+                                      },
+                                    ),
                             ),
                     ),
                   ],
@@ -157,8 +187,7 @@ class _VendorTablePageState extends State<VendorTablePage> {
                         MaterialPageRoute(
                             builder: (context) => NewVendorPage()),
                       );
-                      if (newVendor != null &&
-                          newVendor is Map<String, String>) {
+                      if (newVendor != null && newVendor is Vendor) {
                         _addNewVendor(newVendor);
                       }
                     },

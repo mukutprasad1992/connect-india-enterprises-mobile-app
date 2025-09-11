@@ -18,13 +18,14 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.7.0" apply false
-    id("org.jetbrains.kotlin.android") version "1.8.22" apply false
-    
+    id("com.android.application") version "8.6.0" apply false   // ✅ match build.gradle.kts
+    id("org.jetbrains.kotlin.android") version "2.1.0" apply false   // ✅ upgraded Kotlin
 }
+
 buildscript {
     dependencies {
         classpath("com.google.gms:google-services:4.3.15")
     }
 }
+
 include(":app")

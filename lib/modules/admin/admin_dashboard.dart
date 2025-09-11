@@ -1,37 +1,33 @@
 import 'package:flutter/material.dart';
-import '/modules/admin/widgets/bottomNavbar/bottomNav.dart';
-import '/modules/admin/dashboard_home.dart';
+import 'widgets/bottomNavbarAdmin/bottomNav.dart';
+import '../vendor_Dashboard.dart';
 import '/modules/admin/widgets/customer/customer.dart';
-
 import '/modules/admin/widgets/vendor/vendor.dart';
-
 import '/modules/admin/widgets/voucher/voucher.dart';
-
 import '/modules/admin/widgets/inquiry/inquery.dart';
-
 //import '/modules/admin/widgets/wishlist/wishlist_page.dart';
-import '/modules/admin/widgets/notification/notification.dart';
-import '/modules/admin/widgets/drawer/my_drawer.dart';
-import '/modules/admin/widgets/drawer/drawer_sections.dart';
-import '/modules/admin/widgets/settings/settings.dart';
-import '/modules/admin/widgets/drawer/changepassword.dart';
-import '/modules/admin/widgets/drawer/myprofile.dart';
+import '/modules//notification/notification.dart';
+import '/modules/drawer/my_drawer.dart';
+import '/modules/drawer/drawer_sections.dart';
+import '/modules/settings/settings.dart';
+import '/modules/drawer/changepassword.dart';
+import '/modules/drawer/myprofile.dart';
 import '/consts/appColors.dart';
 
-class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+class AdminDashboardPage extends StatefulWidget {
+  const AdminDashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
+  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
 
   final List<Widget> _pages = [
-    DashboardOverview(),
+    Dashboard(),
     VendorTablePage(),
     CustomerTablePage(),
     InqueryTablePage(),
@@ -54,7 +50,7 @@ class _DashboardPageState extends State<DashboardPage> {
         if (_selectedIndex != 0) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardPage()),
+            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
           );
         }
         break;

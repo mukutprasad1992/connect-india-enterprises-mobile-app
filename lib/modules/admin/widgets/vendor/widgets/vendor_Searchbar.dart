@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class VendorSearchBar extends StatefulWidget {
   final void Function(String searchText) onChanged;
-  final List<Map<String, String>> vendorData;
-  final Function(List<Map<String, String>>) onSearchResult;
+  final List<Map<String, dynamic>> vendorData;
+  final Function(List<Map<String, dynamic>>) onSearchResult;
   final Function(String) onSearchChanged;
   final VoidCallback onMicPressed;
 

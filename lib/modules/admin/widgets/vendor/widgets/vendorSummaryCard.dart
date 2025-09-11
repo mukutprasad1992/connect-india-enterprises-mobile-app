@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'vendorIconbuttons.dart';
 
 class VendorSummaryCard extends StatelessWidget {
-  final Map<String, String> row;
+  final Map<String, dynamic> row;
   final int index;
-  final void Function(int, Map<String, String>) onUpdate;
-  final void Function(int, Map<String, String>) onBlockToggle;
+  final void Function(int, Map<String, dynamic>) onUpdate;
+  final void Function(int, Map<String, dynamic>) onBlockToggle;
   final void Function(int) onDelete;
 
   const VendorSummaryCard({
@@ -61,7 +61,7 @@ class VendorSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    row['Business name'] ?? 'No Name',
+                    row['businessName'] ?? 'No Name',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Colors.indigo,
@@ -80,9 +80,9 @@ class VendorSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            _buildLabelValueText(context, 'Representative', row['Business representative'] ?? '', Colors.teal),
-            _buildLabelValueText(context, 'Vendor Code', row['Vendor code'] ?? '', Colors.blue),
-            _buildLabelValueText(context, 'Vendor Status', row['Status'] ?? '', statusColor),
+            _buildLabelValueText(context, 'Representative', row['businessRepresentative'] ?? '', Colors.teal),
+            _buildLabelValueText(context, 'Vendor Code', row['vendorCode'] ?? '', Colors.blue),
+            _buildLabelValueText(context, 'Vendor Status', row['status'] ?? '', statusColor),
           ],
         ),
       ),

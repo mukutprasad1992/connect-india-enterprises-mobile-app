@@ -3,28 +3,39 @@ import 'package:flutter/services.dart';
 import '/consts/appColors.dart';
 
 class VendorDetailPage extends StatelessWidget {
-  final Map<String, String> row;
+  final Map<String, dynamic> row;
 
   const VendorDetailPage({super.key, required this.row});
 
   IconData _getIconForKey(String key) {
     switch (key.toLowerCase()) {
-      case 'business name':
+      case 'firstName':
         return Icons.business;
-      case 'business representative':
+      case 'lastName':
+        return Icons.business;
+      case 'businessName':
+        return Icons.business;
+      case 'businessRepresentative':
         return Icons.person_outline;
       case 'email':
         return Icons.email_outlined;
-      case 'phone':
+      case 'mobileNo':
         return Icons.phone_android;
-      case 'vendor code':
+      case 'vendorCode':
         return Icons.code;
       case 'address':
         return Icons.location_on_outlined;
-      case 'created at':
-      case 'create at':
+      case 'createdAt':
         return Icons.calendar_today_outlined;
       case 'status':
+        return Icons.toggle_on_outlined;
+      case 'pinCode':
+        return Icons.toggle_on_outlined;
+      case 'roleId':
+        return Icons.toggle_on_outlined;
+      case 'dateOfBirth':
+        return Icons.toggle_on_outlined;
+      case 'profileImageURL':
         return Icons.toggle_on_outlined;
       default:
         return Icons.info_outline;

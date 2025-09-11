@@ -3,10 +3,10 @@ import 'edit_page.dart';
 import 'vendordetailpage.dart';
 
 class VendorActionButtons extends StatelessWidget {
-  final Map<String, String> row;
+  final Map<String, dynamic> row;
   final int index;
-  final Function(int index, Map<String, String> updatedVendor) onUpdate;
-  final Function(int index, Map<String, String> updatedVendor) onBlockToggle;
+  final Function(int index, Map<String, dynamic> updatedVendor) onUpdate;
+  final Function(int index, Map<String, dynamic> updatedVendor) onBlockToggle;
   final void Function(int index) onDelete;
 
   const VendorActionButtons({
@@ -99,7 +99,7 @@ class VendorActionButtons extends StatelessWidget {
                       Navigator.of(dialogContext).pop();
                       final updatedVendor = Map<String, String>.from(row);
                       updatedVendor['Status'] =
-                          isBlocked ? 'Active' : 'Blocked';
+                          isBlocked ? 'Enable' : 'Blocked';
                       onBlockToggle(index, updatedVendor);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -157,7 +157,7 @@ class VendorActionButtons extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      row['Status'] == 'Blocked' ? 'Blocked' : 'Active',
+                      row['Status'] == 'Blocked' ? 'Blocked' : 'Enable',
                       style: const TextStyle(fontSize: 15),
                     ),
                   ],

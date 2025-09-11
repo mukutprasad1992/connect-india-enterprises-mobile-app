@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '/controllers/adminController/loginController.dart';
+import '/controllers/loginController.dart';
 import '/views/signup/signup_page.dart';
-import '/views/login/forgetPassword.dart';
-//import '/services/loginApi_service.dart';
+import 'forgotPassword.dart';
+//import '/services/google_sign_in_service.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,8 +17,6 @@ class _LoginPageState extends State<LoginPage> {
   bool obscurePassword = true;
   bool rememberMe = true;
   bool isLoading = false;
-  //final _apiService = ApiService();
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,8 +124,7 @@ class _LoginPageState extends State<LoginPage> {
               height: 42,
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () =>
-                    controller.trySubmit(() => setState(() {}), context),
+                onPressed: () =>controller.trySubmit(() => setState(() {}), context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   shape: RoundedRectangleBorder(
@@ -143,16 +141,15 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-
+            // ✅ Error message
             if (controller.errorMessage.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 12),
                 child: Text(
                   controller.errorMessage,
-                  style: const TextStyle(color: Colors.redAccent),
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ),
-
             const SizedBox(height: 24),
 
             /// ➖ Divider

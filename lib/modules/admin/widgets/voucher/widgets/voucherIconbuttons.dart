@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'voucherdetailspage.dart';
+import 'Viewvoucher.dart';
 import 'editpage.dart';
 
 class VoucherActionButtons extends StatelessWidget {
@@ -23,7 +23,9 @@ class VoucherActionButtons extends StatelessWidget {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: const Icon(Icons.more_vert, color: Colors.black),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       elevation: 8, // shadow effect
       color: Colors.white, // popup background color
       offset: const Offset(0, 40), // dropdown position
@@ -31,7 +33,11 @@ class VoucherActionButtons extends StatelessWidget {
         if (value == 'view') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => VoucherDetailPage(row: row)),
+            MaterialPageRoute(
+              builder: (_) => VoucherPdfView(
+                viewSelectedVoucher: row,
+              ),
+            ),
           );
         } else if (value == 'delete') {
           showDialog(
@@ -135,7 +141,11 @@ class VoucherActionButtons extends StatelessWidget {
           value: 'view',
           child: Row(
             children: const [
-              Icon(Icons.visibility, color: Colors.blue,size: 20,),
+              Icon(
+                Icons.visibility,
+                color: Colors.blue,
+                size: 20,
+              ),
               SizedBox(width: 5),
               Text('View', style: TextStyle(fontSize: 15)),
             ],
@@ -145,7 +155,7 @@ class VoucherActionButtons extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: const [
-              Icon(Icons.delete, color: Colors.redAccent,size: 20),
+              Icon(Icons.delete, color: Colors.redAccent, size: 20),
               SizedBox(width: 5),
               Text('Delete', style: TextStyle(fontSize: 15)),
             ],
@@ -156,13 +166,15 @@ class VoucherActionButtons extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                row['Redeemed'] == 'true' ? Icons.block : Icons.card_giftcard,size: 20,
+                row['Redeemed'] == 'true' ? Icons.block : Icons.card_giftcard,
+                size: 20,
                 color: row['Redeemed'] == 'true'
                     ? Colors.redAccent
                     : Colors.deepPurple,
               ),
               const SizedBox(width: 5),
-              Text(row['Redeemed'] == 'true' ? 'Already Redeemed' : 'Redeem', style: TextStyle(fontSize: 15)),
+              Text(row['Redeemed'] == 'true' ? 'Already Redeemed' : 'Redeem',
+                  style: TextStyle(fontSize: 15)),
             ],
           ),
         ),
@@ -171,7 +183,7 @@ class VoucherActionButtons extends StatelessWidget {
             value: 'edit',
             child: Row(
               children: const [
-                Icon(Icons.edit, color: Colors.amberAccent,size: 20),
+                Icon(Icons.edit, color: Colors.amberAccent, size: 20),
                 SizedBox(width: 5),
                 Text('Edit', style: TextStyle(fontSize: 15)),
               ],

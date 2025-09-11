@@ -1,13 +1,32 @@
-// import 'package:flutter/material.dart';
-// import 'package:myapp/homescreen/homescreen.dart';
-// import 'package:myapp/views/login/login_page.dart';
+import 'package:flutter/material.dart';
+import '/views/login/login_Page.dart';
+import '/views/login/resetPassword.dart';
+import '/mainSplashScreen.dart';
 
-// class AppRoutes {
-//   static const String home = '/home';
-//   static const String login = '/login';
+class MyAppRoutes {
+  static const String splash = '/';
+  static const String login = '/login';
+  static const String resetPassword = '/reset-password';
 
-//   static final Map<String, WidgetBuilder> routes = {
-//     home: (context) => const HomeScreen(),
-//     login: (context) => const LoginPage(),
-//   };
-// }
+  static Route<dynamic>? generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case splash:
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+
+      case login:
+        return MaterialPageRoute(builder: (_) => const LoginPage());
+
+      case resetPassword:
+        final uri = Uri.parse(settings.name!);
+        final token = uri.queryParameters['token'] ?? '';
+        return MaterialPageRoute(builder: (_) => ResetPasswordPage(token: token));
+
+      default:
+        return MaterialPageRoute(
+          builder: (_) => Scaffold(
+            body: Center(child: Text("No route defined for ${settings.name}")),
+          ),
+        );
+    }
+  }
+}

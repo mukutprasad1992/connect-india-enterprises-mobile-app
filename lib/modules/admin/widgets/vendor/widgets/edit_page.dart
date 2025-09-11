@@ -3,7 +3,7 @@ import '/consts/appColors.dart';
 import 'package:flutter/services.dart';
 
 class EditPage extends StatefulWidget {
-  final Map<String, String> vendor;
+  final Map<String, dynamic> vendor;
 
   const EditPage({super.key, required this.vendor});
 
@@ -25,13 +25,13 @@ class _EditPageState extends State<EditPage> {
   @override
   void initState() {
     super.initState();
-    _businessNameController.text = widget.vendor['Business name'] ?? '';
+    _businessNameController.text = widget.vendor['businessName'] ?? '';
     _representativeController.text =
-        widget.vendor['Business representative'] ?? '';
-    _emailController.text = widget.vendor['Email'] ?? '';
-    _phoneController.text = widget.vendor['Phone'] ?? '';
-    _vendorCodeController.text = widget.vendor['Vendor code'] ?? '';
-    _addressController.text = widget.vendor['Address'] ?? '';
+        widget.vendor['businessRepresentative'] ?? '';
+    _emailController.text = widget.vendor['email'] ?? '';
+    _phoneController.text = widget.vendor['mobileNo'] ?? '';
+    _vendorCodeController.text = widget.vendor['vendorCode'] ?? '';
+    _addressController.text = widget.vendor['address'] ?? '';
   }
 
   @override
@@ -49,12 +49,12 @@ class _EditPageState extends State<EditPage> {
     if (_formKey.currentState!.validate()) {
       final updatedVendor = {
         ...widget.vendor,
-        'Business name': _businessNameController.text,
-        'Business representative': _representativeController.text,
-        'Email': _emailController.text,
-        'Phone': _phoneController.text,
-        'Vendor code': _vendorCodeController.text,
-        'Address': _addressController.text,
+        'businessName': _businessNameController.text,
+        'businessRepresentative': _representativeController.text,
+        'email': _emailController.text,
+        'mobileNo': _phoneController.text,
+        'vendorCode': _vendorCodeController.text,
+        'address': _addressController.text,
         'Updated at': DateTime.now().toString(),
       };
 
