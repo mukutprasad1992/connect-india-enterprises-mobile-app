@@ -17,7 +17,7 @@ class AddInvestmentPage extends StatelessWidget {
 
       mode: "add",
       token: token,
-       isDetailsConfirmed: "0",
+      submit: "0",
       
     );
   }

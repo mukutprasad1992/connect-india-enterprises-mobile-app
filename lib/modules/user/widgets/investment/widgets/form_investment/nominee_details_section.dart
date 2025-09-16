@@ -12,7 +12,6 @@ class NomineeDetailsSection extends StatefulWidget {
 
   final String? selectedRelation;
   final String? selectIDType;
-  final bool isOtherSelected;
   final ValueChanged<String?> onIDTypeChanged;
   final ValueChanged<String?> onRelationChanged;
 
@@ -22,25 +21,23 @@ class NomineeDetailsSection extends StatefulWidget {
   final String token;
   final String? investmentType;
 
-  // Other details from previous steps (used in API payload)
+  final String activeSteps;
   final String? email;
-  final String? mobile;
   final String? income;
   final String? occupation;
   final Map<String, String>? placeOfBirth;
 
-  // 🔹 Callback when step is successfully completed
   final Function(String dbId) onCompleted;
 
   const NomineeDetailsSection({
     super.key,
+    required this.activeSteps,
     required this.formKey,
     required this.nomineeIdController,
     required this.nomineeMobileController,
     required this.nomineeRelationController,
     required this.selectedRelation,
     required this.selectIDType,
-    required this.isOtherSelected,
     required this.onIDTypeChanged,
     required this.onRelationChanged,
     required this.DBId,
@@ -49,7 +46,6 @@ class NomineeDetailsSection extends StatefulWidget {
     required this.token,
     required this.investmentType,
     required this.email,
-    required this.mobile,
     required this.income,
     required this.occupation,
     required this.placeOfBirth,
@@ -84,7 +80,6 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
     );
   }
 
-  /// 🔹 Submit Nominee details
   Future<String?> submitDetails() async {
     if (!widget.formKey.currentState!.validate()) return null;
     if (widget.DBId == null) return null;
@@ -95,16 +90,14 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
       final res = await updateApi.ServiceTypeApi.updateServiceTypeById(
         id: widget.DBId!,
         token: widget.token,
-        serviceId: widget.serviceId.toString(),
-        serviceSubType: widget.investmentType,
+        serviceId: "1",
+        serviceSubType: "Mutual Funds",
         activeSteps: "nomineeDetails",
         status: "Pending",
         nomineeIdType: widget.selectIDType,
         nomineeId: widget.nomineeIdController.text.trim(),
         nomineeMobile: widget.nomineeMobileController.text.trim(),
-        nomineeRelation: widget.isOtherSelected
-            ? widget.nomineeRelationController.text.trim()
-            : widget.selectedRelation,
+        nomineeRelation: widget.nomineeRelationController.text.trim(),
       );
 
       if (res['status'] == true) {
@@ -123,7 +116,7 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("⚠️ ${e.toString()}")),
+          SnackBar(content: Text(" ${e.toString()}")),
         );
       }
       return null;
@@ -138,29 +131,31 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
       key: widget.formKey,
       child: Column(
         children: [
-          // Select ID Type
+          // 🔹 ID Type Dropdown
           DropdownButtonFormField<String>(
-            value: widget.selectIDType,
+            value: ["Aadhar", "PAN"].contains(widget.selectIDType)
+                ? widget.selectIDType
+                : null,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            decoration: _inputDecoration("Select Nominee ID Type", Icons.badge,
+            decoration: _inputDecoration(
+                "Select Nominee ID Type", Icons.badge,
                 required: true),
             items: ["Aadhar", "PAN"]
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
             onChanged: (val) {
-              setState(() {
-                widget.onIDTypeChanged(val);
-                widget.nomineeIdController.clear();
-              });
+              widget.onIDTypeChanged(val);
+              widget.nomineeIdController.clear(); // clear ID on type change
             },
             validator: (val) {
               if (val == null || val.isEmpty) return "Please select ID Type";
               return null;
             },
+            hint: const Text("Select ID Type"),
           ),
           const SizedBox(height: 12),
 
-          // Nominee ID input
+          // 🔹 ID Input
           TextFormField(
             controller: widget.nomineeIdController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -176,15 +171,16 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
                     LengthLimitingTextInputFormatter(12),
                   ]
                 : null,
-            validator: (value) => AddInvestmentController.validateNomineeId(
-              value,
-              idType: widget.selectIDType,
-            ),
+            validator: (value) {
+              return AddInvestmentController.validateNomineeId(
+                value,
+                idType: widget.selectIDType,
+              );
+            },
           ),
-
           const SizedBox(height: 12),
 
-          // Nominee Mobile
+          // 🔹 Mobile
           TextFormField(
             controller: widget.nomineeMobileController,
             keyboardType: TextInputType.number,
@@ -193,43 +189,44 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
-            decoration:
-                _inputDecoration("nominee Mobile Number", Icons.phone, required: true)
-                    .copyWith(
-              prefixText: "+91 ",
-            ),
+            decoration: _inputDecoration("Nominee Mobile Number", Icons.phone,
+                    required: true)
+                .copyWith(prefixText: "+91 "),
             validator: AddInvestmentController.validatePhone,
+            onSaved: (value) {
+              if (value != null && value.length == 10) {
+                widget.nomineeMobileController.text = '+91 $value';
+              }
+            },
           ),
           const SizedBox(height: 12),
 
-          // Relation Dropdown
+          // 🔹 Relation Dropdown
           DropdownButtonFormField<String>(
-            value: widget.selectedRelation,
+            value: ["Uncle", "Mother", "Father", "Brother", "Sister"]
+                    .contains(widget.selectedRelation)
+                ? widget.selectedRelation
+                : null,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            decoration: _inputDecoration("Relation with Nominee", Icons.group,
-                required: true),
-            items: ["Uncle", "Mother", "Father", "Brother", "Sister", "Other"]
+            decoration: _inputDecoration(
+              "Relation with Nominee",
+              Icons.group,
+              required: true,
+            ),
+            items: ["Uncle", "Mother", "Father", "Brother", "Sister"]
                 .map((relation) =>
                     DropdownMenuItem(value: relation, child: Text(relation)))
                 .toList(),
-            onChanged: widget.onRelationChanged,
-            validator: (_) => AddInvestmentController.validateRelation(
-                widget.isOtherSelected
-                    ? widget.nomineeRelationController.text
-                    : widget.selectedRelation),
+            onChanged: (val) {
+              widget.onRelationChanged(val);
+              widget.nomineeRelationController.text = val ?? '';
+            },
+            validator: (val) {
+              if (val == null || val.isEmpty) return "Please select relation";
+              return null;
+            },
+            hint: const Text("Select Relation"),
           ),
-          const SizedBox(height: 12),
-
-          // Other Relation input
-          if (widget.isOtherSelected)
-            TextFormField(
-              controller: widget.nomineeRelationController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: _inputDecoration("Enter Relation", Icons.group,
-                  required: true),
-              validator: (value) =>
-                  AddInvestmentController.validateRelation(value),
-            ),
         ],
       ),
     );

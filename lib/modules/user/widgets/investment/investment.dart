@@ -49,7 +49,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
         token: token,
       );
 
-      print("API response: $response");
+      //print("API response: $response");
 
       final data = response["data"];
       List<InvestmentModel> loadedData = [];
@@ -72,7 +72,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
 
       await _saveInvestments();
     } catch (e) {
-      debugPrint("⚠️ API fetch failed: $e");
+      debugPrint(" API fetch failed: $e");
       await _loadInvestments();
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -218,7 +218,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
                           builder: (context) => InvestmentFormPage(
                             mode: "add",
                             token: widget.token,
-                            isDetailsConfirmed: "0",
+                            submit: "0",
                           ),
                         ),
                       );

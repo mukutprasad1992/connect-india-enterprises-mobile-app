@@ -120,8 +120,8 @@ class ViewInvestment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Active Step: ${investment['activeSteps']}");
-    print("Submit: ${investment['submit']}");
+    //print("Active Step: ${investment['activeSteps']}");
+    //print("Submit: ${investment['submit']}");
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(

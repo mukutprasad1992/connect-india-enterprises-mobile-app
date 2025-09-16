@@ -9,31 +9,28 @@ class PersonalDetailsSection extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
   final TextEditingController mobileController;
-  final TextEditingController annualIncomeController;
-  final TextEditingController netGrossProfitController;
-
+  final TextEditingController incomeController;
   final String? occupation;
   final List<City> cities;
   final City? selectedCity;
   final bool loadingCities;
-
   final String? dbId;
   final String token;
   final String serviceId;
   final String? investmentType;
   final String mode;
-
+  final String activeSteps;
   final Function(String dbId) onCompleted;
   final Function(City?) onCityChanged;
   final Function(String?) onOccupationChanged;
 
   const PersonalDetailsSection({
     super.key,
+    required this.activeSteps,
     required this.formKey,
     required this.emailController,
     required this.mobileController,
-    required this.annualIncomeController,
-    required this.netGrossProfitController,
+    required this.incomeController,
     required this.occupation,
     required this.cities,
     required this.selectedCity,
@@ -75,7 +72,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
     );
   }
 
-  /// 🔹 Submit personal details to backend
+  /// Submit personal details
   Future<String?> submitDetails() async {
     if (!widget.formKey.currentState!.validate() || widget.dbId == null) {
       return null;
@@ -87,31 +84,30 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
       final res = await updateApi.ServiceTypeApi.updateServiceTypeById(
         id: widget.dbId!,
         token: widget.token,
-        serviceId: widget.serviceId,
-        serviceSubType: widget.investmentType,
+        serviceId: "1",
+        serviceSubType: "Mutual Funds",
         activeSteps: "personalDetails",
         status: "Pending",
         email: widget.emailController.text.trim(),
-        mobile: "+91${widget.mobileController.text.trim()}",
-        income: widget.annualIncomeController.text.trim(),
-        netGrossProfit: widget.netGrossProfitController.text.trim(),
+        mobile: widget.mobileController.text.trim(),
         occupation: widget.occupation,
-        placeOfBirth: widget.selectedCity == null
-            ? {}
-            : {
+        income: widget.incomeController.text.trim(),
+        placeOfBirth: widget.selectedCity != null
+            ? {
                 "city": widget.selectedCity!.city,
                 "state": widget.selectedCity!.state,
-              },
+              }
+            : null,
       );
+
+      print("📥 API Response: $res");
 
       if (res['status'] == true) {
         final dbId =
             res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
-
         if (dbId == null || dbId.isEmpty) {
           throw Exception("Backend did not return DBId");
         }
-
         widget.onCompleted(dbId);
         return dbId;
       } else {
@@ -120,7 +116,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("⚠️ ${e.toString()}")),
+          SnackBar(content: Text(" ${e.toString()}")),
         );
       }
       return null;
@@ -144,7 +140,6 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
           ),
           const SizedBox(height: 12),
 
-          /// Mobile Number
           TextFormField(
             controller: widget.mobileController,
             keyboardType: TextInputType.number,
@@ -157,10 +152,14 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
                 _inputDecoration("Mobile Number", Icons.phone, required: true)
                     .copyWith(prefixText: "+91 "),
             validator: AddInvestmentController.validatePhone,
+            onSaved: (value) {
+              if (value != null && value.length == 10) {
+                widget.mobileController.text = '+91 $value';
+              }
+            },
           ),
           const SizedBox(height: 12),
 
-          /// Place of Birth
           widget.loadingCities
               ? const Center(child: CircularProgressIndicator())
               : DropdownButtonFormField<City>(
@@ -182,14 +181,14 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
                           ))
                       .toList(),
                   onChanged: widget.onCityChanged,
-                  validator: (val) =>
-                      val == null ? "Please select city" : null,
+                  validator: (val) => val == null ? "Please select city" : null,
                 ),
           const SizedBox(height: 12),
 
-          /// Occupation
           DropdownButtonFormField<String>(
-            value: widget.occupation,
+            value: ["JOB", "BUSINESS"].contains(widget.occupation)
+                ? widget.occupation
+                : null,
             decoration:
                 _inputDecoration("Occupation", Icons.work, required: true),
             items: ["JOB", "BUSINESS"]
@@ -198,30 +197,22 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
             onChanged: widget.onOccupationChanged,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (val) => val == null ? "Please select occupation" : null,
+            hint: const Text("Select Occupation"),
           ),
+
           const SizedBox(height: 12),
 
-          /// Income/Profit based on Occupation
-          if (widget.occupation == "JOB")
-            _buildDropdown(
-              controller: widget.annualIncomeController,
-              label: "Annual Income",
-              icon: Icons.money,
-              options: _incomeRanges,
-              validator: (val) => val == null || val.isEmpty
-                  ? "Please select annual income"
-                  : null,
-            )
-          else if (widget.occupation == "BUSINESS")
-            _buildDropdown(
-              controller: widget.netGrossProfitController,
-              label: "Net Gross Profit",
-              icon: Icons.bar_chart,
-              options: _incomeRanges,
-              validator: (val) => val == null || val.isEmpty
-                  ? "Please select net gross profit "
-                  : null,
-            ),
+          // Income field for both JOB and BUSINESS
+          _buildDropdown(
+            controller: widget.incomeController,
+            label: widget.occupation == "JOB"
+                ? "Annual Income"
+                : "Net Gross Profit",
+            icon: Icons.money,
+            options: _incomeRanges,
+            validator: (val) =>
+                val == null || val.isEmpty ? "Please select income" : null,
+          ),
         ],
       ),
     );
@@ -252,12 +243,12 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
   }) {
     return DropdownButtonFormField<String>(
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      value: controller.text.isNotEmpty ? controller.text : null,
+      value: options.contains(controller.text) ? controller.text : null,
       decoration: _inputDecoration(label, icon, required: true),
       items: options
           .map((e) => DropdownMenuItem(value: e, child: Text(e)))
           .toList(),
-      onChanged: (val) => controller.text = val ?? "",
+      onChanged: (val) => setState(() => controller.text = val ?? ""),
       validator: validator,
     );
   }

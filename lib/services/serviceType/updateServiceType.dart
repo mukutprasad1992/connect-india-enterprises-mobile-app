@@ -6,34 +6,31 @@ class ServiceTypeApi {
 
   static Future<Map<String, dynamic>> updateServiceTypeById({
     required String id,
-    // common of all section 
-    
+    // common fields
     String? serviceSubType,
     String? serviceId,
     String? status,
     String? activeSteps,
 
-    //basic detaisls
-    String? panNumber,   // 🔹 add this
+    // basic details
+    String? panNumber,
     String? aadharNumber,
 
-    //personal details section
-
+    // personal details
     String? email,
     String? income,
-    String?netGrossProfit,
+    String? netGrossProfit,
     String? mobile,
     String? occupation,
     Map<String, String>? placeOfBirth,
 
-    // nominee fields
-
+    // nominee details
     String? nomineeIdType,
     String? nomineeId,
     String? nomineeMobile,
     String? nomineeRelation,
-    // Documents Section 
 
+    // document section
     String? aadhaarCardFileKey,
     String? panCardFileKey,
     String? bankProofFileKey,
@@ -41,37 +38,46 @@ class ServiceTypeApi {
     String? itrDocumentsFileKey,
 
     // review section
-
-    int? isDetailsConfirmed,
-
-    
+    int? submit,
 
     required String token,
   }) async {
     try {
-      Map<String, dynamic> body = {};
+      // 🔹 Common map for all fields
+      final Map<String, dynamic> body = {
+        if (serviceSubType != null) "serviceSubType": serviceSubType,
+        if (serviceId != null) "serviceId": serviceId,
+        if (status != null) "status": status,
+        if (activeSteps != null) "activeSteps": activeSteps,
 
-      if (serviceSubType != null) body["serviceSubType"] = serviceSubType;
-      if (email != null) body["email"] = email;
-      if (income != null) body["income"] = income;
-      if (mobile != null) body["mobile"] = mobile;
-      if (occupation != null) body["occupation"] = occupation;
-      if (placeOfBirth != null) body["placeOfBirth"] = placeOfBirth;
-      if (serviceId != null) body["serviceId"] = serviceId;
-      if (status != null) body["status"] = status;
-      if (activeSteps != null) body["activeSteps"] = activeSteps;
-      if (aadhaarCardFileKey != null) body["aadhaarCardFileKey"] = aadhaarCardFileKey;
-      if (panCardFileKey != null) body["panCardFileKey"] = panCardFileKey;
-      if (bankProofFileKey != null) body["bankProofFileKey"] = bankProofFileKey;
-      if (salarySlipsFileKey != null) body["salarySlipsFileKey"] = salarySlipsFileKey;
-      if (itrDocumentsFileKey != null) body["itrDocumentsFileKey"] = itrDocumentsFileKey;
-      if (isDetailsConfirmed != null) body["isDetailsConfirmed"] = isDetailsConfirmed;
+        // basic
+        if (panNumber != null) "panNumber": panNumber,
+        if (aadharNumber != null) "aadharNumber": aadharNumber,
 
-      // nominee details
-      if (nomineeIdType != null) body["nomineeIdType"] = nomineeIdType;
-      if (nomineeId != null) body["nomineeId"] = nomineeId;
-      if (nomineeMobile != null) body["nomineeMobile"] = nomineeMobile;
-      if (nomineeRelation != null) body["nomineeRelation"] = nomineeRelation;
+        // personal
+        if (email != null) "email": email,
+        if (income != null) "income": income,
+        if (netGrossProfit != null) "netGrossProfit": netGrossProfit,
+        if (mobile != null) "mobile": mobile,
+        if (occupation != null) "occupation": occupation,
+        if (placeOfBirth != null) "placeOfBirth": placeOfBirth,
+
+        // nominee
+        if (nomineeIdType != null) "nomineeIdType": nomineeIdType,
+        if (nomineeId != null) "nomineeId": nomineeId,
+        if (nomineeMobile != null) "nomineeMobile": nomineeMobile,
+        if (nomineeRelation != null) "nomineeRelation": nomineeRelation,
+
+        // documents
+        if (aadhaarCardFileKey != null) "aadhaarCardFileKey": aadhaarCardFileKey,
+        if (panCardFileKey != null) "panCardFileKey": panCardFileKey,
+        if (bankProofFileKey != null) "bankProofFileKey": bankProofFileKey,
+        if (salarySlipsFileKey != null) "salarySlipsFileKey": salarySlipsFileKey,
+        if (itrDocumentsFileKey != null) "itrDocumentsFileKey": itrDocumentsFileKey,
+
+        // review
+        if (submit != null) "isDetailsConfirmed": submit,
+      };
 
       final response = await http.put(
         Uri.parse('$baseUrl/serviceType/updateServiceTypeById/$id'),
@@ -86,11 +92,11 @@ class ServiceTypeApi {
         return jsonDecode(response.body);
       } else {
         throw Exception(
-          " API Error: ${response.statusCode}, Body: ${response.body}",
+          "API Error: ${response.statusCode}, Body: ${response.body}",
         );
       }
     } catch (e) {
-      throw Exception(" Exception: $e");
+      throw Exception("Exception in updateServiceTypeById: $e");
     }
   }
 }

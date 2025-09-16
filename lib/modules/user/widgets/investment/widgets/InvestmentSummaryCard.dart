@@ -21,7 +21,6 @@ class InvestmentSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Optional: Navigate to details page or edit screen
       },
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -39,7 +38,6 @@ class InvestmentSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: Occupation + Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -63,21 +61,13 @@ class InvestmentSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-
-            // Investment Details
-            _buildLabelValueText(context, "Email", row['email'] ?? '', Colors.green),
-            const SizedBox(height: 6),
-            //_buildLabelValueText(context, "Mobile Number", row['nomineeMobile'] ?? '', Colors.blue),
-            //const SizedBox(height: 6),
             _buildLabelValueText(context, "Aadhaar", row['aadharNumber'] ?? '', Colors.orange),
             const SizedBox(height: 6),
             _buildLabelValueText(context, "PAN", row['panNumber'] ?? '', Colors.purple),
             const SizedBox(height: 6),
-            //_buildLabelValueText(context, "Place of Birth", row['placeOfBirth'] ?? '', Colors.teal),
-            //const SizedBox(height: 6),
-            //_buildLabelValueText(context, "Nominee ID", row['nomineeId'] ?? '', Colors.redAccent),
-            //const SizedBox(height: 6),
-            //_buildLabelValueText(context, "Annual Income", row['income'] ?? '', Colors.deepPurple),
+            _buildLabelValueText(
+                context, "Email", row['email'] ?? '', Colors.green),
+
           ],
         ),
       ),

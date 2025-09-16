@@ -12,14 +12,14 @@ class BasicDetailsSection extends StatefulWidget {
   final String token;
   final String investmentType;
   final String serviceId;
+  final String activeSteps;
   final String? dbId;
   final String mode;
-
-  /// Callback when step is successfully completed
   final Function(String dbId) onCompleted;
 
   const BasicDetailsSection({
     super.key,
+    required this.activeSteps,
     required this.aadharController,
     required this.panController,
     required this.formKey,
@@ -57,56 +57,69 @@ class _BasicDetailsSectionState extends State<BasicDetailsSection> {
       ),
     );
   }
+  Map<String, dynamic> serviceType() {
+    return {
+      "activeSteps": "basicDetails",
+      "panNumber": widget.panController.text.trim(),
+      "aadharNumber": widget.aadharController.text.trim(),
+      "serviceId": "1", 
+      "serviceSubType": widget.investmentType, 
+      "status": "Pending", 
+    };
+  }
 
-  /// 🔹 Validate & save Basic Details
-  Future<void> _saveDetails() async {
-    if (!widget.formKey.currentState!.validate()) return;
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("⚠️ $msg"), backgroundColor: Colors.orangeAccent),
+    );
+  }
+
+  /// 🔹 Validate & Save Basic Details
+  Future<void> saveDetails({bool validate = true}) async {
+    if (validate && !widget.formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-
     try {
       String? dbId = widget.dbId;
-
       if (widget.mode == "add" && dbId == null) {
-        // Create service if adding new
         final res = await CreateServiceType.serviceType(
           activeSteps: "basicDetails",
           panNumber: widget.panController.text.trim(),
           aadharNumber: widget.aadharController.text.trim(),
-          serviceId: widget.serviceId,
-          serviceSubType: widget.investmentType,
-          status: "Pending",
+          serviceId: "1", 
+          serviceSubType: "mutualFund",
+          status: "Pending", 
           token: widget.token,
         );
 
         if (res['status'] == true) {
-          dbId = res['data']?['id']?.toString();
-          if (dbId == null)
-            throw Exception("Service ID not returned by backend");
+          dbId =
+              res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
+          if (dbId == null) {
+            if (mounted) _showError("Service created but DB ID missing");
+            return;
+          }
         } else {
           throw Exception(res['message'] ?? "Error creating service");
         }
       }
-
-      // Always update service
-      await updateApi.ServiceTypeApi.updateServiceTypeById(
-        id: dbId!,
-        serviceId: widget.serviceId,
-        serviceSubType: widget.investmentType,
-        status: "Pending",
-        activeSteps: "basicDetails",
-        panNumber: widget.panController.text.trim(),
-        aadharNumber: widget.aadharController.text.trim(),
-        token: widget.token,
-      );
-
-      widget.onCompleted(dbId); // send back ID to parent
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("⚠️ $e"), backgroundColor: Colors.red),
+      if (dbId != null) {
+        await updateApi.ServiceTypeApi.updateServiceTypeById(
+          id: dbId,
+          token: widget.token,
+          activeSteps: "basicDetails",
+          panNumber: widget.panController.text.trim(),
+          aadharNumber: widget.aadharController.text.trim(),
+          serviceId: "1", 
+          serviceSubType: "Mutual Funds", 
+          status: "Pending",
         );
+
+        widget.onCompleted(dbId);
       }
+      
+    } catch (e) {
+      if (mounted) _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -140,7 +153,6 @@ class _BasicDetailsSectionState extends State<BasicDetailsSection> {
             validator: AddInvestmentController.validatePAN,
           ),
           const SizedBox(height: 12),
-          
         ],
       ),
     );

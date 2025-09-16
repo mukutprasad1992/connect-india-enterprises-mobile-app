@@ -23,7 +23,7 @@ class _EditInvestmentPageState extends State<EditInvestmentPage> {
       mode: "edit",
       investment: widget.investment,
       token: widget.token,
-      isDetailsConfirmed: widget.investment.isDetailsConfirmed.toString(),
+      submit: widget.investment.isSubmitted.toString(),
     );
   }
 }

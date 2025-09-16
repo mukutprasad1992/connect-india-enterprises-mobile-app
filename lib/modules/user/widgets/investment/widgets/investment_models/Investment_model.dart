@@ -21,7 +21,7 @@ class InvestmentModel {
   final String? nomineeRelation;
 
   final String status;
-  final int isDetailsConfirmed;
+  final int isSubmitted;
 
   InvestmentModel({
     required this.id,
@@ -43,7 +43,7 @@ class InvestmentModel {
     this.nomineeIdType,
     this.nomineeMobile,
     this.nomineeRelation,
-    required this.isDetailsConfirmed,
+    required this.isSubmitted,
     this.status = "Pending",
   });
 
@@ -73,7 +73,7 @@ class InvestmentModel {
       nomineeIdType: json['nomineeIdType']?.toString(),
       nomineeMobile: json['nomineeMobile'],
       nomineeRelation: json['nomineeRelation'],
-      isDetailsConfirmed: (json['isDetailsConfirmed'] is int)
+      isSubmitted: (json['isDetailsConfirmed'] is int)
           ? json['isDetailsConfirmed']
           : int.tryParse(json['isDetailsConfirmed']?.toString() ?? "0") ?? 0,
       status: allowedStatuses.contains(rawStatus) ? rawStatus : "Pending",
@@ -101,7 +101,7 @@ class InvestmentModel {
       'nomineeIdType': nomineeIdType,
       'nomineeMobile': nomineeMobile,
       'nomineeRelation': nomineeRelation,
-      'isDetailsConfirmed': isDetailsConfirmed,
+      'isDetailsConfirmed': isSubmitted,
       'status': status,
     };
   }

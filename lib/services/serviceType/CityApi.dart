@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
 import '/controllers/authController.dart';
+import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
 import 'package:flutter/material.dart';
 
 class CityApi {
@@ -16,7 +16,7 @@ class CityApi {
     // 🔹 Token check before API call
     if (token == null || token.isEmpty || JwtDecoder.isExpired(token)) {
       AuthController.checkLoginStatus(context);
-      return []; // Return empty list if token invalid
+      return [];
     }
 
     try {
@@ -30,17 +30,18 @@ class CityApi {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final List<dynamic> data = decoded["data"];
+        final List<dynamic> data = decoded["data"] ?? [];
         return data.map((json) => City.fromJson(json)).toList();
       } else if (response.statusCode == 401) {
-        // Token invalid/expired from server side
         AuthController.checkLoginStatus(context);
         return [];
       } else {
-        throw Exception("Failed to load cities: ${response.statusCode}");
+        debugPrint("⚠️ City API error: ${response.statusCode} ${response.body}");
+        return [];
       }
     } catch (e) {
-      throw Exception("Error fetching cities: $e");
+      debugPrint("⚠️ Error fetching cities: $e");
+      return [];
     }
   }
 }

@@ -4,8 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/services/serviceType/uploadDocumentApi.dart';
 import '/services/serviceType/updateServiceType.dart';
-//import '/routes/myapp_routes.dart';
-//import '/consts/appConstants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -15,13 +13,16 @@ class UploadDocumentSection extends StatefulWidget {
   final String? DBId;
   final String token;
   final String mode;
+  final String serviceId;
+  final String activeSteps;
+  final String investmentType;
   final void Function(Map<String, String?> uploadedFiles)? onUploaded;
-
-  // 🔹 Callback when done
   final Function(String dbId) onCompleted;
-
   const UploadDocumentSection({
     Key? key,
+    required this.investmentType,
+    required this.serviceId,
+    required this.activeSteps,
     required this.occupation,
     required this.existingFiles,
     required this.DBId,
@@ -34,7 +35,6 @@ class UploadDocumentSection extends StatefulWidget {
   @override
   State<UploadDocumentSection> createState() => _UploadDocumentSectionState();
 }
-
 class _UploadDocumentSectionState extends State<UploadDocumentSection> {
   String? aadharFile, panFile, bankProofFile, salarySlipFile, itrFile;
   bool _isLoading = false;
@@ -66,10 +66,7 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
 
     String filePath = result.files.single.path!;
     String fileName = result.files.single.name;
-    String mediaType =
-        fileName.toLowerCase().endsWith(".pdf") ? "document" : "image";
-
-    // show name which file we have uploaded
+    String mediaType =fileName.toLowerCase().endsWith(".pdf") ? "document" : "image";
 
     final Map<String, String> typeLabels = {
       "aadhar": "Aadhar Card",
@@ -144,6 +141,7 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
   }
 
   /// 🔹 Final submit (after uploads)
+
   Future<String?> submitDetails() async {
     if (widget.DBId == null) return null;
 
@@ -153,18 +151,21 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
       final res = await ServiceTypeApi.updateServiceTypeById(
         id: widget.DBId!,
         token: widget.token,
-        serviceId: "1",
-        serviceSubType: "mutualFund",
+
+        serviceId: "1", 
+        serviceSubType: "Mutual Funds", 
         status: "Pending",
-        activeSteps: "uploadDocuments",
-        email: "",
-        mobile: "",
-        income: "",
-        occupation: widget.occupation ?? "",
-        placeOfBirth: {},
+        activeSteps: "Documents",
+
+        // document keys
+        aadhaarCardFileKey: aadharFile,
+        panCardFileKey: panFile,
+        bankProofFileKey: bankProofFile,
+        salarySlipsFileKey: salarySlipFile,
+        itrDocumentsFileKey: itrFile,
       );
 
-      print("UpdateServiceType Response (documents): $res");
+      //print("UpdateServiceType Response (documents): $res");
 
       if (res['status'] == true) {
         final data = res['data'];
@@ -189,7 +190,7 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
   }
 
   /// 🔹 View file
-  ///
+  
   void _viewFile(String fileUrl) {
     final lowerUrl = fileUrl.toLowerCase();
     final fileName = fileUrl.split('/').last;
@@ -313,15 +314,12 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            //  Status Icon
             Icon(
               fileUrl != null ? Icons.check_circle : Icons.upload_file,
               color: fileUrl != null ? Colors.green : Colors.grey,
               size: 30,
             ),
             const SizedBox(width: 12),
-
-            //  Title + Status Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,8 +343,6 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
                 ],
               ),
             ),
-
-            //  Actions
             if (fileUrl == null) ...[
               ElevatedButton(
                 onPressed: () async => await _uploadFile(type),
