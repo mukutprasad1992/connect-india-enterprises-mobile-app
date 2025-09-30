@@ -22,6 +22,8 @@ class ServiceTypeApi {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        // print(
+        //     '@@@@@@@@@ ${responseData.data.isNotEmpty ? responseData.data[0].aadharCardFileKey : 'No data'}');
         return responseData;
       } else if (response.statusCode == 401) {
         throw Exception(" Unauthorized: Token is invalid or expired");

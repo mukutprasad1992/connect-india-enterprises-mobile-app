@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import '/services/userServices/getallvendor.dart';       
+import '../../../../services/userServicesApi/getallvendor.dart';       
 import '/models/Vendor_model.dart';  
  
 import 'widgets/AddNewVendorpage.dart';
@@ -34,9 +34,9 @@ class _VendorTablePageState extends State<VendorTablePage> {
     setState(() => isLoading = true);
     try {
 
-      print("🚀 Fetching vendors from API...");
+      //print("🚀 Fetching vendors from API...");
       final vendors = await VendorApi.fetchVendors();
-      print("✅ Vendors received: ${vendors.length}");
+      //print("✅ Vendors received: ${vendors.length}");
       for (var v in vendors) {
         print("Vendor: ${v.businessName} (${v.email})");
       }

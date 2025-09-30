@@ -1,5 +1,4 @@
 // import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
 // import 'package:url_launcher/url_launcher.dart';
 // import '/consts/appColors.dart';
 // import '/services/serviceType/CityApi.dart';
@@ -131,37 +130,23 @@
 
 //     final inv = widget.investment!;
 //     DBId = inv.id;
-//     _aadharController.text = inv.aadharNumber ?? '';
-//     _panController.text = inv.panNumber ?? '';
+//     _aadharController.text = inv.aadharNumber ?? ''; 
+//     _panController.text = inv.panNumber ?? ''; 
 //     _emailController.text = inv.email ?? '';
 
 //     // Mobile → UI me bina +91 dikhayenge
-//     if (inv.mobile != null && inv.mobile!.isNotEmpty) {
-//       _mobileController.text = inv.mobile!.startsWith('+91')
-//           ? inv.mobile!.substring(3)
-//           : inv.mobile!;
-//     }
+//     if (inv.mobile != null && inv.mobile!.isNotEmpty) { _mobileController.text = inv.mobile!.startsWith('+91') ? inv.mobile!.substring(3) : inv.mobile!; }
 
-//     if (inv.nomineeMobile != null && inv.nomineeMobile!.isNotEmpty) {
-//       _nomineeMobileController.text = inv.nomineeMobile!.startsWith('+91')
-//           ? inv.nomineeMobile!.substring(3)
-//           : inv.nomineeMobile!;
-//     }
+//     if (inv.nomineeMobile != null && inv.nomineeMobile!.isNotEmpty) { _nomineeMobileController.text = inv.nomineeMobile!.startsWith('+91') ? inv.nomineeMobile!.substring(3) : inv.nomineeMobile!; }
 //     // Occupation + Income
-//     occupation = inv.occupation;
-//     _incomeController.text = inv.income ?? '';
+//    occupation = inv.occupation; 
+//    _incomeController.text = inv.income ?? '';
 
-//     // Nominee ID type
-//     if (inv.nomineeIdType == "aadharNumber") {
-//       selectIDType = "Aadhar";
-//       _nomineeIdController.text = inv.nomineeId ?? '';
-//     } else if (inv.nomineeIdType == "panNumber") {
-//       selectIDType = "PAN";
-//       _nomineeIdController.text = inv.nomineeId ?? '';
-//     }
+//     // Nominee ID type 
+//     if (inv.nomineeIdType == "aadharNumber") { selectIDType = "Aadhar"; _nomineeIdController.text = inv.nomineeId ?? ''; } else if (inv.nomineeIdType == "panNumber") { selectIDType = "PAN"; _nomineeIdController.text = inv.nomineeId ?? ''; }
 
 //     // Nominee Relation
-//     selectedRelation = inv.nomineeRelation;
+//     selectedRelation = inv.nomineeRelation; 
 //     _nomineeRelationController.text = inv.nomineeRelation ?? '';
 
 //     // documents
@@ -169,7 +154,7 @@
 //     aadharFile = inv.aadharCardFileKey;
 //     panFile = inv.panCardFileKey;
 //     bankProofFile = inv.bankProofFileKey;
-//     salarySlipFile = inv.salarySlipsFileKey;
+//     salarySlipFile = inv.salarySlipsFileKey; 
 //     itrFile = inv.itrDocumentsFileKey;
 //     // Investment Type
 //     investmentType = inv.investmentType;
@@ -178,24 +163,28 @@
 
 //     if (_aadharController.text.isEmpty || _panController.text.isEmpty) {
 //       _currentStep = 1;
-//     } else if (_emailController.text.isEmpty ||
+//     } 
+//     else if (_emailController.text.isEmpty ||
 //         _mobileController.text.isEmpty ||
 //         _selectedCity == null ||
 //         occupation == null ||
 //         _incomeController.text.isEmpty) {
 //       _currentStep = 2;
-//     } else if (_nomineeIdController.text.isEmpty ||
+//     } 
+//     else if (_nomineeIdController.text.isEmpty ||
 //         _nomineeMobileController.text.isEmpty ||
 //         (selectedRelation == null || selectedRelation!.isEmpty)) {
 //       _currentStep = 3;
-//     } else if ((aadharFile == null || aadharFile!.isEmpty) ||
+//     } 
+//     else if ((aadharFile == null || aadharFile!.isEmpty) ||
 //         (panFile == null || panFile!.isEmpty) ||
 //         (bankProofFile == null || bankProofFile!.isEmpty) ||
 //         (occupation == "JOB" &&
 //             (salarySlipFile == null || salarySlipFile!.isEmpty)) ||
 //         (occupation == "BUSINESS" && (itrFile == null || itrFile!.isEmpty))) {
 //       _currentStep = 4;
-//     } else {
+//     } 
+//     else {
 //       _currentStep = 5;
 //     }
 //     //debugPrint("Aadhar from API 📤: ${inv.aadharCardFileKey}");
@@ -212,20 +201,14 @@
 
 //   /// Back button in stepper
 //   void _onStepCancel() {
-//     setState(() {
-//       if (widget.mode == "edit") {
-//         // In edit mode, don't go back before Basic Details
-//         if (_currentStep > 1) {
-//           _currentStep--;
-//           _viewStep = _currentStep;
-//         }
-//       } else {
-//         if (_currentStep > 0) {
-//           _currentStep--;
-//           _viewStep = _currentStep;
-//         }
-//       }
-//     });
+//     if (_currentStep > 0) {
+//       setState(() {
+//         _currentStep--;
+//         _viewStep = _currentStep;
+//       });
+//     } else {
+//       Navigator.pop(context);
+//     }
 //   }
 
 //   Future<String?> saveSection(
@@ -292,23 +275,13 @@
 //           nomineeRelation: selectedRelation ?? "",
 
 //           // --- City / Place of Birth
-//           placeOfBirth: _selectedCity != null
-//               ? {"city": _selectedCity!.city, "state": _selectedCity!.state}
-//               : null,
+//           placeOfBirth: _selectedCity != null ? {"city": _selectedCity!.city, "state": _selectedCity!.state} : null,
 
-//           aadharCardFileKey:
-//               (aadharFile?.isNotEmpty ?? false) ? aadharFile! : "",
+//           aadharCardFileKey: (aadharFile?.isNotEmpty ?? false) ? aadharFile! : "",
 //           panCardFileKey: (panFile?.isNotEmpty ?? false) ? panFile! : "",
-//           bankProofFileKey:
-//               (bankProofFile?.isNotEmpty ?? false) ? bankProofFile! : "",
-//           salarySlipsFileKey:
-//               occupation == "JOB" && (salarySlipFile?.isNotEmpty ?? false)
-//                   ? salarySlipFile!
-//                   : "Null",
-//           itrDocumentsFileKey:
-//               occupation == "BUSINESS" && (itrFile?.isNotEmpty ?? false)
-//                   ? itrFile!
-//                   : "Null",
+//           bankProofFileKey: (bankProofFile?.isNotEmpty ?? false) ? bankProofFile! : "",
+//           salarySlipsFileKey: occupation == "JOB" && (salarySlipFile?.isNotEmpty ?? false)? salarySlipFile!: "Null",
+//           itrDocumentsFileKey: occupation == "BUSINESS" && (itrFile?.isNotEmpty ?? false)? itrFile!: "Null",
 //         );
 //         //debugPrint("Building UI → AadharFile📤: $aadharFile");
 
@@ -325,7 +298,7 @@
 //               message = "Documents uploaded successfully!";
 //               break;
 //             case "review":
-//               message = submitValue == 1
+//               message = submitValue == 1 
 //                   ? "Investment Details Submitted Successfully!"
 //                   : "Review section updated!";
 //               break;
@@ -341,7 +314,7 @@
 //       } else {
 //         return DBId;
 //       }
-//     } catch (e) {
+//     } catch (e ) {
 //       //debugPrint(" Error updating section [$section]: $e");
 //       _showError("Failed to save $section: ${e.toString()}");
 //       return DBId;
@@ -349,243 +322,172 @@
 //   }
 
 //   Future<void> _onStepContinue() async {
-//     if (_isSaving) return; // prevent multiple clicks
-//     setState(() => _isSaving = true);
+//   if (_isSaving) return; // prevent multiple clicks
+//   setState(() => _isSaving = true);
 
-//     try {
-//       final totalSteps = 6;
+//   try {
+//     final totalSteps = 6;
 
-//       // ===== Final Step: Review & Submit =====
-//       if (_currentStep == 5) {
-//         if (!isDeclared) {
-//           _showError("Please confirm declaration");
-//           return;
-//         }
-
-//         DBId = await saveSection(section: "review", submitValue: 1);
-
-//         try {
-//           final res = await updateApi.ServiceTypeApi.updateServiceTypeById(
-//             id: DBId!,
-//             token: widget.token,
-//             serviceId: "1",
-//             serviceSubType: investmentType ?? "Mutual Funds",
-//             status: "Pending",
-//             activeSteps: "review",
-//             submit: 1,
-//           );
-
-//           if (res['status'] == true) {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               SnackBar(
-//                 content: Text(widget.mode == "add"
-//                     ? "Investment added successfully!"
-//                     : "Investment updated successfully!"),
-//                 backgroundColor: Colors.green,
-//               ),
-//             );
-//             Navigator.pop(context, true);
-//           } else {
-//             throw Exception(res['message'] ?? "Unknown error from server");
-//           }
-//         } catch (e) {
-//           _showError("⚠️ Final Submit Failed: ${e.toString()}");
-//         }
+//     // ===== Final Step: Review & Submit =====
+//     if (_currentStep == 5) {
+//       if (!isDeclared) {
+//         _showError("Please confirm declaration");
 //         return;
 //       }
 
-//       // ===== Other Steps (0 to 4) =====
-//       switch (_currentStep) {
-//         case 0: // Investment Type
-//           if (investmentType == null || investmentType!.isEmpty) {
-//             _showError("Please select investment type");
-//             return;
-//           }
+//       DBId = await saveSection(section: "review", submitValue: 1);
 
-//           if (widget.mode == "edit") {
-//             ScaffoldMessenger.of(context).showSnackBar(
-//               const SnackBar(
-//                 content: Text("Investment Type section updated successfully"),
-//                 backgroundColor: Colors.green,
-//               ),
-//             );
-//           } else {
-//             // For add mode → Save only Investment Type, not Basic Details
-//             DBId = await saveSection(section: "investmentType");
-//           }
-//           break;
+//       try {
+//         final res = await updateApi.ServiceTypeApi.updateServiceTypeById(
+//           id: DBId!,
+//           token: widget.token,
+//           serviceId: "1",
+//           serviceSubType: investmentType ?? "Mutual Funds",
+//           status: "Pending",
+//           activeSteps: "review",
+//           submit: 1,
+//         );
 
-//         case 1:
-//           if (_basicFormKey.currentState!.validate()) {
-//             DBId = await saveSection(section: "basicDetails");
-//           } else
-//             return;
-//           break;
-
-//         case 2:
-//           if (_personalFormKey.currentState!.validate()) {
-//             if (occupation == null || occupation!.isEmpty) {
-//               _showError("Please select occupation");
-//               return;
-//             }
-//             DBId = await saveSection(section: "personalDetails");
-//           } else
-//             return;
-//           break;
-
-//         case 3:
-//           if (_nomineeFormKey.currentState!.validate()) {
-//             if (selectIDType == null || selectIDType!.isEmpty) {
-//               _showError("Please select Nominee ID type");
-//               return;
-//             }
-//             DBId = await saveSection(section: "nomineeDetails");
-//           } else
-//             return;
-//           break;
-
-//         case 4:
-//           if ((aadharFile ?? '').isEmpty ||
-//               (panFile ?? '').isEmpty ||
-//               (bankProofFile ?? '').isEmpty) {
-//             _showError("Please upload mandatory documents");
-//             return;
-//           }
-//           if (occupation == "JOB" && (salarySlipFile ?? '').isEmpty) {
-//             _showError("Please upload Salary Slip");
-//             return;
-//           }
-//           if (occupation == "BUSINESS" && (itrFile ?? '').isEmpty) {
-//             _showError("Please upload ITR Document");
-//             return;
-//           }
-//           DBId = await saveSection(section: "documents");
-//           break;
+//         if (res['status'] == true) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(
+//               content: Text(widget.mode == "add"
+//                   ? "Investment added successfully!"
+//                   : "Investment updated successfully!"),
+//               backgroundColor: Colors.green,
+//             ),
+//           );
+//           Navigator.pop(context, true);
+//         } else {
+//           throw Exception(res['message'] ?? "Unknown error from server");
+//         }
+//       } catch (e) {
+//         _showError("⚠️ Final Submit Failed: ${e.toString()}");
 //       }
-
-//       // ===== Move to next step only after API success =====
-//       setState(() {
-//         _currentStep++;
-//         _viewStep = _currentStep;
-//       });
-//     } finally {
-//       setState(() => _isSaving = false);
+//       return;
 //     }
+
+//     // ===== Other Steps (0 to 4) =====
+//     switch (_currentStep) {
+//       case 0: // Investment Type
+//         if (investmentType == null || investmentType!.isEmpty) {
+//           _showError("Please select investment type");
+//           return;
+//         }
+
+//         if (widget.mode == "edit") {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             const SnackBar(
+//               content: Text("Investment Type section updated successfully"),
+//               backgroundColor: Colors.green,
+//             ),
+//           );
+//         } else {
+//           // For add mode → Save only Investment Type, not Basic Details
+//           DBId = await saveSection(section: "investmentType");
+//         }
+//         break;
+
+//       case 1: 
+//         if (_basicFormKey.currentState!.validate()) {
+//           DBId = await saveSection(section: "basicDetails");
+//         } else return;
+//         break;
+
+//       case 2:
+//         if (_personalFormKey.currentState!.validate()) {
+//           if (occupation == null || occupation!.isEmpty) {
+//             _showError("Please select occupation");
+//             return;
+//           }
+//           DBId = await saveSection(section: "personalDetails");
+//         } else return;
+//         break;
+
+//       case 3: 
+//         if (_nomineeFormKey.currentState!.validate()) {
+//           if (selectIDType == null || selectIDType!.isEmpty) {
+//             _showError("Please select Nominee ID type");
+//             return;
+//           }
+//           DBId = await saveSection(section: "nomineeDetails");
+//         } else return;
+//         break;
+
+//       case 4: 
+//         if ((aadharFile ?? '').isEmpty ||
+//             (panFile ?? '').isEmpty ||
+//             (bankProofFile ?? '').isEmpty) {
+//           _showError("Please upload mandatory documents");
+//           return;
+//         }
+//         if (occupation == "JOB" && (salarySlipFile ?? '').isEmpty) {
+//           _showError("Please upload Salary Slip");
+//           return;
+//         }
+//         if (occupation == "BUSINESS" && (itrFile ?? '').isEmpty) {
+//           _showError("Please upload ITR Document");
+//           return;
+//         }
+//         DBId = await saveSection(section: "documents");
+//         break;
+//     }
+
+//     // ===== Move to next step only after API success =====
+//     setState(() {
+//       _currentStep++;
+//       _viewStep = _currentStep;
+//     });
+//   } finally {
+//     setState(() => _isSaving = false);
 //   }
+// }
+
+
 
 //   // =================== UI & Sections (UNCHANGED) ===================
-
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
 //       appBar: AppBar(
-//         title: Text(
-//           widget.mode == "add" ? "Add Investment" : "Edit Investment",
-//           style: const TextStyle(color: Colors.white),
-//         ),
+//         title: Text(widget.mode == "add" ? "Add Investment" : "Edit Investment",style: const TextStyle(color: Colors.white)),
 //         backgroundColor: AppColors.background,
 //         foregroundColor: Colors.white,
 //         iconTheme: const IconThemeData(color: Colors.white),
-//         systemOverlayStyle: const SystemUiOverlayStyle(
-//           statusBarColor:
-//               Colors.transparent, 
-//           statusBarIconBrightness: Brightness
-//               .light, 
-//           statusBarBrightness: Brightness
-//               .dark, 
-//         ),
 //       ),
-//       body: Column(
-//         children: [
-//           // ================= Header / Progress =================
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: Row(
+//       body: SingleChildScrollView(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             _buildVerticalProgressBar(),
+//             const SizedBox(height: 20),
+//             _buildStepContent(),
+//             const SizedBox(height: 30),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //               children: [
-//                 // Progress Circle with fraction
-//                 CustomPaint(
-//                   painter: StepProgressPainter(
-//                     currentStep:
-//                         widget.mode == "edit" ? _currentStep : _currentStep + 1,
-//                     totalSteps: widget.mode == "edit" ? lastStep : lastStep + 1,
-//                   ),
-//                   child: Container(
-//                     width: 50,
-//                     height: 50,
-//                     alignment: Alignment.center,
-//                     child: Text(
-//                       widget.mode == "edit"
-//                           ? "$_currentStep/$lastStep"
-//                           : "${_currentStep + 1}/${lastStep + 1}",
-//                       style: const TextStyle(
-//                         fontSize: 16,
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(width: 16),
-//                 Expanded(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.end,
-//                     children: [
-//                       Text(
-//                         getStepTitle(_viewStep),
-//                         style: const TextStyle(
-//                           fontSize: 20,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-//                       if (_viewStep < lastStep)
-//                         Text(
-//                           "Next: ${getStepTitle(_viewStep + 1)}",
-//                           style: const TextStyle(
-//                             fontSize: 14,
-//                             color: Colors.grey,
-//                           ),
-//                         ),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           const SizedBox(height: 16),
-//           Expanded(
-//             child: SingleChildScrollView(
-//               padding: const EdgeInsets.symmetric(horizontal: 16),
-//               child: _buildStepContent(),
-//             ),
-//           ),
-//           Container(
-//             padding: const EdgeInsets.all(16),
-//             color: Colors.white,
-//             child: Row(
-//               children: [
-//                 if (_currentStep > 0)
-//                   ElevatedButton(
-//                     onPressed: _onStepCancel,
-//                     style: OutlinedButton.styleFrom(
-//                       minimumSize: const Size(70, 36),
-//                       padding: const EdgeInsets.symmetric(
-//                           horizontal: 18, vertical: 12),
-//                       backgroundColor: AppColors.background,
-//                       foregroundColor: Colors.white,
-//                       textStyle: const TextStyle(fontSize: 14),
-//                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-//                     ),
-//                     child: const Text(
-//                       "Back",
-//                       style: TextStyle(color: Colors.white),
-//                     ),
-//                   ),
-//                 const Spacer(),
 //                 ElevatedButton(
+//                   onPressed: _onStepCancel,
+//                   style: ElevatedButton.styleFrom(
+//                     minimumSize: const Size(70, 36),
+//                     padding:
+//                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//                     backgroundColor: AppColors.background,
+//                     foregroundColor: Colors.white,
+//                     textStyle: const TextStyle(fontSize: 14),
+//                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+//                   ),
+//                   child: Text(_currentStep == 0 ? "Cancel" : "Back"),
+//                 ),
+//                 //const SizedBox(width: 20),
+//                 ElevatedButton(
+//                   //onPressed: _onStepContinue,
 //                   onPressed: _isSaving ? null : _onStepContinue,
 //                   style: ElevatedButton.styleFrom(
 //                     minimumSize: const Size(70, 36),
-//                     padding: const EdgeInsets.symmetric(
-//                         horizontal: 18, vertical: 12),
+//                     padding:
+//                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
 //                     backgroundColor: Colors.blue,
 //                     foregroundColor: Colors.white,
 //                     textStyle: const TextStyle(fontSize: 14),
@@ -599,8 +501,8 @@
 //                 ),
 //               ],
 //             ),
-//           ),
-//         ],
+//           ],
+//         ),
 //       ),
 //     );
 //   }
@@ -625,25 +527,147 @@
 //     }
 //   }
 
+  // Widget _buildVerticalProgressBar() {
+  //   return Column(
+  //     children: List.generate(6, (index) {
+  //       bool isClickable = !(widget.mode == "edit" && index == 0);
+
+  //       bool isActive = index == _viewStep;
+  //       bool isCompleted = index < _currentStep;
+  //       bool isNextIncomplete = index == _currentStep;
+  //       bool isHovered = _hoveredStep == index;
+
+  //       return MouseRegion(
+  //         onEnter: (_) {
+  //           setState(() {
+  //             if (isCompleted) _hoveredStep = index;
+  //           });
+  //         },
+  //         onExit: (_) {
+  //           setState(() {
+  //             if (_hoveredStep == index) _hoveredStep = null;
+  //           });
+  //         },
+  //         child: InkWell(
+  //           onTap: isClickable
+  //               ? () async {
+  //                   if (index <= _currentStep) {
+  //                     setState(() => _viewStep = index);
+  //                   } else {
+  //                     _showError("Please complete previous steps first");
+  //                   }
+  //                 }
+  //               : () {
+  //                   if (index == 0 && widget.mode == "edit") {
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(
+  //                         content: Text(
+  //                           "Investment Type section updated successfully",
+  //                         ),
+  //                         backgroundColor: Colors.green,
+  //                       ),
+  //                     );
+  //                   }
+  //                 },
+  //           splashColor: (isCompleted || isNextIncomplete)
+  //               ? Colors.blue.withOpacity(0.2)
+  //               : Colors.transparent,
+  //           highlightColor: Colors.transparent,
+  //           borderRadius: BorderRadius.circular(12),
+  //           child: Row(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               // Circle + connector
+  //               Column(
+  //                 children: [
+  //                   CircleAvatar(
+  //                     radius: 12,
+  //                     backgroundColor: isCompleted
+  //                         ? Colors.green
+  //                         : (isActive ? Colors.orange : Colors.grey[300]),
+  //                     child: (isCompleted && !isActive)
+  //                         ? const Icon(Icons.check,
+  //                             color: Colors.white, size: 14)
+  //                         : Icon(
+  //                             _getStepIcon(index),
+  //                             size: 14,
+  //                             color: isActive ? Colors.white : Colors.black54,
+  //                           ),
+  //                   ),
+  //                   if (index != 5)
+  //                     Container(
+  //                       margin: const EdgeInsets.only(top: 0), 
+  //                       width: 3,
+  //                       height: 40, 
+  //                       color: (isCompleted || index < _currentStep)
+  //                           ? Colors.green
+  //                           : Colors.grey[300],
+  //                     ),
+  //                 ],
+  //               ),
+  //               const SizedBox(width: 16),
+
+  //               // Title + arrow
+  //               Expanded(
+  //                 child: Row(
+  //                   crossAxisAlignment: CrossAxisAlignment.center,
+  //                   children: [
+  //                     if (isActive)
+  //                       const Padding(
+  //                         padding: EdgeInsets.only(right: 4),
+  //                         child: Icon(
+  //                           Icons.keyboard_arrow_right,
+  //                           color: Colors.brown,
+  //                           size: 18,
+  //                         ),
+  //                       ),
+  //                     Flexible(
+  //                       child: Text(
+  //                         getStepTitle(index),
+  //                         style: TextStyle(
+  //                           fontSize: 14,
+  //                           fontWeight:
+  //                               isActive ? FontWeight.bold : FontWeight.normal,
+  //                           color: isActive
+  //                               ? Colors.orange
+  //                               : (isCompleted
+  //                                   ? Colors.green
+  //                                   : (isNextIncomplete
+  //                                       ? Colors.orange
+  //                                       : Colors.black87)),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     }),
+  //   );
+  // }
+
 //   //
-//   // IconData _getStepIcon(int index) {
-//   //   switch (index) {
-//   //     case 0:
-//   //       return Icons.account_balance;
-//   //     case 1:
-//   //       return Icons.person;
-//   //     case 2:
-//   //       return Icons.badge;
-//   //     case 3:
-//   //       return Icons.group;
-//   //     case 4:
-//   //       return Icons.description;
-//   //     case 5:
-//   //       return Icons.rate_review;
-//   //     default:
-//   //       return Icons.circle;
-//   //   }
-//   // }
+//   IconData _getStepIcon(int index) {
+//     switch (index) {
+//       case 0:
+//         return Icons.account_balance;
+//       case 1:
+//         return Icons.person;
+//       case 2:
+//         return Icons.badge;
+//       case 3:
+//         return Icons.group;
+//       case 4:
+//         return Icons.description;
+//       case 5:
+//         return Icons.rate_review;
+//       default:
+//         return Icons.circle; 
+//     }
+//   }
 
 //   Widget _buildStepContent() {
 //     switch (_viewStep) {
@@ -695,7 +719,7 @@
 //           onCompleted: (id) => setState(() => DBId = id),
 //           activeSteps: "basicDetails",
 //         );
-
+        
 //       case 2:
 //         return PersonalDetailsSection(
 //           formKey: _personalFormKey,
@@ -758,7 +782,7 @@
 //           investmentType: investmentType ?? '',
 //           activeSteps: "documents",
 //           onCompleted: (id) => setState(() => DBId = id),
-//           onUploaded: (files) async {
+//           onUploaded: (files) async{
 //             setState(() {
 //               aadharFile = files["aadhar"];
 //               panFile = files["pan"];
@@ -767,7 +791,7 @@
 //               itrFile = files["itr"];
 //             });
 //             if (DBId != null) {
-//               await saveSection(section: "documents");
+//               await saveSection(section: "documents"); 
 //             }
 //           },
 //         );
@@ -984,35 +1008,5 @@
 //   }
 // }
 
-// // StepProgressPainter
-// class StepProgressPainter extends CustomPainter {
-//   final int currentStep;
-//   final int totalSteps;
 
-//   StepProgressPainter({required this.currentStep, required this.totalSteps});
 
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final rect = Offset.zero & size;
-//     final startAngle = -90.0 * 3.1416 / 180.0;
-
-//     final backgroundPaint = Paint()
-//       ..color = Colors.brown.shade200
-//       ..strokeWidth = 8
-//       ..style = PaintingStyle.stroke;
-
-//     canvas.drawArc(rect, 0, 2 * 3.1416, false, backgroundPaint);
-
-//     final progressPaint = Paint()
-//       ..color = Colors.green
-//       ..strokeWidth = 8
-//       ..style = PaintingStyle.stroke
-//       ..strokeCap = StrokeCap.round;
-
-//     final sweepAngle = (currentStep / totalSteps) * 2 * 3.1416;
-//     canvas.drawArc(rect, startAngle, sweepAngle, false, progressPaint);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-// }

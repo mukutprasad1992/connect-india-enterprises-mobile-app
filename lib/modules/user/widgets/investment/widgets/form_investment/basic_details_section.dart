@@ -41,18 +41,25 @@ class _BasicDetailsSectionState extends State<BasicDetailsSection> {
   InputDecoration _inputDecoration(String label, IconData icon,
       {bool required = false}) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: AppColors.background, size: 20),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 10, 
+        horizontal: 12, 
+      ),
+      prefixIcon: Icon(icon, color:Colors.deepPurple, size: 18),
       label: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          if (required) const Text(" *", style: TextStyle(color: Colors.red)),
+        children: [         
+          Text(
+          label,
+          style: const TextStyle(fontSize: 13), 
+          ),
+          if (required) const Text(" *", style: TextStyle(color: Colors.red, fontSize: 13)),
         ],
       ),
       filled: true,
       fillColor: Colors.grey.shade100,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
     );
@@ -133,19 +140,20 @@ class _BasicDetailsSectionState extends State<BasicDetailsSection> {
         children: [
           TextFormField(
             controller: widget.aadharController,
+            style: const TextStyle(fontSize: 14),
             keyboardType: TextInputType.number,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(12),
+              LengthLimitingTextInputFormatter(16),
             ],
-            decoration: _inputDecoration("Aadhar Number", Icons.credit_card,
-                required: true),
+            decoration: _inputDecoration("Aadhar Number", Icons.credit_card,required: true),
             validator: AddInvestmentController.validateAadhar,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: widget.panController,
+            style: const TextStyle(fontSize: 14),
             textCapitalization: TextCapitalization.characters,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration:

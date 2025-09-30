@@ -8,12 +8,34 @@ class LoanPage extends StatefulWidget {
 }
 
 class _LoanPageState extends State<LoanPage> {
+  // Variables and controllers go here
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize data or controllers here
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers or streams here
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:Center(
-        child:Text('LoanPage'),
-      )
+      appBar: AppBar(
+        title: const Text("Insurance Page"),
+      ),
+      body: const Center(
+        child: Text("This is the Insurance Page"),
+      ),
     );
   }
 }
+
+
+
+
+

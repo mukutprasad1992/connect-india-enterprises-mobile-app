@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/bottomNavbarAdmin/bottomNav.dart';
-import '../vendor_Dashboard.dart';
+import '../../Main_dashboard.dart';
 import '/modules/admin/widgets/customer/customer.dart';
 import '/modules/admin/widgets/vendor/vendor.dart';
 import '/modules/admin/widgets/voucher/voucher.dart';
@@ -13,6 +13,7 @@ import '/modules/settings/settings.dart';
 import '/modules/drawer/changepassword.dart';
 import '/modules/drawer/myprofile.dart';
 import '/consts/appColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -26,14 +27,34 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
 
-  final List<Widget> _pages = [
-    Dashboard(),
-    VendorTablePage(),
-    CustomerTablePage(),
-    InqueryTablePage(),
-    VoucherTablePage(),
-  ];
+  String? userToken;
+  bool loadingToken = true;
 
+   @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  final List<Widget> _pages = [];
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('KEYTOKEN');
+    setState(() {
+      userToken = token;
+      loadingToken = false;
+
+      _pages.clear();
+      _pages.addAll([
+        Dashboard(),
+        VendorTablePage(),
+        CustomerTablePage(),
+        InqueryTablePage(token: token ?? ''), 
+        VoucherTablePage(),
+      ]);
+    });
+  }
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -97,10 +118,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             GestureDetector(
               onTap: () => _scaffoldKey.currentState?.openDrawer(),
               child: CircleAvatar(
-                radius: 22,
+                radius: 20,
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
-                  radius: 18,
+                  radius: 16,
                   backgroundImage: AssetImage('assets/images/logo.png'),
                   backgroundColor: Colors.transparent,
                 ),

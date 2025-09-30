@@ -31,7 +31,7 @@ class ServiceTypeApi {
     String? nomineeRelation,
 
     // document section
-    String? aadhaarCardFileKey,
+    String? aadharCardFileKey,
     String? panCardFileKey,
     String? bankProofFileKey,
     String? salarySlipsFileKey,
@@ -69,14 +69,14 @@ class ServiceTypeApi {
         if (nomineeRelation != null) "nomineeRelation": nomineeRelation,
 
         // documents
-        if (aadhaarCardFileKey != null) "aadhaarCardFileKey": aadhaarCardFileKey,
+        if (aadharCardFileKey != null) "aadharCardFileKey": aadharCardFileKey,
         if (panCardFileKey != null) "panCardFileKey": panCardFileKey,
         if (bankProofFileKey != null) "bankProofFileKey": bankProofFileKey,
         if (salarySlipsFileKey != null) "salarySlipsFileKey": salarySlipsFileKey,
         if (itrDocumentsFileKey != null) "itrDocumentsFileKey": itrDocumentsFileKey,
 
         // review
-        if (submit != null) "isDetailsConfirmed": submit,
+        if (submit != null) "submit": submit,
       };
 
       final response = await http.put(
@@ -85,8 +85,10 @@ class ServiceTypeApi {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
+        
         body: jsonEncode(body),
       );
+      //print("🔹 Raw API Response: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);

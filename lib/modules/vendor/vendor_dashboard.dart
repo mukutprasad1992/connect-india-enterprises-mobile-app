@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import '../vendor/bottomNavbarVendor/bottomNav.dart';
-import '../vendor_Dashboard.dart';
+import '../../Main_dashboard.dart';
 
 import '/modules/notification/notification.dart';
 import '/modules/drawer/my_drawer.dart';
@@ -95,10 +95,10 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
             GestureDetector(
               onTap: () => _scaffoldKey.currentState?.openDrawer(),
               child: CircleAvatar(
-                radius: 22,
+                radius: 20,
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
-                  radius: 18,
+                  radius: 16,
                   backgroundImage: AssetImage('assets/images/logo.png'),
                   backgroundColor: Colors.transparent,
                 ),

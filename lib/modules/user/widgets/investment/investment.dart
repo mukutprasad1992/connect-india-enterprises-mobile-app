@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+//import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzontle.dart';
 import 'widgets/InvestmentSummaryCard.dart';
 import 'widgets/InvestmentSearchBar.dart';
-import 'widgets/investment_models/Investment_model.dart';
+import '/models/investmentModel.dart';
 import '/services/serviceType/getdatabyserviceid.dart';
 
 class InvestmentPage extends StatefulWidget {
   final String token;
-  const InvestmentPage({super.key, required this.token});
+  const InvestmentPage({
+    super.key, 
+    required this.token
+  });
 
   @override
   State<InvestmentPage> createState() => _InvestmentPageState();
@@ -49,7 +53,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
         token: token,
       );
 
-      //print("API response: $response");
+      print("API response: $response");
 
       final data = response["data"];
       List<InvestmentModel> loadedData = [];
@@ -176,12 +180,11 @@ class _InvestmentPageState extends State<InvestmentPage> {
                               ? const Center(
                                   child: Text('No investment data available.'))
                               : GridView.builder(
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: isWideScreen ? 2 : 1,
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 12,
-                                    childAspectRatio: isWideScreen ? 2.2 : 1.7,
+                                    childAspectRatio: isWideScreen ? 2.8 : 2.1,
                                   ),
                                   itemCount: filteredData.length,
                                   itemBuilder: (context, index) {
@@ -218,7 +221,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
                           builder: (context) => InvestmentFormPage(
                             mode: "add",
                             token: widget.token,
-                            submit: "0",
+                            submit: "1",
                           ),
                         ),
                       );
@@ -229,10 +232,10 @@ class _InvestmentPageState extends State<InvestmentPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(10),
                       shape: const CircleBorder(),
                     ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
+                    child: const Icon(Icons.add, color: Colors.white, size: 24),
                   ),
                 ),
               ),

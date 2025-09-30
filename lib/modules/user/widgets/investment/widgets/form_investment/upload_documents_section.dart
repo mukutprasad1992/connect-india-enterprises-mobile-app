@@ -35,7 +35,12 @@ class UploadDocumentSection extends StatefulWidget {
   @override
   State<UploadDocumentSection> createState() => _UploadDocumentSectionState();
 }
+
 class _UploadDocumentSectionState extends State<UploadDocumentSection> {
+  bool _hasFile(String? fileUrl) {
+    return fileUrl != null && fileUrl.isNotEmpty && fileUrl != "N/A";
+  }
+
   String? aadharFile, panFile, bankProofFile, salarySlipFile, itrFile;
   bool _isLoading = false;
 
@@ -66,7 +71,8 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
 
     String filePath = result.files.single.path!;
     String fileName = result.files.single.name;
-    String mediaType =fileName.toLowerCase().endsWith(".pdf") ? "document" : "image";
+    String mediaType =
+        fileName.toLowerCase().endsWith(".pdf") ? "document" : "image";
 
     final Map<String, String> typeLabels = {
       "aadhar": "Aadhar Card",
@@ -152,13 +158,13 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
         id: widget.DBId!,
         token: widget.token,
 
-        serviceId: "1", 
-        serviceSubType: "Mutual Funds", 
+        serviceId: "1",
+        serviceSubType: "Mutual Funds",
         status: "Pending",
-        activeSteps: "Documents",
+        activeSteps: "documents",
 
         // document keys
-        aadhaarCardFileKey: aadharFile,
+        aadharCardFileKey: aadharFile,
         panCardFileKey: panFile,
         bankProofFileKey: bankProofFile,
         salarySlipsFileKey: salarySlipFile,
@@ -190,7 +196,7 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
   }
 
   /// 🔹 View file
-  
+
   void _viewFile(String fileUrl) {
     final lowerUrl = fileUrl.toLowerCase();
     final fileName = fileUrl.split('/').last;
@@ -305,6 +311,8 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
     required String type,
     required String? fileUrl,
   }) {
+    final hasFile = _hasFile(fileUrl);
+
     return Card(
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -315,9 +323,9 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
-              fileUrl != null ? Icons.check_circle : Icons.upload_file,
-              color: fileUrl != null ? Colors.green : Colors.grey,
-              size: 30,
+              hasFile ? Icons.check_circle : Icons.upload_file,
+              color: hasFile ? Colors.green : Colors.grey,
+              size: 26,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -328,22 +336,23 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
                     title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    fileUrl != null ? "Uploaded" : "No file uploaded",
+                    hasFile ? "Uploaded" : "No file uploaded",
                     style: TextStyle(
-                      color:
-                          fileUrl != null ? Colors.green.shade700 : Colors.grey,
-                      fontSize: 12,
+                      color: hasFile ? Colors.green.shade700 : Colors.grey,
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
-            if (fileUrl == null) ...[
+
+            // 🔹 Agar file nahi hai to sirf Upload button dikhayenge
+            if (!hasFile) ...[
               ElevatedButton(
                 onPressed: () async => await _uploadFile(type),
                 style: ElevatedButton.styleFrom(
@@ -360,15 +369,18 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
                 ),
               ),
             ] else ...[
+              
               IconButton(
-                onPressed: () => _viewFile(fileUrl),
-                icon: const Icon(Icons.visibility, color: Colors.blue),
+                onPressed: () => _viewFile(fileUrl!),
+                icon:
+                    const Icon(Icons.visibility, color: Colors.blue, size: 20),
                 tooltip: "View File",
               ),
               IconButton(
-                onPressed: () => _deleteFile(fileUrl),
-                icon: const Icon(Icons.delete, color: Colors.redAccent),
-                tooltip: "Delete File",
+                onPressed: () => _deleteFile(fileUrl!),
+                icon:
+                    const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+                tooltip: "Remove File",
               ),
             ],
           ],

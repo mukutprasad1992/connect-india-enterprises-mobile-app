@@ -1,149 +1,100 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/Inquiry_Searchbar.dart';
-
 import 'widgets/InquerySummaryCard.dart';
+import '/services/adminServiceApi/InquirydataApi.dart';
+import 'widgets/InquiryModel/inquirymodel.dart';
 
 class InqueryTablePage extends StatefulWidget {
-  const InqueryTablePage({super.key});
+  final String token;
+  const InqueryTablePage({super.key, required this.token});
 
   @override
   State<InqueryTablePage> createState() => _InqueryTablePageState();
 }
 
 class _InqueryTablePageState extends State<InqueryTablePage> {
-  List<Map<String, String>> inquiryData = [];
-  List<Map<String, String>> filteredData = [];
+  List<InquiryModel> inquiryData = [];
+  List<InquiryModel> filteredData = [];
+  bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _loadDummyInquiryData();
+    _fetchInquiryData();
   }
 
-  void _loadDummyInquiryData() {
-    inquiryData = [
-      {
-        'ID': '001',
-        'First Name': 'John',
-        'Last Name': 'Doe',
-        'Email': 'john@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '100000',
-        'Duration': '2 years',
-        'Contact Timing': 'Morning',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '002',
-        'First Name': 'Pramod',
-        'Last Name': 'Singh',
-        'Email': 'pk@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Business',
-        'Amount': '500000',
-        'Duration': '3 years',
-        'Contact Timing': 'Evening',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '003',
-        'First Name': 'Rajiv',
-        'Last Name': 'Gupta',
-        'Email': 'rajiv@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '75000',
-        'Duration': '1 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Rejected',
-      },
-      {
-        'ID': '004',
-        'First Name': 'Ram Kailash ',
-        'Last Name': 'kushwaha',
-        'Email': 'ram@example.com',
-        'Mobile No': '9284283432',
-        'Type': 'Mutul fund',
-        'Amount': '500000',
-        'Duration': '2 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '005',
-        'First Name': 'Ajay',
-        'Last Name': 'Kushwaha',
-        'Email': 'ajay@example.com',
-        'Mobile No': '8081920652',
-        'Type': 'Term Insuarnce',
-        'Amount': '200000',
-        'Duration': '3 year',
-        'Contact Timing': 'Evening',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '006',
-        'First Name': 'Antim',
-        'Last Name': 'Kumar',
-        'Email': 'antim@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '75000',
-        'Duration': '1 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '007',
-        'First Name': 'Rajiv',
-        'Last Name': 'Gupta',
-        'Email': 'rajiv@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '75000',
-        'Duration': '1 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '008',
-        'First Name': 'Rajiv',
-        'Last Name': 'Gupta',
-        'Email': 'rajiv@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '75000',
-        'Duration': '1 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '009',
-        'First Name': 'Rajiv',
-        'Last Name': 'Gupta',
-        'Email': 'rajiv@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '75000',
-        'Duration': '1 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-      {
-        'ID': '010',
-        'First Name': 'Deepak',
-        'Last Name': 'Majhi',
-        'Email': 'majhi@example.com',
-        'Mobile No': '9876543210',
-        'Type': 'Personal',
-        'Amount': '5245000',
-        'Duration': '5 year',
-        'Contact Timing': 'Afternoon',
-        'Status': 'Pending',
-      },
-    ];
-    filteredData = inquiryData;
+  Future<void> _fetchInquiryData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      final token = widget.token.isNotEmpty
+          ? widget.token
+          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
+
+      if (token == null) {
+        _redirectToLogin();
+        return;
+      }
+
+      final response = await ServiceTypeApi.getAllServiceType(token: token);
+      final data = response["data"];
+
+      List<InquiryModel> loadedData = [];
+
+      if (data is List) {
+        loadedData = data
+            .map((json) =>
+                InquiryModel.fromJson(Map<String, dynamic>.from(json)))
+            .toList();
+      } else if (data is Map) {
+        loadedData = [InquiryModel.fromJson(Map<String, dynamic>.from(data))];
+      }
+
+      setState(() {
+        inquiryData = loadedData;
+        filteredData = List.from(inquiryData);
+      });
+
+      await _saveInquiry();
+    } catch (e) {
+      debugPrint("API fetch failed: $e");
+      await _loadInquiry();
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _saveInquiry() async {
+    final prefs = await SharedPreferences.getInstance();
+    final inquiryJsonList =
+        inquiryData.map((e) => jsonEncode(e.toJson())).toList();
+    await prefs.setStringList('inquiry', inquiryJsonList);
+  }
+
+  Future<void> _loadInquiry() async {
+    final prefs = await SharedPreferences.getInstance();
+    final inquiryJsonList = prefs.getStringList('inquiry') ?? [];
+
+    final loadedData = inquiryJsonList
+        .map((jsonStr) => InquiryModel.fromJson(jsonDecode(jsonStr)))
+        .toList();
+
+    setState(() {
+      inquiryData = loadedData;
+      filteredData = List.from(inquiryData);
+    });
+  }
+
+  void _redirectToLogin() {
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, "/login");
+    }
   }
 
   @override
@@ -152,6 +103,15 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 600;
+
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (errorMessage.isNotEmpty) {
+            return Center(child: Text(errorMessage));
+          }
+
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -177,13 +137,18 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
                             crossAxisCount: isWideScreen ? 2 : 1,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio:
-                                isWideScreen ? 2.2 : 1.9, // smoother aspect
+                            childAspectRatio: isWideScreen ? 2.2 : 1.9,
                           ),
-                          itemCount: filteredData.length,
                           itemBuilder: (context, index) {
+                            debugPrint("Building card $index of ${filteredData.length}");
+                            if (index >= filteredData.length) {
+                              return const SizedBox
+                                  .shrink(); 
+                            }
+
                             final row = filteredData[index];
                             return InquirySummaryCard(
+                              token: widget.token,
                               row: row,
                               onStatusChanged: () => setState(() {}),
                             );

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'inquiryIconbuttons.dart';
+import 'InquiryModel/inquirymodel.dart';
 
 class InquirySummaryCard extends StatelessWidget {
-  final Map<String, String> row;
+  final InquiryModel row;
   final VoidCallback onStatusChanged;
+  final token;
 
   const InquirySummaryCard({
     super.key,
+    required this.token,
     required this.row,
     required this.onStatusChanged,
   });
@@ -32,13 +35,10 @@ class InquirySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(row['Status']);
+    final statusColor = _getStatusColor(row.status);
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      onTap: () {
-        // Handle card tap here if needed
-      },
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -56,13 +56,13 @@ class InquirySummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: Name and action buttons
+            // Top Row: ID and action buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    '${row['First Name'] ?? ''} ${row['Last Name'] ?? ''}',
+                    "Inquiry ID: ${row.id}",
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.indigo,
@@ -72,6 +72,7 @@ class InquirySummaryCard extends StatelessWidget {
                   ),
                 ),
                 InquiryActionButtons(
+                  token:token,
                   row: row,
                   onStatusChanged: onStatusChanged,
                 ),
@@ -79,37 +80,31 @@ class InquirySummaryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 10),
+            
 
-            // Email
-            _buildLabelValueText(
-              context,
-              'Email',
-              row['Email'] ?? '',
-              Colors.teal,
+            // Aadhaar Number
+            _buildLabelValueText(context,'Adhar Number',row.aadharNumber, Colors.teal,),
+
+            const SizedBox(height: 6),
+
+            // PAN Number
+            _buildLabelValueText(context,'PAN Number',row.panNumber,Colors.blue,
             ),
 
             const SizedBox(height: 6),
 
-            // Mobile Number
-            _buildLabelValueText(
-              context,
-              'Mobile No',
-              row['Mobile No'] ?? '',
-              Colors.blue,
-            ),
-
-            const SizedBox(height: 6),
-
-            // Status with color
+            // Status
             Text.rich(
               TextSpan(
                 children: [
                   TextSpan(
                     text: 'Inquiry Status: ',
-                    style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   TextSpan(
-                    text: row['Status'] ?? '',
+                    text: row.status,
                     style: textTheme.bodyMedium?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w600,
@@ -141,7 +136,7 @@ class InquirySummaryCard extends StatelessWidget {
             style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           TextSpan(
-            text: value,
+            text: value.isEmpty ? 'N/A' : value,
             style: textTheme.bodyMedium?.copyWith(color: valueColor),
           ),
         ],

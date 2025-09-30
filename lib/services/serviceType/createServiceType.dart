@@ -50,9 +50,9 @@ class CreateServiceType {
       );
 
       // ✅ Debugging logs
-      print("🟡 [CreateServiceType] API URL => $baseUrl/serviceType/createServiceType");
-      print("🟡 [CreateServiceType] Headers => ${_headers(token)}");
-      print("📤 [CreateServiceType] Final Payload => $bodyData");
+      //print("🟡 [CreateServiceType] API URL => $baseUrl/serviceType/createServiceType");
+      //print("🟡 [CreateServiceType] Headers => ${_headers(token)}");
+      //print("📤 [CreateServiceType] Final Payload => $bodyData");
 
       final response = await http.post(
         Uri.parse('$baseUrl/serviceType/createServiceType'),
@@ -60,12 +60,12 @@ class CreateServiceType {
         body: jsonEncode(bodyData),
       );
 
-      print("📥 [CreateServiceType] Raw Response => ${response.body}");
-      print("📥 [CreateServiceType] Status Code => ${response.statusCode}");
+      //print("📥 [CreateServiceType] Raw Response => ${response.body}");
+      //print("📥 [CreateServiceType] Status Code => ${response.statusCode}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonResponse = jsonDecode(response.body);
-        print("✅ [CreateServiceType] Parsed Response => $jsonResponse");
+        //print("✅ [CreateServiceType] Parsed Response => $jsonResponse");
         return jsonResponse;
       } else if (response.statusCode == 401) {
         throw Exception("Token expired. Please login again.");
@@ -75,7 +75,7 @@ class CreateServiceType {
         );
       }
     } catch (e) {
-      print("❌ [CreateServiceType] Exception => $e");
+      //print("❌ [CreateServiceType] Exception => $e");
       throw Exception("API Exception: $e");
     }
   }

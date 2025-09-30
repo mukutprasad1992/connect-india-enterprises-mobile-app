@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'ViewInvestment.dart';
 import 'add_edit_pages/edit_investment_page.dart';
-import '/modules/user/widgets/investment/widgets/investment_models/Investment_model.dart';
+import '/models/investmentModel.dart';
+import '/services/serviceType/deleteServiceTypeApi.dart';
 
 class InvestmentActionButtons extends StatelessWidget {
   final Map<String, dynamic> investment;
@@ -38,24 +39,42 @@ class InvestmentActionButtons extends StatelessWidget {
             break;
 
           case 'edit':
-            final updatedInvestment = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EditInvestmentPage(
-                  investment: InvestmentModel.fromJson(investment),
-                  token: token,
+            if (investment is Map<String, dynamic>) {
+              final updatedInvestment = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditInvestmentPage(
+                    investment: InvestmentModel.fromJson(investment),
+                    token: token,
+                  ),
                 ),
-              ),
-            );
-            if (updatedInvestment != null) {
-              onUpdate(updatedInvestment);
+              );
+              if (updatedInvestment != null) {
+                onUpdate(updatedInvestment);
+                _showSnackBar(
+                  context,
+                  'Investment Updated Successfully!',
+                  Colors.green,
+                );
+              }
+            } else {
               _showSnackBar(
-                  context, 'Investment Updated Successfully!', Colors.green);
+                context,
+                'Invalid investment data received.',
+                Colors.red,
+              );
             }
             break;
-
           case 'delete':
-            _confirmDelete(context);
+            if (investment['id'] != null) {
+              _confirmDelete(context);
+            } else {
+              _showSnackBar(
+                context,
+                'Invalid investment ID!',
+                Colors.red,
+              );
+            }
             break;
         }
       },
@@ -94,17 +113,51 @@ class InvestmentActionButtons extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(dialogContext).pop();
-              onDelete();
-              _showSnackBar(context, 'Investment Deleted Successfully!',
-                  Colors.orangeAccent);
+              await _deleteInvestment(context); // <-- call here
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteInvestment(BuildContext context) async {
+    try {
+      final id = investment['id']?.toString() ?? '';
+      if (id.isEmpty) {
+        _showSnackBar(context, 'Cannot delete: ID is missing', Colors.red);
+        return;
+      }
+
+      final result = await ServiceTypeApi.DeleteServiceType(
+        token: token,
+        id: id,
+      );
+
+      if (result["status"] == true) {
+        onDelete();
+        _showSnackBar(
+          context,
+          result["message"] ?? 'Investment Deleted Successfully!',
+          Colors.orangeAccent,
+        );
+      } else {
+        _showSnackBar(
+          context,
+          result["message"] ?? 'Failed to delete investment',
+          Colors.redAccent,
+        );
+      }
+    } catch (e) {
+      _showSnackBar(
+        context,
+        "Error deleting investment: $e",
+        Colors.red,
+      );
+    }
   }
 
   void _showSnackBar(BuildContext context, String message, Color color) {

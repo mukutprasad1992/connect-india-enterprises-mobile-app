@@ -62,19 +62,26 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
   InputDecoration _inputDecoration(String label, IconData icon,
       {bool required = false, String? prefixText}) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: AppColors.background, size: 20),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 10, 
+        horizontal: 12, 
+      ),
+      prefixIcon: Icon(icon, color:Colors.deepPurple, size: 18),
       prefixText: prefixText,
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label),
-          if (required) const Text(" *", style: TextStyle(color: Colors.red)),
+          Text(
+          label,
+          style: const TextStyle(fontSize: 13), 
+          ),
+          if (required) const Text(" *", style: TextStyle(color: Colors.red,fontSize: 13)),
         ],
       ),
       filled: true,
       fillColor: Colors.grey.shade100,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
     );
@@ -137,6 +144,7 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
                 ? widget.selectIDType
                 : null,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: const TextStyle(fontSize: 14,color: Colors.black),
             decoration: _inputDecoration(
                 "Select Nominee ID Type", Icons.badge,
                 required: true),
@@ -145,7 +153,7 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
                 .toList(),
             onChanged: (val) {
               widget.onIDTypeChanged(val);
-              widget.nomineeIdController.clear(); // clear ID on type change
+              widget.nomineeIdController.clear(); 
             },
             validator: (val) {
               if (val == null || val.isEmpty) return "Please select ID Type";
@@ -158,19 +166,22 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
           // 🔹 ID Input
           TextFormField(
             controller: widget.nomineeIdController,
+            style: const TextStyle(fontSize: 14),
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            keyboardType: widget.selectIDType == "Aadhar"
-                ? TextInputType.number
-                : TextInputType.text,
-            decoration: _inputDecoration(
-                "Enter Nominee ${widget.selectIDType ?? "ID"}", Icons.person,
-                required: true),
-            inputFormatters: widget.selectIDType == "Aadhar"
+            textCapitalization: TextCapitalization.characters,
+            keyboardType: widget.selectIDType == "PAN"
+                ? TextInputType.text
+                : TextInputType.number,
+            decoration: _inputDecoration("Enter Nominee ${widget.selectIDType ?? "ID"}", Icons.person,required: true),
+            inputFormatters: widget.selectIDType == "PAN"
                 ? [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(12),
+                    //FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
                   ]
-                : null,
+                : [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(16),
+                  ],
             validator: (value) {
               return AddInvestmentController.validateNomineeId(
                 value,
@@ -183,6 +194,7 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
           // 🔹 Mobile
           TextFormField(
             controller: widget.nomineeMobileController,
+            style: const TextStyle(fontSize: 14,color: Colors.black),
             keyboardType: TextInputType.number,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             inputFormatters: [
@@ -208,6 +220,7 @@ class _NomineeDetailsSectionState extends State<NomineeDetailsSection> {
                 ? widget.selectedRelation
                 : null,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: const TextStyle(fontSize: 14,color:Colors.black),
             decoration: _inputDecoration(
               "Relation with Nominee",
               Icons.group,

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '/controllers/authController.dart';
-import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
+import '/models/citymodel.dart';
 import 'package:flutter/material.dart';
 
 class CityApi {

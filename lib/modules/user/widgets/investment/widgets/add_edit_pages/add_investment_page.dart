@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+//import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzontle.dart';
 
 class AddInvestmentPage extends StatelessWidget {
   final String token;

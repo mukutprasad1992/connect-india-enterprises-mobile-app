@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'InquiryModel/inquirymodel.dart';
 
 class InquerySearchBar extends StatefulWidget {
+  final List<InquiryModel> inquiryData;
   final void Function(String searchText) onChanged;
-  final List<Map<String, String>> inquiryData;
-  final Function(List<Map<String, String>>) onSearchResult;
+  final Function(List<InquiryModel>) onSearchResult;
   final Function(String) onSearchChanged;
   final VoidCallback onMicPressed;
 
   const InquerySearchBar({
     super.key,
-    required this.onChanged,
     required this.inquiryData,
+    required this.onChanged,
     required this.onSearchResult,
     required this.onMicPressed,
     required this.onSearchChanged,
@@ -43,8 +44,28 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
 
   void _filterData() {
     final query = _searchController.text.toLowerCase();
-    final filtered = widget.inquiryData.where((row) {
-      return row.values.any((val) => val.toLowerCase().contains(query));
+
+    final filtered = widget.inquiryData.where((inquiry) {
+      final values = [
+        inquiry.id,
+        inquiry.email,
+        inquiry.mobile,
+        inquiry.investmentType,
+        inquiry.amount,
+        inquiry.aadharNumber,
+        inquiry.panNumber,
+        inquiry.income,
+        inquiry.occupation,
+        inquiry.nomineeRelation ?? '',
+        inquiry.nomineeId ?? '',
+        inquiry.nomineeMobile ?? '',
+        inquiry.placeOfBirth['city'] ?? '',
+        inquiry.placeOfBirth['state'] ?? '',
+        inquiry.status,
+      ];
+
+      return values
+          .any((val) => val.toLowerCase().contains(query.toLowerCase()));
     }).toList();
 
     widget.onSearchResult(filtered);
@@ -81,12 +102,13 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Inquiry',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600,),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
-
-            // Search Bar
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: inputWidth.clamp(150.0, availableWidth),
@@ -152,10 +174,7 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
                   ),
                   isDense: true,
                   contentPadding: _isFocused
-                      ? const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 12,
-                        )
+                      ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
                       : const EdgeInsets.only(top: 18, left: 12),
                   filled: true,
                   fillColor: Colors.grey.shade100,

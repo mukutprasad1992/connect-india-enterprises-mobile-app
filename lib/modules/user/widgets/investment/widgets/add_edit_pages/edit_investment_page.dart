@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
-import '/modules/user/widgets/investment/widgets/investment_models/Investment_model.dart';
+//import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+//import '/modules/user/widgets/investment/widgets/investment_models/Investment_model.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzontle.dart';
+import '/models/investmentModel.dart';
 
 class EditInvestmentPage extends StatefulWidget {
   final InvestmentModel investment;
@@ -14,7 +16,7 @@ class EditInvestmentPage extends StatefulWidget {
 
   @override
   State<EditInvestmentPage> createState() => _EditInvestmentPageState();
-}
+} 
 
 class _EditInvestmentPageState extends State<EditInvestmentPage> {
   @override
@@ -23,7 +25,7 @@ class _EditInvestmentPageState extends State<EditInvestmentPage> {
       mode: "edit",
       investment: widget.investment,
       token: widget.token,
-      submit: widget.investment.isSubmitted.toString(),
+      submit: widget.investment.submit.toString(),
     );
   }
 }

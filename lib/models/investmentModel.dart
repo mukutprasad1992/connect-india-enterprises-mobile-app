@@ -5,7 +5,7 @@ class InvestmentModel {
   final String investmentType;
   final String amount;
   final String aadharNumber;
-  final String aadhaarCardFileKey;
+  final String aadharCardFileKey;
   final String panNumber;
   final String panCardFileKey;
   final String bankProofFileKey;
@@ -15,13 +15,13 @@ class InvestmentModel {
   final String income;
   final String occupation;
 
-  final String? nomineeId;       // modified to nullable
-  final String? nomineeIdType;   // new
+  final String? nomineeId;
+  final String? nomineeIdType;
   final String? nomineeMobile;
   final String? nomineeRelation;
 
   final String status;
-  final int isSubmitted;
+  final int submit;
 
   InvestmentModel({
     required this.id,
@@ -30,7 +30,7 @@ class InvestmentModel {
     required this.investmentType,
     required this.amount,
     required this.aadharNumber,
-    required this.aadhaarCardFileKey,
+    required this.aadharCardFileKey,
     required this.panNumber,
     required this.panCardFileKey,
     required this.bankProofFileKey,
@@ -43,7 +43,7 @@ class InvestmentModel {
     this.nomineeIdType,
     this.nomineeMobile,
     this.nomineeRelation,
-    required this.isSubmitted,
+    required this.submit,
     this.status = "Pending",
   });
 
@@ -55,15 +55,16 @@ class InvestmentModel {
       id: json['id']?.toString() ?? '',
       email: json['email'] ?? '',
       mobile: json['mobile'] ?? '',
-      investmentType: json['investmentType'] ?? '',
+      investmentType: json['serviceSubTypeName'] ?? '', 
       amount: json['amount']?.toString() ?? '',
       aadharNumber: json['aadharNumber'] ?? '',
-      aadhaarCardFileKey: json['aadhaarCardFileKey'] ?? '',
+      aadharCardFileKey: json['aadharCardFileKey'] ?? '',
       panNumber: json['panNumber'] ?? '',
       panCardFileKey: json['panCardFileKey'] ?? '',
       bankProofFileKey: json['bankProofFileKey'] ?? '',
       salarySlipsFileKey: json['salarySlipsFileKey'],
       itrDocumentsFileKey: json['itrDocumentsFileKey'],
+      
       placeOfBirth: json['placeOfBirth'] is Map<String, dynamic>
           ? json['placeOfBirth']
           : {},
@@ -73,9 +74,9 @@ class InvestmentModel {
       nomineeIdType: json['nomineeIdType']?.toString(),
       nomineeMobile: json['nomineeMobile'],
       nomineeRelation: json['nomineeRelation'],
-      isSubmitted: (json['isDetailsConfirmed'] is int)
-          ? json['isDetailsConfirmed']
-          : int.tryParse(json['isDetailsConfirmed']?.toString() ?? "0") ?? 0,
+      submit: json['submit'] is int
+          ? json['submit']
+          : int.tryParse(json['submit']?.toString() ?? "0") ?? 0, 
       status: allowedStatuses.contains(rawStatus) ? rawStatus : "Pending",
     );
   }
@@ -88,7 +89,7 @@ class InvestmentModel {
       'investmentType': investmentType,
       'amount': amount,
       'aadharNumber': aadharNumber,
-      'aadhaarCardFileKey': aadhaarCardFileKey,
+      'aadharCardFileKey': aadharCardFileKey,
       'panNumber': panNumber,
       'panCardFileKey': panCardFileKey,
       'bankProofFileKey': bankProofFileKey,
@@ -101,8 +102,9 @@ class InvestmentModel {
       'nomineeIdType': nomineeIdType,
       'nomineeMobile': nomineeMobile,
       'nomineeRelation': nomineeRelation,
-      'isDetailsConfirmed': isSubmitted,
+      'submit': submit,
       'status': status,
     };
   }
 }
+

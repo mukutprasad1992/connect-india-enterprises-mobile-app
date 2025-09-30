@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+import 'package:pdfx/pdfx.dart';
+
 import '/consts/appColors.dart';
+import 'package:http/http.dart' as http;
 
 class ViewInvestment extends StatelessWidget {
   final Map<String, dynamic> investment;
@@ -23,11 +26,7 @@ class ViewInvestment extends StatelessWidget {
     }
   }
 
-  void _openFile(String? url) {
-    if (url == null || url.isEmpty) return;
-    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
-
+  /// 📌 Field UI Builder
   Widget _buildField(BuildContext context, String label, String value,
       {IconData? icon, bool isStatus = false, String? fileUrl}) {
     return Padding(
@@ -44,8 +43,14 @@ class ViewInvestment extends StatelessWidget {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                if (fileUrl != null) {
-                  _openFile(fileUrl);
+                if (fileUrl != null && fileUrl.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          DocumentViewerPage(fileUrl: fileUrl, title: label),
+                    ),
+                  );
                 } else {
                   Clipboard.setData(ClipboardData(text: value));
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -81,10 +86,18 @@ class ViewInvestment extends StatelessWidget {
               ),
             ),
           ),
-          if (fileUrl != null)
+          if (isValidFile(fileUrl))
             IconButton(
               icon: const Icon(Icons.visibility, color: Colors.blue),
-              onPressed: () => _openFile(fileUrl),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        DocumentViewerPage(fileUrl: fileUrl!, title: label),
+                  ),
+                );
+              },
             ),
         ],
       ),
@@ -118,10 +131,49 @@ class ViewInvestment extends StatelessWidget {
     );
   }
 
+  // String? _checkFile(dynamic value, String label) {
+  //   if (value != null && value.toString().isNotEmpty) {
+  //     return "View $label";
+  //   }
+  //   return null;
+  // }
+
+  // String? _getValidFileUrl(dynamic value) {
+  //   if (value == null) return null;
+  //   final str = value.toString().trim();
+  //   if (str.isEmpty || str == "N/A") return null;
+  //   return str;
+  // }
+
+  bool isValidFile(dynamic value) {
+    if (value == null) return false;
+    final str = value.toString().trim().toLowerCase();
+    if (str.isEmpty || str == "n/a" || str == "null") return false;
+    return true;
+  }
+
+  String _safeValue(dynamic value) {
+    if (value == null) return "N/A";
+    final str = value.toString().trim();
+    return str.isEmpty ? "N/A" : str;
+  }
+
+  String _formatPlaceOfBirth(dynamic place) {
+    if (place is Map) {
+      final city = place['city']?.toString().trim();
+      final state = place['state']?.toString().trim();
+      if (city != null &&
+          city.isNotEmpty &&
+          state != null &&
+          state.isNotEmpty) {
+        return "$city, $state";
+      }
+    }
+    return "N/A";
+  }
+
   @override
   Widget build(BuildContext context) {
-    //print("Active Step: ${investment['activeSteps']}");
-    //print("Submit: ${investment['submit']}");
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -151,21 +203,23 @@ class ViewInvestment extends StatelessWidget {
                   _buildField(
                     context,
                     "Active Step",
-                    investment['activeSteps']?.toString().capitalize() ??
-                        "N/A",
+                    investment['activeSteps']?.toString().capitalize() ?? "N/A",
                     icon: Icons.flag,
                   ),
                   _buildField(
                     context,
                     "Submit Status",
-                    (investment['submit']?.toString().toLowerCase() ==
-                            "complete")
+                    (investment['activeSteps']?.toString().toLowerCase() ==
+                            "review")
                         ? "Complete"
                         : "Incomplete",
                     icon: Icons.check_circle,
                     isStatus: true,
                   ),
                 ]),
+
+                // Basic details
+
                 _buildSection("Basic Details", [
                   _buildField(context, "Aadhar Number",
                       investment['aadharNumber'] ?? "N/A",
@@ -174,27 +228,44 @@ class ViewInvestment extends StatelessWidget {
                       context, "Pan Number", investment['panNumber'] ?? "N/A",
                       icon: Icons.credit_card_outlined),
                 ]),
+
+                // Personal details
+
                 _buildSection("Personal Details", [
-                  _buildField(context, "Email", investment['email'] ?? "N/A",
-                      icon: Icons.email),
-                  _buildField(context, "Mobile", investment['mobile'] ?? "N/A",
-                      icon: Icons.phone_android),
+                  _buildField(
+                    context,
+                    "Email",
+                    _safeValue(investment['email']),
+                    icon: Icons.email,
+                  ),
+                  _buildField(
+                    context,
+                    "Mobile",
+                    _safeValue(investment['mobile']),
+                    icon: Icons.phone_android,
+                  ),
                   _buildField(
                     context,
                     "Place Of Birth",
-                    (investment['placeOfBirth'] is Map &&
-                            investment['placeOfBirth'] != null)
-                        ? "${investment['placeOfBirth']['city']}, ${investment['placeOfBirth']['state']}"
-                        : (investment['placeOfBirth']?.toString() ?? "N/A"),
+                    _formatPlaceOfBirth(investment['placeOfBirth']),
                     icon: Icons.place,
                   ),
                   _buildField(
-                      context, "Occupation", investment['occupation'] ?? "N/A",
-                      icon: Icons.work_outline),
-                  _buildField(context, "Income",
-                      investment['income']?.toString() ?? "N/A",
-                      icon: Icons.attach_money),
+                    context,
+                    "Occupation",
+                    _safeValue(investment['occupation']),
+                    icon: Icons.work_outline,
+                  ),
+                  _buildField(
+                    context,
+                    "Income",
+                    _safeValue(investment['income']),
+                    icon: Icons.attach_money,
+                  ),
                 ]),
+
+                // Nominee details
+
                 _buildSection("Nominee Details", [
                   _buildField(
                       context, "Nominee ID", investment['nomineeId'] ?? "N/A",
@@ -206,32 +277,65 @@ class ViewInvestment extends StatelessWidget {
                       investment['nomineeRelation'] ?? "N/A",
                       icon: Icons.group),
                 ]),
+
+                // Documents Section
+
                 _buildSection("Documents", [
-                  _buildField(context, "Aadhaar Card File", investment['aadhaarCardFileKey'] != null ?"View Aadhaar Card":"N/A",
-                      fileUrl: investment['aadhaarCardFileKey'],
-                      icon: Icons.picture_as_pdf),
-                  _buildField(context, "PAN Card File", investment['panCardFileKey'] != null ?"View PAN Card":"N/A",
-                      fileUrl: investment['panCardFileKey'],
-                      icon: Icons.picture_as_pdf),
-                  _buildField(context, "Bank Proof", investment['bankProofFileKey'] != null ?"View Bank Proof":"N/A",
-                      fileUrl: investment['bankProofFileKey'],
-                      icon: Icons.account_balance),
                   _buildField(
-                      context,
-                      "Salary Slip",
-                      investment['salarySlipsFileKey'] != null
-                          ? "View Salary Slip"
-                          : "N/A",
-                      fileUrl: investment['salarySlipsFileKey'],
-                      icon: Icons.receipt_long),
+                    context,
+                    "Adhar Card File",
+                    isValidFile(investment['aadharCardFileKey'])
+                        ? "View Adhar Card"
+                        : "N/A",
+                    fileUrl: isValidFile(investment['aadharCardFileKey'])
+                        ? investment['aadharCardFileKey']
+                        : null,
+                    icon: Icons.picture_as_pdf,
+                  ),
                   _buildField(
-                      context,
-                      "ITR Document",
-                      investment['itrDocumentsFileKey'] != null
-                          ? "View ITR Document"
-                          : "N/A",
-                      fileUrl: investment['itrDocumentsFileKey'],
-                      icon: Icons.description),
+                    context,
+                    "PAN Card File",
+                    isValidFile(investment['panCardFileKey'])
+                        ? "View Adhar Card"
+                        : "N/A",
+                    fileUrl: isValidFile(investment['panCardFileKey'])
+                        ? investment['panCardFileKey']
+                        : null,
+                    icon: Icons.picture_as_pdf,
+                  ),
+                  _buildField(
+                    context,
+                    "Bank Proof",
+                    isValidFile(investment['bankProofFileKey'])
+                        ? "View Bank proof"
+                        : "N/A",
+                    fileUrl: isValidFile(investment['bankProofFileKey'])
+                        ? investment['bankProofFileKey']
+                        : null,
+                    icon: Icons.account_balance,
+                  ),
+                  _buildField(
+                    context,
+                    "Salary Slip",
+                    isValidFile(investment['salarySlipsFileKey'])
+                        ? "View Salary Slip"
+                        : "N/A",
+                    fileUrl: isValidFile(investment['salarySlipsFileKey'])
+                        ? investment['salarySlipsFileKey']
+                        : null,
+                    icon: Icons.receipt_long,
+                  ),
+                  _buildField(
+                    context,
+                    "ITR Document",
+                    isValidFile(investment['itrDocumentsFileKey'])
+                        ? "View ITR document"
+                        : "N/A",
+                    fileUrl: isValidFile(investment['itrDocumentsFileKey'])
+                        ? investment['itrDocumentsFileKey']
+                        : null,
+                    icon: Icons.description,
+                  ),
                 ]),
               ],
             ),
@@ -241,9 +345,88 @@ class ViewInvestment extends StatelessWidget {
     );
   }
 }
+
 extension StringCasingExtension on String {
   String capitalize() {
     if (isEmpty) return this;
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  }
+}
+
+/// 📌 Document Viewer Page
+
+class DocumentViewerPage extends StatefulWidget {
+  final String fileUrl;
+  final String title;
+
+  const DocumentViewerPage(
+      {super.key, required this.fileUrl, required this.title});
+
+  @override
+  State<DocumentViewerPage> createState() => _DocumentViewerPageState();
+}
+
+class _DocumentViewerPageState extends State<DocumentViewerPage> {
+  PdfControllerPinch? pdfController;
+  bool isPdf = false;
+  bool isImage = false;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final lowerUrl = widget.fileUrl.toLowerCase();
+    if (lowerUrl.endsWith(".pdf")) {
+      isPdf = true;
+      _loadPdf(widget.fileUrl);
+    } else if (lowerUrl.endsWith(".jpg") ||
+        lowerUrl.endsWith(".jpeg") ||
+        lowerUrl.endsWith(".png")) {
+      isImage = true;
+      isLoading = false;
+    } else {
+      isLoading = false;
+    }
+  }
+
+  Future<void> _loadPdf(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        pdfController = PdfControllerPinch(
+          document: PdfDocument.openData(response.bodyBytes),
+        );
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Failed to load PDF");
+      }
+    } catch (e) {
+      //print("❌ Error loading PDF: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: Text(widget.title,
+              style: TextStyle(fontSize: 18, color: Colors.white)),
+          iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: AppColors.background),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : isPdf
+              ? PdfViewPinch(controller: pdfController!)
+              : isImage
+                  ? Center(
+                      child: InteractiveViewer(
+                        child: Image.network(widget.fileUrl),
+                      ),
+                    )
+                  : const Center(child: Text("Unsupported file format")),
+    );
   }
 }

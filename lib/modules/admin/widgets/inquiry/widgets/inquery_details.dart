@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/consts/appColors.dart';
+import 'InquiryModel/inquirymodel.dart';
 
 class InqueryDetails extends StatelessWidget {
-  final Map<String, String> row;
+  final InquiryModel row;
 
   const InqueryDetails({super.key, required this.row});
 
@@ -11,34 +12,44 @@ class InqueryDetails extends StatelessWidget {
     switch (key.toLowerCase()) {
       case 'id':
         return Icons.badge_outlined;
-      case 'first name':
-      case 'last name':
-        return Icons.person_outline;
       case 'email':
         return Icons.email_outlined;
-      case 'mobile no':
+      case 'mobile':
         return Icons.phone_android;
-      case 'type':
+      case 'investment type':
         return Icons.category_outlined;
       case 'amount':
         return Icons.attach_money_outlined;
-      case 'duration':
-        return Icons.timer_outlined;
-      case 'from time':
-        return Icons.access_time_outlined;
-      case 'to time':
-        return Icons.access_time;
+      case 'aadhar number':
+        return Icons.credit_card;
+      case 'aadhaar card file':
+      case 'pan card file':
+      case 'bank proof file':
+      case 'salary slips file':
+      case 'itr documents file':
+        return Icons.insert_drive_file_outlined;
+      case 'pan number':
+        return Icons.credit_card_outlined;
+      case 'place of birth':
+        return Icons.location_city_outlined;
+      case 'income':
+        return Icons.account_balance_wallet_outlined;
+      case 'occupation':
+        return Icons.work_outline;
+      case 'nominee id':
+      case 'nominee id type':
+      case 'nominee mobile':
+        return Icons.contact_phone_outlined;
+      case 'nominee relation':
+        return Icons.family_restroom;
       case 'status':
         return Icons.toggle_on_outlined;
-      case 'comment':
-        return Icons.comment_outlined;
+      case 'submit':
+        return Icons.done_all_outlined;
       default:
         return Icons.info_outline;
     }
   }
-
-  String capitalize(String s) =>
-      s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
 
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -55,9 +66,39 @@ class InqueryDetails extends StatelessWidget {
     }
   }
 
+  String capitalize(String s) =>
+      s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
+
   @override
   Widget build(BuildContext context) {
-    final sortedEntries = row.entries.toList()
+    // Prepare data map for display
+    final Map<String, String> displayData = {
+      'ID': row.id,
+      'Email': row.email,
+      'Mobile': row.mobile,
+      'Investment Type': row.investmentType,
+      'Amount': row.amount,
+      'Aadhar Number': row.aadharNumber,
+      'Aadhaar Card File': row.aadhaarCardFileKey,
+      'PAN Number': row.panNumber,
+      'PAN Card File': row.panCardFileKey,
+      'Bank Proof File': row.bankProofFileKey,
+      'Salary Slips File': row.salarySlipsFileKey ?? 'N/A',
+      'ITR Documents File': row.itrDocumentsFileKey ?? 'N/A',
+      'Place of Birth': row.placeOfBirth.isNotEmpty
+          ? "${row.placeOfBirth['city'] ?? ''}, ${row.placeOfBirth['state'] ?? ''}"
+          : 'N/A',
+      'Income': row.income,
+      'Occupation': row.occupation,
+      'Nominee ID': row.nomineeId ?? 'N/A',
+      'Nominee ID Type': row.nomineeIdType ?? 'N/A',
+      'Nominee Mobile': row.nomineeMobile ?? 'N/A',
+      'Nominee Relation': row.nomineeRelation ?? 'N/A',
+      'Status': row.status,
+      'Submit': row.submit.toString(),
+    };
+
+    final sortedEntries = displayData.entries.toList()
       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
 
     return Scaffold(
@@ -65,7 +106,8 @@ class InqueryDetails extends StatelessWidget {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: AppColors.background,
-        title:Text('Inquiry Details', style: TextStyle(color: Colors.white)),
+        title:
+            const Text('Inquiry Details', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         elevation: 3,
       ),
@@ -80,59 +122,73 @@ class InqueryDetails extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: sortedEntries.map((entry) {
-                final icon = _getIconForKey(entry.key);
-                final isStatusField = entry.key.toLowerCase() == 'status';
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: sortedEntries.map((entry) {
+                  final icon = _getIconForKey(entry.key);
+                  final isStatusField = entry.key.toLowerCase() == 'status';
+                  final isFileField = entry.key.toLowerCase().contains('file');
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(icon, color: Colors.indigo, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              capitalize(entry.key),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: entry.value));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('${capitalize(entry.key)} copied'),
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                entry.value.isEmpty ? 'N/A' : entry.value,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: isStatusField
-                                      ? getStatusColor(entry.value)
-                                      : Colors.black54,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(icon, color: Colors.indigo, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                capitalize(entry.key),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: Colors.black87,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  Clipboard.setData(
+                                      ClipboardData(text: entry.value));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${capitalize(entry.key)} copied'),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                                child: isFileField && entry.value != 'N/A'
+                                    ? Text(
+                                        entry.value,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.blue,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      )
+                                    : Text(
+                                        entry.value,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isStatusField
+                                              ? getStatusColor(entry.value)
+                                              : Colors.black54,
+                                        ),
+                                      ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -140,4 +196,3 @@ class InqueryDetails extends StatelessWidget {
     );
   }
 }
-

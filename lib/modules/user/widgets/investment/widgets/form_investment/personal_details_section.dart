@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import '/controllers/usercontroller/investmentController/InvesrmentformController.dart';
 import '/consts/appColors.dart';
 import '/services/serviceType/updateServiceType.dart' as updateApi;
-import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
+import '/models/citymodel.dart';
+//import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
 
 class PersonalDetailsSection extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -55,18 +56,25 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
   InputDecoration _inputDecoration(String label, IconData icon,
       {bool required = false}) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: AppColors.background, size: 20),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 10, 
+        horizontal: 12, 
+      ),
+      prefixIcon: Icon(icon, color:Colors.deepPurple, size: 18),
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label),
-          if (required) const Text(" *", style: TextStyle(color: Colors.red)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13), 
+          ),
+          if (required) const Text(" *", style: TextStyle(color: Colors.red,fontSize:13)),
         ],
       ),
       filled: true,
       fillColor: Colors.grey.shade100,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
     );
@@ -100,7 +108,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
             : null,
       );
 
-      print("📥 API Response: $res");
+      //print("📥 API Response: $res");
 
       if (res['status'] == true) {
         final dbId =
@@ -133,6 +141,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
         children: [
           _buildTextField(
             controller: widget.emailController,
+            
             label: "Email",
             icon: Icons.email,
             keyboardType: TextInputType.emailAddress,
@@ -142,6 +151,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
 
           TextFormField(
             controller: widget.mobileController,
+            style: const TextStyle(fontSize: 14),
             keyboardType: TextInputType.number,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             inputFormatters: [
@@ -154,7 +164,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
             validator: AddInvestmentController.validatePhone,
             onSaved: (value) {
               if (value != null && value.length == 10) {
-                widget.mobileController.text = '+91 $value';
+                widget.mobileController.text = '$value';
               }
             },
           ),
@@ -166,6 +176,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
                   isExpanded: true,
                   value: widget.selectedCity,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
+                  style: const TextStyle(fontSize: 14,color: Colors.black),
                   decoration: _inputDecoration(
                     "Place of Birth",
                     Icons.location_city,
@@ -196,6 +207,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
                 .toList(),
             onChanged: widget.onOccupationChanged,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: const TextStyle(fontSize: 14,color: Colors.black),
             validator: (val) => val == null ? "Please select occupation" : null,
             hint: const Text("Select Occupation"),
           ),
@@ -205,6 +217,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
           // Income field for both JOB and BUSINESS
           _buildDropdown(
             controller: widget.incomeController,
+            
             label: widget.occupation == "JOB"
                 ? "Annual Income"
                 : "Net Gross Profit",
@@ -227,6 +240,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
   }) {
     return TextFormField(
       controller: controller,
+      style: const TextStyle(fontSize: 14),
       keyboardType: keyboardType,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: _inputDecoration(label, icon, required: true),
@@ -243,6 +257,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
   }) {
     return DropdownButtonFormField<String>(
       autovalidateMode: AutovalidateMode.onUserInteraction,
+      style: const TextStyle(fontSize: 14,color: Colors.black),
       value: options.contains(controller.text) ? controller.text : null,
       decoration: _inputDecoration(label, icon, required: true),
       items: options

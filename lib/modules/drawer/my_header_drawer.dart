@@ -113,15 +113,15 @@ class _MyHeaderDrawerState extends State<MyHeaderDrawer> {
               children: [
                 Image.asset(
                   'assets/images/logo.png',
-                  width: 30,
-                  height: 30,
+                  width: 26,
+                  height: 26,
                 ),
                 const SizedBox(width: 10),
                 const Text(
                   'Connect India Enterprises',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
