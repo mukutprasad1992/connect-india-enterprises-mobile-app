@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/investmentController/InvesrmentformController.dart';
 import '/consts/appColors.dart';
-import '/services/serviceType/updateServiceType.dart' as updateApi;
+import '/services/serviceType/investmentServices/updateServiceType.dart' as updateApi;
 
 class NomineeDetailsSection extends StatefulWidget {
   final GlobalKey<FormState> formKey;

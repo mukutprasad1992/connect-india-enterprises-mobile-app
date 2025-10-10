@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'inquery_details.dart';
-import 'InquiryModel/inquirymodel.dart';
-import '/services/adminServiceApi/inqueryStatusApi.dart';
+import '/models/inquiryModel.dart';
+import '/services/adminServiceApi/Inquiry/inqueryStatusApi.dart';
 
 class InquiryActionButtons extends StatelessWidget {
   final InquiryModel row;
   final VoidCallback onStatusChanged;
-  final String token; 
+  final String token;
 
   const InquiryActionButtons({
     super.key,
@@ -17,8 +17,9 @@ class InquiryActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = row.status.toLowerCase();
-    final isPendingOrInProgress = status == 'pending' || status == 'in progress';
+    final status = row.status?.toLowerCase() ?? '';
+    final isPendingOrInProgress =
+        status == 'pending' || status == 'in progress';
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
@@ -124,8 +125,7 @@ class InquiryActionButtons extends StatelessWidget {
     );
   }
 
-  void _showConfirmationDialog(
-      BuildContext context, String title,
+  void _showConfirmationDialog(BuildContext context, String title,
       String content, VoidCallback onConfirm) {
     showDialog(
       context: context,
@@ -155,15 +155,13 @@ class InquiryActionButtons extends StatelessWidget {
     try {
       final response = await ServiceTypeApi.UpdateStatus(
         token: token,
-        serviceId: row.serviceId,
+        serviceId: row.serviceId ?? '',
         id: row.id.toString(),
         status: newStatus,
       );
 
       if (response['status'] == true) {
-        row.status = response['data']['status'];
-        onStatusChanged();
-
+        onStatusChanged(); // parent refreshes the list
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

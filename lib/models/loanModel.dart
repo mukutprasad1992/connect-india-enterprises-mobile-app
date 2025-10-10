@@ -1,139 +1,158 @@
-// import 'package:myapp/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
+class LoanModel {
+  final String? id;
 
-// //import 'models/citymodel.dart';
+  // Personal details
+  String? panNumber;
+  String? aadharNumber;
+  String? motherName;
+  String? maritalStatus;
+  String? currentAddress;
 
-// class LoanModel {
-//   final String id;
-//   final String investmentType;
+  // Contact details
 
-//   // Basic Details
-//   final String aadharNumber;
-//   final String panNumber;
+  int? yearsOfCity;
+  String? alternateNo;
+  String? landmark;
 
-//   // Personal Details
-//   final String motherName;
-//   final String heightCM;
-//   final String weightKG;
-//   final String smoker;
-//   final String alcohol;
-//   final Map<String, dynamic> placeOfBirth;
-//   //final PlaceOfBirth placeOfBirth;
-//   final String occupation;
-//   final String income;
+  // employmentDetails
 
-//   // Nominee Details
-//   final String nomineeName;
-//   final String nomineeDOB;
-//   final String? nomineeRelation;
+  String? designation;
+  int? companyExp;
+  int? totalWorkExp;
+  String? officeAddress;
+  String? officeMobile;
 
-//   // Documents
-//   final String aadharCardFileKey;
-//   final String panCardFileKey;
-//   final String bankProofFileKey;
-//   final String? salarySlipsFileKey;
-//   final String? itrDocumentsFileKey;
+  //referenceDetails
 
-//   // Review / Status
-//   final String status;
-//   final int submit;
+  String? ref1Name;
+  String? ref1Mobile;
+  String? ref1Address;
 
-//   LoanModel({
-//     required this.id,
-//     required this.investmentType,
+  String? ref2Name;
+  String? ref2Mobile;
+  String? ref2Address;
 
-//     // Basic
-//     required this.aadharNumber,
-//     required this.panNumber,
+  //documents
 
-//     // Personal
-//     required this.motherName,
-//     required this.heightCM,
-//     required this.weightKG,
-//     required this.smoker,
-//     required this.alcohol,
-//     required this.placeOfBirth,
-//     required this.occupation,
-//     required this.income,
+  dynamic photoFileKey;
+  dynamic panCardFileKey;
+  dynamic aadharCardFileKey;
+  dynamic salarySlipsFileKey;
+  dynamic bankStatementFileKey;
 
-//     // Nominee
-//     required this.nomineeName,
-//     required this.nomineeDOB,
-//     this.nomineeRelation,
+  // review
+  bool? submit;
+  String? activeSteps;
+  String? loanType;
+  String? status;
 
-//     // Docs
-//     required this.aadharCardFileKey,
-//     required this.panCardFileKey,
-//     required this.bankProofFileKey,
-//     this.salarySlipsFileKey,
-//     this.itrDocumentsFileKey,
+  LoanModel({
+    this.id,
+    this.motherName,
+    this.landmark,
+    this.currentAddress,
+    this.yearsOfCity,
+    this.alternateNo,
+    this.maritalStatus,
+    this.designation,
+    this.companyExp,
+    this.totalWorkExp,
+    this.officeAddress,
+    this.officeMobile,
+    this.ref1Name,
+    this.ref1Mobile,
+    this.ref1Address,
+    this.ref2Name,
+    this.ref2Mobile,
+    this.ref2Address,
+    this.panNumber,
+    this.aadharNumber,
+    this.photoFileKey,
+    this.panCardFileKey,
+    this.aadharCardFileKey,
+    this.salarySlipsFileKey,
+    this.bankStatementFileKey,
+    this.submit,
+    this.activeSteps,
+    this.loanType,
+    this.status,
+  });
 
-//     // Status
-//     required this.submit,
-//     this.status = "Pending",
-//   });
+  factory LoanModel.fromJson(Map<String, dynamic> json) {
+    return LoanModel(
+      id: json['id']?.toString(),
+      motherName: json['motherName']?.toString(),
+      landmark: json['landmark']?.toString(),
+      currentAddress: json['currentAddress']?.toString(),
+      yearsOfCity: json['yearsOfCity'] != null
+          ? int.tryParse(json['yearsOfCity'].toString())
+          : null,
+      alternateNo: json['alternateNo']?.toString(),
+      maritalStatus: json['maritalStatus']?.toString(),
+      designation: json['designation']?.toString(),
+      companyExp: json['companyExp'] != null
+          ? int.tryParse(json['companyExp'].toString())
+          : null,
+      totalWorkExp: json['totalWorkExp'] != null
+          ? int.tryParse(json['totalWorkExp'].toString())
+          : null,
+      officeAddress: json['officeAddress']?.toString(),
+      officeMobile: json['officeMobile']?.toString(),
+      ref1Name: json['ref1Name']?.toString(),
+      ref1Mobile: json['ref1Mobile']?.toString(),
+      ref1Address: json['ref1Address']?.toString(),
+      ref2Name: json['ref2Name']?.toString(),
+      ref2Mobile: json['ref2Mobile']?.toString(),
+      ref2Address: json['ref2Address']?.toString(),
+      panNumber: json['panNumber']?.toString(),
+      aadharNumber: json['aadharNumber']?.toString(),
+      photoFileKey: json['photoFileKey']?.toString(),
+      panCardFileKey: json['panCardFileKey']?.toString(),
+      aadharCardFileKey: json['aadharCardFileKey']?.toString(),
+      salarySlipsFileKey: json['salarySlipsFileKey']?.toString(),
+      bankStatementFileKey: json['bankStatementFileKey']?.toString(),
+      submit: json['submit'] != null
+          ? (json['submit'] is bool
+              ? json['submit']
+              : json['submit'].toString() == '1')
+          : false,
+      activeSteps: json['activeSteps']?.toString(),
+      loanType: json['loanType']?.toString(),
+      status: json['status']?.toString(),
+    );
+  }
 
-//   factory LoanModel.fromJson(Map<String, dynamic> json) {
-//     final rawStatus = json['status']?.toString() ?? "Pending";
-//     const allowedStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
-
-//     return LoanModel(
-//       id: json['id']?.toString() ?? '',
-//       investmentType: json['serviceSubTypeName'] ?? '',
-//       aadharNumber: json['aadharNumber'] ?? '',
-//       panNumber: json['panNumber'] ?? '',
-//       motherName: json['motherName'] ?? '',
-//       heightCM: json['heightCM'] ?? '',
-//       weightKG: json['weightKG'] ?? '',
-//       smoker: json['smoker'] ?? '',
-//       alcohol: json['alcohol'] ?? '',
-
-//       // placeOfBirth: json['placeOfBirth'] != null
-//       //     ? PlaceOfBirth.fromJson(json['placeOfBirth'])
-//       //     : PlaceOfBirth(city: '', state: ''),
-
-//       placeOfBirth: json['placeOfBirth'] is Map<String, dynamic>? json['placeOfBirth']: {},
-
-//       occupation: json['occupation'] ?? '',
-//       income: json['income']?.toString() ?? '',
-//       nomineeName: json['nomineeName'] ?? '',
-//       nomineeDOB: json['nomineeDOB'] ?? '',
-//       nomineeRelation: json['nomineeRelation'],
-//       aadharCardFileKey: json['aadhaarCardFileKey'] ?? '',
-//       panCardFileKey: json['panCardFileKey'] ?? '',
-//       bankProofFileKey: json['bankProofFileKey'] ?? '',
-//       salarySlipsFileKey: json['salarySlipsFileKey'],
-//       itrDocumentsFileKey: json['itrDocumentsFileKey'],
-//       submit: json['submit'] is int
-//           ? json['submit']
-//           : int.tryParse(json['submit']?.toString() ?? "0") ?? 0,
-//       status: allowedStatuses.contains(rawStatus) ? rawStatus : "Pending",
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'id': id,
-//       'investmentType': investmentType,
-//       'aadharNumber': aadharNumber,
-//       'panNumber': panNumber,
-//       'motherName': motherName,
-//       'heightCM': heightCM,
-//       'weightKG': weightKG,
-//       'smoker': smoker,
-//       'alcohol': alcohol,
-//       'placeOfBirth': placeOfBirth,
-//       'occupation': occupation,
-//       'income': income,
-//       'nomineeName': nomineeName,
-//       'nomineeDOB': nomineeDOB,
-//       'nomineeRelation': nomineeRelation,
-//       'aadhaarCardFileKey': aadharCardFileKey,
-//       'panCardFileKey': panCardFileKey,
-//       'bankProofFileKey': bankProofFileKey,
-//       'salarySlipsFileKey': salarySlipsFileKey,
-//       'itrDocumentsFileKey': itrDocumentsFileKey,
-//       'submit': submit,
-//       'status': status,
-//     };
-//   }
-// }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'motherName': motherName,
+      'landmark': landmark,
+      'currentAddress': currentAddress,
+      'yearsOfCity': yearsOfCity,
+      'alternateNo': alternateNo,
+      'maritalStatus': maritalStatus,
+      'designation': designation,
+      'companyExp': companyExp,
+      'totalWorkExp': totalWorkExp,
+      'officeAddress': officeAddress,
+      'officeMobile': officeMobile,
+      'ref1Name': ref1Name,
+      'ref1Mobile': ref1Mobile,
+      'ref1Address': ref1Address,
+      'ref2Name': ref2Name,
+      'ref2Mobile': ref2Mobile,
+      'ref2Address': ref2Address,
+      'panNumber': panNumber,
+      'aadharNumber': aadharNumber,
+      'photoFileKey': photoFileKey,
+      'panCardFileKey': panCardFileKey,
+      'aadharCardFileKey': aadharCardFileKey,
+      'salarySlipsFileKey': salarySlipsFileKey,
+      'bankStatementFileKey': bankStatementFileKey,
+      'submit': submit,
+      'activeSteps': activeSteps,
+      'loanType': loanType,
+      'status': status,
+    };
+  }
+}

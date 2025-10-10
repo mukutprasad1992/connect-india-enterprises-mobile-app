@@ -1,9 +1,53 @@
+// import 'package:html/parser.dart' as html_parser;
+
+// class AppNotification {
+//   final String id;
+//   final String message;
+//   int isRead;
+//   final DateTime createdAt;
+//   final String email;
+
+//   AppNotification({
+//     required this.id,
+//     required this.message,
+//     required this.isRead,
+//     required this.createdAt,
+//     required this.email,
+//   });
+
+//   factory AppNotification.fromJson(Map<String, dynamic> json) {
+//     return AppNotification(
+//       id: json['_id'].toString(),
+//       message: json['message'] ?? '',
+//       isRead: int.parse(json['isRead'].toString()),
+//       createdAt: DateTime.parse(json['createdAt']),
+//       email: json['email'] ?? '',
+//     );
+//   }
+
+//   /// Extract <h3> content for title
+//   String extractH3() {
+//     final document = html_parser.parse(message);
+//     final h3 = document.getElementsByTagName('h3');
+//     if (h3.isNotEmpty) {
+//       return h3.first.text.trim();
+//     }
+//     return 'Notification';
+//   }
+
+//   /// Convert HTML to plain text
+//   String toPlainText() {
+//     final document = html_parser.parse(message);
+//     return document.body?.text.replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
+//   }
+// }
+
 import 'package:html/parser.dart' as html_parser;
 
 class AppNotification {
-  final int id;
+  final String id;
   final String message;
-  final int isRead;
+  int isRead;
   final DateTime createdAt;
   final String email;
 
@@ -17,25 +61,25 @@ class AppNotification {
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     return AppNotification(
-      id: json['id'],
+      id: json['id'].toString(), 
       message: json['message'] ?? '',
-      isRead: json['isRead'] ?? 0,
+      isRead: int.parse(json['isRead'].toString()),
       createdAt: DateTime.parse(json['createdAt']),
       email: json['email'] ?? '',
     );
   }
 
+  /// Extract <h3> content for title
   String extractH3() {
     final document = html_parser.parse(message);
     final h3 = document.getElementsByTagName('h3');
-    if (h3.isNotEmpty) {
-      return h3.first.text.trim();
-    }
-    return 'Notification'; 
+    if (h3.isNotEmpty) return h3.first.text.trim();
+    return 'Notification';
   }
 
+  /// Convert HTML to plain text
   String toPlainText() {
     final document = html_parser.parse(message);
-    return document.body?.text.replaceAll(RegExp(r'\s+'), ' ').trim() ??'';
+    return document.body?.text.replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
   }
 }

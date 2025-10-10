@@ -7,16 +7,18 @@ import 'widgets/insurance/insurance.dart';
 import 'widgets/loan/loan.dart';
 
 import '../user/widgets/bottomNavbarUser/bottomNav.dart';
-import '../../Main_dashboard.dart';
+import '/Main_dashboard.dart';
 
-import '/modules/notification/notification.dart';
-import '/modules/drawer/my_drawer.dart';
-import '/modules/drawer/drawer_sections.dart';
-import '/modules/settings/settings.dart';
-import '/modules/drawer/changepassword.dart';
-import '/modules/drawer/myprofile.dart';
+import '/views/notification/notification.dart';
+import '/views/drawer/my_drawer.dart';
+import '/views/drawer/drawer_sections.dart';
+import '/views/settings/settings.dart';
+import '/views/drawer/changepassword.dart';
+import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
 
+import 'package:badges/badges.dart' as badges;
+import '/services/notificationServices/notificationApi.dart';
 class UserDashboardPage extends StatefulWidget {
   const UserDashboardPage({super.key});
 
@@ -31,6 +33,16 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
 
   String? userToken;
   bool loadingToken = true;
+
+  Future<int> fetchUnreadCount() async {
+    try {
+      final list = await NotificationService.getNotifications();
+      return list.where((n) => n.isRead == 0).length;
+    } catch (e) {
+      debugPrint("Error fetching unread count: $e");
+      return 0;
+    }
+  }
 
   final List<Widget> _pages = [];
 
@@ -51,13 +63,14 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       _pages.clear();
       _pages.addAll([
         Dashboard(),
-        //InsurancePage(token: token ?? ''),
-        InsurancePage(),
-        InvestmentPage(token: token ?? ''), 
-        LoanPage(),
-        //LoanPage(token: token ?? ''),
-        PolicyPage(),
-        //PolicyPage(token: token ?? ''),
+        InsurancePage(token: token ?? ''),
+        //InsurancePage(),
+
+        InvestmentPage(token: token ?? ''),
+        //LoanPage(),
+        LoanPage(token: token ?? ''),
+        //PolicyPage(),
+        PolicyPage(token: token ?? ''),
       ]);
     });
   }
@@ -151,13 +164,29 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationPage()),
+            child: FutureBuilder<int>(
+              future: fetchUnreadCount(),
+              builder: (context, snapshot) {
+                final count = snapshot.data ?? 0;
+
+                return badges.Badge(
+                  showBadge: count > 0,
+                  badgeContent: Text(
+                    count.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications, color: Colors.white),
+                    onPressed: () async {
+                      // NotificationPage kholne par
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const NotificationPage()),
+                      );
+                      setState(() {});
+                    },
+                  ),
                 );
               },
             ),

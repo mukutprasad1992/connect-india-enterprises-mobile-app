@@ -131,19 +131,6 @@ class ViewInvestment extends StatelessWidget {
     );
   }
 
-  // String? _checkFile(dynamic value, String label) {
-  //   if (value != null && value.toString().isNotEmpty) {
-  //     return "View $label";
-  //   }
-  //   return null;
-  // }
-
-  // String? _getValidFileUrl(dynamic value) {
-  //   if (value == null) return null;
-  //   final str = value.toString().trim();
-  //   if (str.isEmpty || str == "N/A") return null;
-  //   return str;
-  // }
 
   bool isValidFile(dynamic value) {
     if (value == null) return false;
@@ -403,7 +390,7 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
         throw Exception("Failed to load PDF");
       }
     } catch (e) {
-      //print("❌ Error loading PDF: $e");
+      //print(" Error loading PDF: $e");
       setState(() => isLoading = false);
     }
   }

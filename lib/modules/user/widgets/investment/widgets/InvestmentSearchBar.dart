@@ -101,11 +101,12 @@ class _InvestmentSearchBarState extends State<InvestmentSearchBar> {
               flex: _isFocused ? 2 : 1,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                height: 42,
-                width: _isFocused ? availableWidth : 200, 
+                height: 38,
+                width: _isFocused ? availableWidth : 200,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
+                  
                   border: Border.all(
                       color: _isFocused
                           ? Colors.black.withOpacity(0.7)
@@ -166,13 +167,12 @@ class _InvestmentSearchBarState extends State<InvestmentSearchBar> {
                       ],
                     ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 12),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
-                    ),
+                    //fillColor: Colors.grey.shade100,
+                    fillColor:Colors.transparent, 
+                    border: InputBorder.none,
                   ),
                   style: const TextStyle(fontSize: 14),
                 ),

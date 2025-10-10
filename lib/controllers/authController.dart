@@ -50,7 +50,7 @@ class AuthController {
     }
   }
 
-  /// Logout + Redirect to login page
+  // Logout + Redirect to login page
 
   static void _logoutAndRedirect(
       BuildContext context, SharedPreferences prefs) {

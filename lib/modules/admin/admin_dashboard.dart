@@ -6,14 +6,18 @@ import '/modules/admin/widgets/vendor/vendor.dart';
 import '/modules/admin/widgets/voucher/voucher.dart';
 import '/modules/admin/widgets/inquiry/inquery.dart';
 //import '/modules/admin/widgets/wishlist/wishlist_page.dart';
-import '/modules//notification/notification.dart';
-import '/modules/drawer/my_drawer.dart';
-import '/modules/drawer/drawer_sections.dart';
-import '/modules/settings/settings.dart';
-import '/modules/drawer/changepassword.dart';
-import '/modules/drawer/myprofile.dart';
+import '/views//notification/notification.dart';
+import '/views/drawer/my_drawer.dart';
+import '/views/drawer/drawer_sections.dart';
+import '/views/settings/settings.dart';
+import '/views/drawer/changepassword.dart';
+import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:badges/badges.dart' as badges;
+
+import '/services/notificationServices/notificationApi.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -30,7 +34,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   String? userToken;
   bool loadingToken = true;
 
-   @override
+  Future<int> fetchUnreadCount() async {
+    try {
+      final list = await NotificationService.getNotifications();
+      return list.where((n) => n.isRead == 0).length;
+    } catch (e) {
+      debugPrint("Error fetching unread count: $e");
+      return 0;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _loadToken();
@@ -48,13 +62,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       _pages.clear();
       _pages.addAll([
         Dashboard(),
-        VendorTablePage(),
+        VendorTablePage(token: token ?? ''),
         CustomerTablePage(),
-        InqueryTablePage(token: token ?? ''), 
+        InqueryTablePage(token: token ?? ''),
         VoucherTablePage(),
       ]);
     });
   }
+
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -78,9 +93,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       case DrawerSections.myprofile:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MyProfilePage(
-            
-          ),),
+          MaterialPageRoute(
+            builder: (context) => MyProfilePage(),
+          ),
         );
         break;
       case DrawerSections.changepassword:
@@ -140,32 +155,34 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationPage()),
+            child: FutureBuilder<int>(
+              future: fetchUnreadCount(),
+              builder: (context, snapshot) {
+                final count = snapshot.data ?? 0;
+
+                return badges.Badge(
+                  showBadge: count > 0,
+                  badgeContent: Text(
+                    count.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications, color: Colors.white),
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationPage(),
+                        ),
+                      );
+                      // Refresh badge count after returning
+                      setState(() {});
+                    },
+                  ),
                 );
               },
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.only(right: 16),
-          //   child: IconButton(
-          //     icon: const Icon(Icons.favorite_border, color: Colors.white),
-          //     tooltip: 'Wishlist',
-          //     onPressed: () {
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //           builder: (context) => const WishlistPage(),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          // ),
         ],
       ),
       body: _pages[_selectedIndex],

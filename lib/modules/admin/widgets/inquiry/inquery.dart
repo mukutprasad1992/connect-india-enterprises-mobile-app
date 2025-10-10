@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/Inquiry_Searchbar.dart';
 import 'widgets/InquerySummaryCard.dart';
-import '/services/adminServiceApi/InquirydataApi.dart';
-import 'widgets/InquiryModel/inquirymodel.dart';
+import '/services/adminServiceApi/Inquiry/getAllServiceTypeInquirydata.dart'; 
+import '/models/inquiryModel.dart';
 
 class InqueryTablePage extends StatefulWidget {
   final String token;
@@ -33,24 +33,26 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
     });
 
     try {
+      final prefs = await SharedPreferences.getInstance();
       final token = widget.token.isNotEmpty
           ? widget.token
-          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
+          : prefs.getString("KEYTOKEN");
 
-      if (token == null) {
+      if (token == null || token.isEmpty) {
         _redirectToLogin();
         return;
       }
 
-      final response = await ServiceTypeApi.getAllServiceType(token: token);
+      final response = await InquiryService.getAllServiceTypes(token: token);
       final data = response["data"];
 
       List<InquiryModel> loadedData = [];
 
       if (data is List) {
         loadedData = data
-            .map((json) =>
-                InquiryModel.fromJson(Map<String, dynamic>.from(json)))
+            .map((json) => InquiryModel.fromJson(
+                  Map<String, dynamic>.from(json),
+                ))
             .toList();
       } else if (data is Map) {
         loadedData = [InquiryModel.fromJson(Map<String, dynamic>.from(data))];
@@ -63,8 +65,11 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
 
       await _saveInquiry();
     } catch (e) {
-      debugPrint("API fetch failed: $e");
+      print("API fetch failed: $e");
       await _loadInquiry();
+      setState(() {
+        errorMessage = "Failed to load live data, showing cached results.";
+      });
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -108,7 +113,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (errorMessage.isNotEmpty) {
+          if (errorMessage.isNotEmpty && inquiryData.isEmpty) {
             return Center(child: Text(errorMessage));
           }
 
@@ -120,9 +125,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
                   inquiryData: inquiryData,
                   onChanged: (text) {},
                   onSearchResult: (filteredList) {
-                    setState(() {
-                      filteredData = filteredList;
-                    });
+                    setState(() => filteredData = filteredList);
                   },
                   onMicPressed: () {},
                   onSearchChanged: (searchText) {},
@@ -137,15 +140,10 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
                             crossAxisCount: isWideScreen ? 2 : 1,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: isWideScreen ? 2.2 : 1.9,
+                            childAspectRatio: isWideScreen ? 2.3 : 1.7,
                           ),
+                          itemCount: filteredData.length,
                           itemBuilder: (context, index) {
-                            debugPrint("Building card $index of ${filteredData.length}");
-                            if (index >= filteredData.length) {
-                              return const SizedBox
-                                  .shrink(); 
-                            }
-
                             final row = filteredData[index];
                             return InquirySummaryCard(
                               token: widget.token,

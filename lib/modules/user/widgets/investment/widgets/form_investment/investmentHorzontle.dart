@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/consts/appColors.dart';
-import '/services/serviceType/CityApi.dart';
-import '/services/serviceType/createServiceType.dart';
-import '/services/serviceType/updateServiceType.dart' as updateApi;
+import '/services/cityApi/CityApi.dart';
+import '/services/serviceType/investmentServices/createServiceType.dart';
+import '/services/serviceType/investmentServices/updateServiceType.dart'
+    as updateApi;
 import '/models/investmentModel.dart';
 import '/models/citymodel.dart';
 // Sections
@@ -12,13 +13,13 @@ import 'personal_details_section.dart';
 import 'nominee_details_section.dart';
 import 'upload_documents_section.dart';
 
-class InvestmentFormPage extends StatefulWidget {
+class StepperFormPage extends StatefulWidget {
   final String mode;
   final String token;
   final InvestmentModel? investment;
   final String submit;
 
-  InvestmentFormPage({
+  StepperFormPage({
     super.key,
     required this.submit,
     required this.mode,
@@ -27,10 +28,10 @@ class InvestmentFormPage extends StatefulWidget {
   });
 
   @override
-  State<InvestmentFormPage> createState() => _InvestmentFormPageState();
+  State<StepperFormPage> createState() => _StepperFormPageState();
 }
 
-class _InvestmentFormPageState extends State<InvestmentFormPage> {
+class _StepperFormPageState extends State<StepperFormPage> {
   bool isDeclared = false;
   int get lastStep => 5;
   int get firstStep => widget.mode == "edit" ? 1 : 0;
@@ -46,7 +47,7 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
   City? _selectedCity;
   bool _loadingCities = false;
   //bool setloadingBasicdetials false;
-  bool _isSaving = false;
+  bool isLoading = false;
 
   // Form Keys
   final _basicFormKey = GlobalKey<FormState>();
@@ -124,11 +125,11 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
 
       // Show dialog only in add mode
 
-      if (widget.mode == "add" && investmentType == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _showInvestmentTypeDialog();
-        });
-      }
+      // if (widget.mode == "add" && investmentType == null) {
+      //   WidgetsBinding.instance.addPostFrameCallback((_) {
+      //     showInvestmentTypeDialog();
+      //   });
+      // }
     });
   }
 
@@ -328,11 +329,17 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
               message = "Nominee Details saved successfully!";
               break;
             case "documents":
-              message = "Documents uploaded successfully!";
+              if (aadharFile != null &&
+                  panFile != null &&
+                  bankProofFile != null &&
+                  salarySlipFile != null &&
+                  itrFile != null) {
+                message = "All documents uploaded successfully!";
+              }
               break;
             case "review":
               message = submitValue == 1
-                  ? "Investment Details Submitted Successfully!"
+                  ? "Updated all section"
                   : "Review section updated!";
               break;
           }
@@ -355,8 +362,8 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
   }
 
   Future<void> _onStepContinue() async {
-    if (_isSaving) return;
-    setState(() => _isSaving = true);
+    if (isLoading) return;
+    setState(() => isLoading = true);
 
     try {
       final totalSteps = 5;
@@ -367,9 +374,7 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
           _showError("Please confirm declaration");
           return;
         }
-
         DBId = await saveSection(section: "review", submitValue: 1);
-
         try {
           final res = await updateApi.ServiceTypeApi.updateServiceTypeById(
             id: DBId!,
@@ -395,12 +400,12 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
             throw Exception(res['message'] ?? "Unknown error from server");
           }
         } catch (e) {
-          _showError("⚠️ Final Submit Failed: ${e.toString()}");
+          _showError(" Final Submit Failed: ${e.toString()}");
         }
         return;
       }
 
-      // ===== Other Steps (0 to 4) =====
+      // ===== Other Steps (1 to 4) =====
       switch (_currentStep) {
         case 1:
           if (_basicFormKey.currentState!.validate()) {
@@ -449,24 +454,33 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
           DBId = await saveSection(section: "documents");
           break;
       }
-
       // ===== Move to next step only after API success =====
+
       setState(() {
-        _currentStep++;
-        _viewStep = _currentStep;
+        if (_currentStep < totalSteps) {
+          _currentStep++;
+          _viewStep = _currentStep;
+        }
       });
+    } catch (e) {
+      // Agar backend error aaya toh wahi step me ruko
+      _showError("Step $_currentStep failed: ${e.toString()}");
+      return;
     } finally {
-      setState(() => _isSaving = false);
+      setState(() => isLoading = false);
     }
   }
 
   // =================== UI & Sections (UNCHANGED) ===================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.mode == "add" ? "Add Investment" : "Edit Investment",
-            style: const TextStyle(color: Colors.white)),
+        title: Text(
+          widget.mode == "add" ? "Add Investment" : "Edit Investment",
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: AppColors.background,
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -476,45 +490,91 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHorizontalStepperAligned(),
-            const SizedBox(height: 20),
-            _buildStepContent(),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
               children: [
-                ElevatedButton(
-                  onPressed: _onStepCancel,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(70, 36),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    backgroundColor: AppColors.background,
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 14),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(_currentStep == 0 ? "Cancel" : "Back"),
-                ),
-                //const SizedBox(width: 20),
-                ElevatedButton(
-                  //onPressed: _onStepContinue,
-                  onPressed: _isSaving ? null : _onStepContinue,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(70, 36),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 14),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    _currentStep == lastStep
-                        ? (widget.mode == "add" ? "Submit" : "Update")
-                        : "Next",
-                  ),
-                ),
+                _buildHorizontalStepperAligned(),
+                const SizedBox(height: 20),
+                _buildStepContent(),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentStep > 1 && _currentStep < lastStep)
+                          ElevatedButton(
+                            onPressed: _onStepCancel,
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(70, 36),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              backgroundColor: AppColors.background,
+                              foregroundColor: Colors.white,
+                              textStyle: const TextStyle(fontSize: 14),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: const Text("Back"),
+                          )
+                        else
+                          const SizedBox(width: 70),
+                        ElevatedButton(
+                          onPressed: isLoading ? null : _onStepContinue,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(70, 36),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            textStyle: const TextStyle(fontSize: 14),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  _currentStep < lastStep
+                                      ? "Next"
+                                      : (widget.mode == "add"
+                                          ? "Submit"
+                                          : "Update"),
+                                ),
+                        ),
+                      ],
+                    ),
+
+                    // 👇 Add this below the Row (outside it)
+                    if (isLoading)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              widget.mode == "add"
+                                  ? "Saving your data, please wait..."
+                                  : "Updating your data, please wait...",
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                )
               ],
             ),
           ],
@@ -524,23 +584,6 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
   }
 
   // =================== Stepper ===================
-
-  String getStepTitle(int index) {
-    switch (index) {
-      case 1:
-        return "Basic Details";
-      case 2:
-        return "Personal Details";
-      case 3:
-        return "Nominee Details";
-      case 4:
-        return "Document";
-      case 5:
-        return "Review";
-      default:
-        return "";
-    }
-  }
 
   Widget _buildHorizontalStepperAligned() {
     const stepCount = 5;
@@ -577,97 +620,84 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
           Row(
             children: List.generate(stepCount, (i) {
               int index = i + 1;
-              bool isClickable = !(widget.mode == "edit" && index == 1);
+
+              // 👉 Clickable Logic
+              bool isClickable;
+              if (widget.mode == "add") {
+                // Add mode → sequential only
+                isClickable = index <= _currentStep;
+              } else {
+                // Edit mode → based on filled/unfilled detection
+                if (index <= _currentStep) {
+                  isClickable = true; // filled ya current tak ke steps
+                } else {
+                  isClickable = false; // future steps locked
+                }
+              }
+
               bool isActive = _viewStep == index;
               bool isCompleted = _currentStep > index;
               bool isNextIncomplete = index == _currentStep;
-              bool isHovered = _hoveredStep == index;
 
               return Expanded(
-                child: MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      if (isCompleted) _hoveredStep = index;
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      if (_hoveredStep == index) _hoveredStep = null;
-                    });
-                  },
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    splashColor: (isCompleted || isNextIncomplete)
-                        ? Colors.blue.withOpacity(0.2)
-                        : Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: isClickable
-                        ? () async {
-                            if (index <= _currentStep) {
-                              setState(() => _viewStep = index);
-                            } else {
-                              _showError(
-                                  "Please complete previous steps first");
-                            }
-                          }
-                        : () {
-                            // if (index == 1 && widget.mode == "edit") {
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     const SnackBar(
-                            //       content: Text(
-                            //         "Investment Type section updated successfully",
-                            //       ),
-                            //       backgroundColor: Colors.green,
-                            //     ),
-                            //   );
-                            // }
-                          },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Circle Icon
-                        CircleAvatar(
-                          radius: iconRadius,
-                          backgroundColor: isCompleted
-                              ? Colors.green
-                              : (isActive ? Colors.orange : Colors.grey[300]),
-                          child: (isCompleted && !isActive)
-                              ? const Icon(Icons.check,
-                                  color: Colors.white, size: 16)
-                              : Icon(
-                                  _getStepIcon(index),
-                                  size: 12,
-                                  color: isCompleted
-                                      ? Colors.white
-                                      : (isActive ? Colors.white : Colors.grey),
-                                ),
-                        ),
-                        const SizedBox(height: 6),
-                        // Title
-                        SizedBox(
-                          height: titleHeight,
-                          child: Center(
-                            child: Text(
-                              getStepTitle(index),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isActive
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: isActive
-                                    ? Colors.orange
-                                    : (isCompleted
-                                        ? Colors.green
-                                        : (isNextIncomplete
-                                            ? Colors.orange
-                                            : Colors.black87)),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  splashColor: isClickable
+                      ? Colors.blue.withOpacity(0.2)
+                      : Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: isClickable
+                      ? () {
+                          setState(() => _viewStep = index);
+                        }
+                      : () {
+                          _showError("Please complete previous steps first");
+                        },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Circle Icon
+                      CircleAvatar(
+                        radius: iconRadius,
+                        backgroundColor: isCompleted
+                            ? Colors.green
+                            : (isActive ? Colors.orange : Colors.grey[300]),
+                        child: (isCompleted && !isActive)
+                            ? const Icon(Icons.check,
+                                color: Colors.white, size: 16)
+                            : Icon(
+                                _getStepIcon(index),
+                                size: 12,
+                                color: isCompleted
+                                    ? Colors.white
+                                    : (isActive ? Colors.white : Colors.grey),
                               ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Title
+                      SizedBox(
+                        height: titleHeight,
+                        child: Center(
+                          child: Text(
+                            getStepTitle(index),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isActive
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isActive
+                                  ? Colors.orange
+                                  : (isCompleted
+                                      ? Colors.green
+                                      : (isNextIncomplete
+                                          ? Colors.orange
+                                          : Colors.black87)),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -694,54 +724,25 @@ class _InvestmentFormPageState extends State<InvestmentFormPage> {
         return Icons.circle;
     }
   }
-  // dialog box open for select investment type
 
-  Future<void> _showInvestmentTypeDialog() async {
-    String? tempSelection = investmentType;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Select Investment Type"),
-          content: DropdownButtonFormField<String>(
-            value: tempSelection,
-            decoration: const InputDecoration(
-              labelText: "Investment Type",
-              border: OutlineInputBorder(),
-            ),
-            items: ["Mutual Funds"]
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            onChanged: (val) {
-              tempSelection = val;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (tempSelection == null || tempSelection!.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Please select investment type")),
-                  );
-                  return;
-                }
-                setState(() {
-                  investmentType = tempSelection;
-                  _currentStep = 1; // start from Basic
-                  _viewStep = 1;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Next"),
-            ),
-          ],
-        );
-      },
-    );
+  String getStepTitle(int index) {
+    switch (index) {
+      case 1:
+        return "Basic Details";
+      case 2:
+        return "Personal Details";
+      case 3:
+        return "Nominee Details";
+      case 4:
+        return "Document";
+      case 5:
+        return "Review";
+      default:
+        return "";
+    }
   }
+
+  // dialog box open for select investment type
 
   Widget _buildStepContent() {
     switch (_viewStep) {

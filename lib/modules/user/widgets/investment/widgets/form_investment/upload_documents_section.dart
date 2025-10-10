@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '/services/serviceType/uploadDocumentApi.dart';
-import '/services/serviceType/updateServiceType.dart';
+import '/services/serviceType/documentServices/uploadDocumentApi.dart';
+import '/services/serviceType/investmentServices/updateServiceType.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -44,8 +44,7 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
   String? aadharFile, panFile, bankProofFile, salarySlipFile, itrFile;
   bool _isLoading = false;
 
-  static const String baseUrl =
-      "https://connect-india-upload-documents.s3.ap-south-1.amazonaws.com";
+  static const String baseUrl = "https://connect-india-upload-documents.s3.ap-south-1.amazonaws.com";
 
   @override
   void initState() {
@@ -97,25 +96,27 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
         token: token,
       );
 
+      //final String key = jsonData['result']['key'];
+      //final String uploadedUrl = '$baseUrl/$key';
+
       final String key = jsonData['result']['key'];
-      final String uploadedUrl = '$baseUrl/$key';
 
       setState(() {
         switch (type) {
           case "aadhar":
-            aadharFile = uploadedUrl;
+            aadharFile = key;
             break;
           case "pan":
-            panFile = uploadedUrl;
+            panFile = key;
             break;
           case "bank":
-            bankProofFile = uploadedUrl;
+            bankProofFile = key;
             break;
           case "salary":
-            salarySlipFile = uploadedUrl;
+            salarySlipFile = key;
             break;
           case "itr":
-            itrFile = uploadedUrl;
+            itrFile = key;
             break;
         }
       });
@@ -197,7 +198,51 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
 
   /// 🔹 View file
 
-  void _viewFile(String fileUrl) {
+  // void _viewFile(String fileUrl) {
+  //   //final String uploadedUrl = '$baseUrl/$key';
+
+  //   final String fileUrl = '$baseUrl/$fileKey';
+  //   final lowerUrl = fileUrl.toLowerCase();
+  //   final fileName = fileUrl.split('/').last;
+
+  //   if (lowerUrl.endsWith(".pdf")) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) => Scaffold(
+  //           appBar: AppBar(title: Text(fileName)),
+  //           body: SfPdfViewer.network(fileUrl),
+  //         ),
+  //       ),
+  //     );
+  //   } else if (lowerUrl.endsWith(".jpg") ||
+  //       lowerUrl.endsWith(".jpeg") ||
+  //       lowerUrl.endsWith(".png")) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) => Scaffold(
+  //           appBar: AppBar(title: Text(fileName)),
+  //           body: Center(
+  //             child: InteractiveViewer(
+  //               child: CachedNetworkImage(
+  //                 imageUrl: fileUrl,
+  //                 placeholder: (context, url) =>
+  //                     const CircularProgressIndicator(),
+  //                 errorWidget: (context, url, error) => const Icon(Icons.error),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     launchUrl(Uri.parse(fileUrl), mode: LaunchMode.externalApplication);
+  //   }
+  // }
+
+  void _viewFile(String fileKey) {
+    final String fileUrl = "$baseUrl/$fileKey";
     final lowerUrl = fileUrl.toLowerCase();
     final fileName = fileUrl.split('/').last;
 
@@ -239,9 +284,10 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
 
   // remove file fuction code
 
-  Future<void> _deleteFile(String? fileUrl) async {
-    if (fileUrl == null) return;
+  Future<void> _deleteFile(String? fileKey) async {
+    if (fileKey == null) return;
 
+    // mapping
     final Map<String, String> typeLabel = {
       "aadhar": "Aadhar Card",
       "pan": "PAN Card",
@@ -250,7 +296,9 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
       "itr": "ITR Document",
     };
 
-    String label = typeLabel[fileUrl] ?? "Document";
+    // 🔹 key se type nikalna (first part before '/')
+    String docType = fileKey.split("/").first;
+    String label = typeLabel[docType] ?? "Document";
 
     final bool? confirm = await showDialog<bool>(
       context: context,
@@ -260,11 +308,11 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("remove"),
+            child: const Text("Remove"),
           ),
         ],
       ),
@@ -273,21 +321,20 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
     if (confirm != true) return;
 
     setState(() {
-      if (aadharFile == fileUrl) {
+      if (aadharFile == fileKey) {
         aadharFile = null;
-      } else if (panFile == fileUrl) {
+      } else if (panFile == fileKey) {
         panFile = null;
-      } else if (bankProofFile == fileUrl) {
+      } else if (bankProofFile == fileKey) {
         bankProofFile = null;
-      } else if (salarySlipFile == fileUrl) {
+      } else if (salarySlipFile == fileKey) {
         salarySlipFile = null;
-      } else if (itrFile == fileUrl) {
+      } else if (itrFile == fileKey) {
         itrFile = null;
       }
     });
 
-    // 🔹 Update parent about remove changes
-
+    // parent ko notify karo
     widget.onUploaded?.call({
       "aadhar": aadharFile,
       "pan": panFile,
@@ -369,7 +416,6 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
                 ),
               ),
             ] else ...[
-              
               IconButton(
                 onPressed: () => _viewFile(fileUrl!),
                 icon:

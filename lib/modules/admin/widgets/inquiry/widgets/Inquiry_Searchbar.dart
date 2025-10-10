@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'InquiryModel/inquirymodel.dart';
+import '/models/inquiryModel.dart';
 
 class InquerySearchBar extends StatefulWidget {
   final List<InquiryModel> inquiryData;
@@ -47,25 +47,24 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
 
     final filtered = widget.inquiryData.where((inquiry) {
       final values = [
-        inquiry.id,
-        inquiry.email,
-        inquiry.mobile,
-        inquiry.investmentType,
-        inquiry.amount,
-        inquiry.aadharNumber,
-        inquiry.panNumber,
-        inquiry.income,
-        inquiry.occupation,
+        inquiry.id?.toString() ?? '',
+        inquiry.email ?? '',
+        inquiry.mobile ?? '',
+        inquiry.investmentType ?? '',
+        inquiry.amount ?? '',
+        inquiry.aadharNumber ?? '',
+        inquiry.panNumber ?? '',
+        inquiry.income ?? '',
+        inquiry.occupation ?? '',
         inquiry.nomineeRelation ?? '',
         inquiry.nomineeId ?? '',
         inquiry.nomineeMobile ?? '',
-        inquiry.placeOfBirth['city'] ?? '',
-        inquiry.placeOfBirth['state'] ?? '',
-        inquiry.status,
+        inquiry.status ?? '',
+        inquiry.placeOfBirth?['city'] ?? '',
+        inquiry.placeOfBirth?['state'] ?? '',
       ];
 
-      return values
-          .any((val) => val.toLowerCase().contains(query.toLowerCase()));
+      return values.any((val) => val.toLowerCase().contains(query));
     }).toList();
 
     widget.onSearchResult(filtered);

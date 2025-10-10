@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
-//import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
-import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzontle.dart';
 import 'widgets/InvestmentSummaryCard.dart';
 import 'widgets/InvestmentSearchBar.dart';
 import '/models/investmentModel.dart';
-import '/services/serviceType/getdatabyserviceid.dart';
+import '/services/serviceType/investmentServices/getdatabyserviceid.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentType.dart';
 
 class InvestmentPage extends StatefulWidget {
   final String token;
-  const InvestmentPage({
-    super.key, 
-    required this.token
-  });
+  const InvestmentPage({super.key, required this.token});
 
   @override
   State<InvestmentPage> createState() => _InvestmentPageState();
@@ -53,7 +48,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
         token: token,
       );
 
-      print("API response: $response");
+      //print("API response: $response");
 
       final data = response["data"];
       List<InvestmentModel> loadedData = [];
@@ -74,16 +69,16 @@ class _InvestmentPageState extends State<InvestmentPage> {
         filteredData = List.from(loadedData);
       });
 
-      await _saveInvestments();
+      await saveInvestments();
     } catch (e) {
-      debugPrint(" API fetch failed: $e");
+      //debugPrint(" API fetch failed: $e");
       await _loadInvestments();
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
 
-  Future<void> _saveInvestments() async {
+  Future<void> saveInvestments() async {
     final prefs = await SharedPreferences.getInstance();
     final investmentJsonList =
         investmentData.map((e) => jsonEncode(e.toJson())).toList();
@@ -114,18 +109,18 @@ class _InvestmentPageState extends State<InvestmentPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       filteredData = investmentData.where((investment) {
-        return investment.amount.toLowerCase().contains(query) ||
-            investment.aadharNumber.toLowerCase().contains(query);
+        return investment.amount.toString().toLowerCase().contains(query);
+            
       }).toList();
     });
   }
 
   /// Add new investment
-  void _addNewInvestment(InvestmentModel newInvestment) {
+  void addNewInvestment(InvestmentModel newInvestment) {
     setState(() {
-      investmentData.add(newInvestment);
+      investmentData.insert(0, newInvestment);
     });
-    _saveInvestments();
+    saveInvestments();
     _applySearchFilter();
   }
 
@@ -134,7 +129,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
     setState(() {
       investmentData[index] = updatedInvestment;
     });
-    _saveInvestments();
+    saveInvestments();
     _applySearchFilter();
   }
 
@@ -143,8 +138,13 @@ class _InvestmentPageState extends State<InvestmentPage> {
     setState(() {
       investmentData.removeAt(index);
     });
-    _saveInvestments();
+    saveInvestments();
     _applySearchFilter();
+  }
+
+  void submitNewInvestment(Map<String, dynamic> investmentData) {
+    final newInvestment = InvestmentModel.fromJson(investmentData);
+    addNewInvestment(newInvestment);
   }
 
   @override
@@ -180,7 +180,8 @@ class _InvestmentPageState extends State<InvestmentPage> {
                               ? const Center(
                                   child: Text('No investment data available.'))
                               : GridView.builder(
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: isWideScreen ? 2 : 1,
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 12,
@@ -214,21 +215,17 @@ class _InvestmentPageState extends State<InvestmentPage> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final newInvestment = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => InvestmentFormPage(
-                            mode: "add",
-                            token: widget.token,
-                            submit: "1",
-                          ),
-                        ),
+                    onPressed: () {
+                      showInvestmentTypeDialog(
+                        context: context,
+                        mode: "add",
+                        token: widget.token,
+                        submit: "1",
+                        onSubmit: (investmentData) {
+                          submitNewInvestment(
+                              investmentData); 
+                        },
                       );
-                      if (newInvestment != null &&
-                          newInvestment is InvestmentModel) {
-                        _addNewInvestment(newInvestment);
-                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
@@ -238,7 +235,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
                     child: const Icon(Icons.add, color: Colors.white, size: 24),
                   ),
                 ),
-              ),
+              )
             ],
           );
         },

@@ -21,7 +21,7 @@ class EditInvestmentPage extends StatefulWidget {
 class _EditInvestmentPageState extends State<EditInvestmentPage> {
   @override
   Widget build(BuildContext context) {
-    return InvestmentFormPage(
+    return StepperFormPage(
       mode: "edit",
       investment: widget.investment,
       token: widget.token,

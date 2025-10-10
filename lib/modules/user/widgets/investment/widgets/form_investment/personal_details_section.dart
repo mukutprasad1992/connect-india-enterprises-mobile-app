@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/investmentController/InvesrmentformController.dart';
-import '/consts/appColors.dart';
-import '/services/serviceType/updateServiceType.dart' as updateApi;
+//import '/consts/appColors.dart';
+import '/services/serviceType/investmentServices/updateServiceType.dart' as updateApi;
 import '/models/citymodel.dart';
 //import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
 
@@ -158,9 +158,7 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
-            decoration:
-                _inputDecoration("Mobile Number", Icons.phone, required: true)
-                    .copyWith(prefixText: "+91 "),
+            decoration:_inputDecoration("Mobile Number", Icons.phone, required: true).copyWith(prefixText: "+91 "),
             validator: AddInvestmentController.validatePhone,
             onSaved: (value) {
               if (value != null && value.length == 10) {

@@ -182,7 +182,7 @@ class InvestmentSummaryCard extends StatelessWidget {
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: valueColor, // Aadhaar orange / PAN indigo
+                    color: valueColor, 
                     fontWeight: FontWeight.w600,
                     fontSize: 12, // reduced size
                   ),

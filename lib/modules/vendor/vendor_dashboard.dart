@@ -1,18 +1,20 @@
-
 import 'package:flutter/material.dart';
 import '../vendor/bottomNavbarVendor/bottomNav.dart';
 import '../../Main_dashboard.dart';
 
-import '/modules/notification/notification.dart';
-import '/modules/drawer/my_drawer.dart';
-import '/modules/drawer/drawer_sections.dart';
-import '/modules/settings/settings.dart';
-import '/modules/drawer/changepassword.dart';
-import '/modules/drawer/myprofile.dart';
+import '/views/notification/notification.dart';
+import '/views/drawer/my_drawer.dart';
+import '/views/drawer/drawer_sections.dart';
+import '/views/settings/settings.dart';
+import '/views/drawer/changepassword.dart';
+import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
 
 import '/modules/vendor/customer/vendorCustomer.dart';
 import '/modules/vendor/voucher/vendorVoucher.dart';
+
+import 'package:badges/badges.dart' as badges;
+import '/services/notificationServices/notificationApi.dart';
 
 class VendorDashboardPage extends StatefulWidget {
   const VendorDashboardPage({super.key});
@@ -25,6 +27,16 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
+
+  Future<int> fetchUnreadCount() async {
+    try {
+      final list = await NotificationService.getNotifications();
+      return list.where((n) => n.isRead == 0).length;
+    } catch (e) {
+      debugPrint("Error fetching unread count: $e");
+      return 0;
+    }
+  }
 
   final List<Widget> _pages = [
     Dashboard(),
@@ -55,9 +67,9 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
       case DrawerSections.myprofile:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MyProfilePage(
-            
-          ),),
+          MaterialPageRoute(
+            builder: (context) => MyProfilePage(),
+          ),
         );
         break;
       case DrawerSections.changepassword:
@@ -117,32 +129,33 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationPage()),
+            child: FutureBuilder<int>(
+              future: fetchUnreadCount(),
+              builder: (context, snapshot) {
+                final count = snapshot.data ?? 0;
+
+                return badges.Badge(
+                  showBadge: count > 0,
+                  badgeContent: Text(
+                    count.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.notifications, color: Colors.white),
+                    onPressed: () async {
+                      // NotificationPage kholne par
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const NotificationPage()),
+                      );
+                      setState(() {});
+                    },
+                  ),
                 );
               },
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.only(right: 16),
-          //   child: IconButton(
-          //     icon: const Icon(Icons.favorite_border, color: Colors.white),
-          //     tooltip: 'Wishlist',
-          //     onPressed: () {
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //           builder: (context) => const WishlistPage(),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          // ),
         ],
       ),
       body: _pages[_selectedIndex],

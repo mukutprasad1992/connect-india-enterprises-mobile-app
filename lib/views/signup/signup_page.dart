@@ -77,28 +77,28 @@ class _SignupPageState extends State<SignupPage> {
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
-                  decoration: InputDecoration(
-                    hintText: "Enter your email",
-                    isDense: true,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                  ),
+                  decoration: _inputDecoration("Enter your email"),
+                  // hintText: "Enter your email",
+                  // isDense: true,
+                  // contentPadding:
+                  //     EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+                  // enabledBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(6),
+                  //   borderSide: BorderSide(color: Colors.grey.shade400),
+                  // ),
+                  // focusedBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(6),
+                  //   borderSide: const BorderSide(color: Colors.deepPurple),
+                  // ),
+                  // errorBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(6),
+                  //   borderSide: const BorderSide(color: Colors.deepPurple),
+                  // ),
+                  // focusedErrorBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(6),
+                  //   borderSide: const BorderSide(color: Colors.deepPurple),
+                  // ),
+                  //),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Email is required';
                     if (!controller.emailRegExp.hasMatch(v))
@@ -138,12 +138,13 @@ class _SignupPageState extends State<SignupPage> {
                     LengthLimitingTextInputFormatter(10),
                   ],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                  decoration: InputDecoration(
+                  // style: const TextStyle(
+                  //   fontFamily: 'Manrope',
+                  //   fontWeight: FontWeight.w600,
+                  //   fontSize: 13,
+                  // ),
+                  decoration:
+                      _inputDecoration("Enter your phone number").copyWith(
                     prefixIcon: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
@@ -157,26 +158,26 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
                     ),
-                    hintText: "Enter your phone number",
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 13, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
+                    // hintText: "Enter your phone number",
+                    // isDense: true,
+                    // contentPadding: const EdgeInsets.symmetric(
+                    //     horizontal: 13, vertical: 10),
+                    // enabledBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: BorderSide(color: Colors.grey.shade400),
+                    // ),
+                    // focusedBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // errorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // focusedErrorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty)
@@ -213,31 +214,31 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   obscureText: controller.obscurePassword,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  style: const TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: "Enter your password",
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 13, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
+                  // style: const TextStyle(
+                  //     fontFamily: 'Manrope',
+                  //     fontWeight: FontWeight.w600,
+                  //     fontSize: 13),
+                  decoration: _inputDecoration("Enter your password").copyWith(
+                    // hintText: "Enter your password",
+                    // isDense: true,
+                    // contentPadding: const EdgeInsets.symmetric(
+                    //     horizontal: 13, vertical: 10),
+                    // enabledBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: BorderSide(color: Colors.grey.shade400),
+                    // ),
+                    // focusedBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // errorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // focusedErrorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.obscurePassword
@@ -284,31 +285,33 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   obscureText: controller.obscureConfirm,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  style: const TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: "Re-enter your password",
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 13, vertical: 10),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
-                    ),
+                  // style: const TextStyle(
+                  //   fontFamily: 'Manrope',
+                  //   fontWeight: FontWeight.w600,
+                  //   fontSize: 13
+                  // ),
+                  decoration:
+                      _inputDecoration("Re-enter your password").copyWith(
+                    // hintText: "Re-enter your password",
+                    // isDense: true,
+                    // contentPadding: const EdgeInsets.symmetric(
+                    //     horizontal: 13, vertical: 10),
+                    // enabledBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: BorderSide(color: Colors.grey.shade400),
+                    // ),
+                    // focusedBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // errorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
+                    // focusedErrorBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(6),
+                    //   borderSide: const BorderSide(color: Colors.deepPurple),
+                    // ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.obscureConfirm
@@ -329,7 +332,6 @@ class _SignupPageState extends State<SignupPage> {
                   },
                   onSaved: (v) => controller.confirmPassword = v!,
                   //onChanged: (v) => controller.enteredPassword = v,
-
                 ),
 
                 const SizedBox(height: 40),
@@ -388,8 +390,7 @@ class _SignupPageState extends State<SignupPage> {
                     Expanded(child: Divider(thickness: 1)),
                   ],
                 ),
-                const SizedBox(height: 24),
-
+                const SizedBox(height: 20),
                 // Google Button
                 Center(
                   child: SizedBox(
@@ -424,7 +425,45 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+
+                Row(
+                  children: const [
+                    Expanded(child: Divider(thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child:
+                          Text("Or With", style: TextStyle(color: Colors.grey)),
+                    ),
+                    Expanded(child: Divider(thickness: 1)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // facebook Button
+                SizedBox(
+                  height: 42,
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: Image.asset('assets/images/facebook.png',
+                        height: 30, width: 30),
+                    label: const Text(
+                      "Sign in with facebook",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                      side: const BorderSide(color: Colors.grey),
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
 
                 // Login Text
                 Row(
@@ -451,6 +490,38 @@ class _SignupPageState extends State<SignupPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 13,
+        fontFamily: 'Manrope',
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(color: Colors.deepPurple),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(color: Colors.deepPurple),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(color: Colors.deepPurple),
       ),
     );
   }

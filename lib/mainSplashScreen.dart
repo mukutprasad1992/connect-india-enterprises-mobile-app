@@ -13,6 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   final PageController _controller = PageController();
   int currentIndex = 0;
 
+
   final List<Map<String, String>> onboardingData = [
     {
       "image": "assets/images/1.jpg",

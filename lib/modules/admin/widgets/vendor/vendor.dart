@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '/services/adminServiceApi/getallvendor.dart';
+import '/models/Vendor_model.dart';
 
-import '../../../../services/userServicesApi/getallvendor.dart';       
-import '/models/Vendor_model.dart';  
- 
 import 'widgets/AddNewVendorpage.dart';
 import 'widgets/vendorSummaryCard.dart';
 import 'widgets/vendor_Searchbar.dart';
 
 class VendorTablePage extends StatefulWidget {
-  const VendorTablePage({super.key});
+  final String token;
+  const VendorTablePage({
+    super.key,
+    required this.token
+    
+  });
 
   @override
   State<VendorTablePage> createState() => _VendorTablePageState();
@@ -30,18 +34,20 @@ class _VendorTablePageState extends State<VendorTablePage> {
   }
 
   /// ✅ Fetch vendors from API
+  /// 
   Future<void> _loadVendorsFromApi() async {
     setState(() => isLoading = true);
     try {
+      final token = widget.token.isNotEmpty
+          ? widget.token
+          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
 
-      //print("🚀 Fetching vendors from API...");
-      final vendors = await VendorApi.fetchVendors();
-      //print("✅ Vendors received: ${vendors.length}");
-      for (var v in vendors) {
-        print("Vendor: ${v.businessName} (${v.email})");
+      if (token == null) {
+        _redirectToLogin();
+        return;
       }
-      //final vendors = await VendorApi.fetchVendors();
-
+      final vendors = await VendorApi.fetchVendorsData();
+      for (var v in vendors) {}
       setState(() {
         vendorData = vendors;
         filteredData = List.from(vendors);
@@ -49,11 +55,11 @@ class _VendorTablePageState extends State<VendorTablePage> {
       });
 
       // (Optional) save to SharedPreferences for offline usage
-      
-      final prefs = await SharedPreferences.getInstance();
-      final vendorJsonList = vendors.map((v) => jsonEncode(v.toJson())).toList();
-      await prefs.setStringList('vendors', vendorJsonList);
 
+      final prefs = await SharedPreferences.getInstance();
+      final vendorJsonList =
+          vendors.map((v) => jsonEncode(v.toJson())).toList();
+      await prefs.setStringList('vendors', vendorJsonList);
     } catch (e) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,14 +68,20 @@ class _VendorTablePageState extends State<VendorTablePage> {
     }
   }
 
+  void _redirectToLogin() {
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, "/login");
+    }
+  }
+
   void _filterData() {
     String query = searchController.text.toLowerCase();
     setState(() {
       filteredData = vendorData.where((vendor) {
         return vendor.businessName.toLowerCase().contains(query) ||
-               vendor.businessRepresentative.toLowerCase().contains(query) ||
-               vendor.email.toLowerCase().contains(query) ||
-               vendor.mobileNo.toLowerCase().contains(query);
+            vendor.businessRepresentative.toLowerCase().contains(query) ||
+            vendor.email.toLowerCase().contains(query) ||
+            vendor.mobileNo.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -134,25 +146,28 @@ class _VendorTablePageState extends State<VendorTablePage> {
                       onSearchChanged: (searchText) {},
                     ),
                     const SizedBox(height: 10),
-
                     Expanded(
                       child: isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : RefreshIndicator(   // ✅ Pull-to-refresh added
+                          : RefreshIndicator(
                               onRefresh: _loadVendorsFromApi,
                               child: filteredData.isEmpty
-                                  ? ListView(   // ✅ Needed so RefreshIndicator still works
+                                  ? ListView(
                                       children: [
                                         SizedBox(height: 200),
-                                        Center(child: Text('No vendor data available.')),
+                                        Center(
+                                            child: Text(
+                                                'No vendor data available.')),
                                       ],
                                     )
                                   : GridView.builder(
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: isWideScreen ? 2 : 1,
                                         crossAxisSpacing: 12,
                                         mainAxisSpacing: 12,
-                                        childAspectRatio: isWideScreen ? 2.2 : 1.9,
+                                        childAspectRatio:
+                                            isWideScreen ? 2.2 : 1.9,
                                       ),
                                       itemCount: filteredData.length,
                                       itemBuilder: (context, index) {
@@ -161,9 +176,11 @@ class _VendorTablePageState extends State<VendorTablePage> {
                                           row: vendor.toJson(),
                                           index: index,
                                           onUpdate: (i, updated) =>
-                                              _updateVendor(i, Vendor.fromJson(updated)),
+                                              _updateVendor(
+                                                  i, Vendor.fromJson(updated)),
                                           onBlockToggle: (i, updated) =>
-                                              _toggleVendorBlockStatus(i, Vendor.fromJson(updated)),
+                                              _toggleVendorBlockStatus(
+                                                  i, Vendor.fromJson(updated)),
                                           onDelete: _deleteVendor,
                                         );
                                       },
@@ -193,10 +210,10 @@ class _VendorTablePageState extends State<VendorTablePage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(10),
                       shape: const CircleBorder(),
                     ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
+                    child: const Icon(Icons.add, color: Colors.white, size: 24),
                   ),
                 ),
               ),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'inquiryIconbuttons.dart';
-import 'InquiryModel/inquirymodel.dart';
+import '/models/inquiryModel.dart';
 
 class InquirySummaryCard extends StatelessWidget {
   final InquiryModel row;
   final VoidCallback onStatusChanged;
-  final token;
+  final String token;
 
   const InquirySummaryCard({
     super.key,
@@ -15,7 +16,7 @@ class InquirySummaryCard extends StatelessWidget {
   });
 
   Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
+    switch (status?.toLowerCase() ?? '') {
       case 'approved':
         return Colors.green;
       case 'rejected':
@@ -62,7 +63,7 @@ class InquirySummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    "Inquiry ID: ${row.id}",
+                    "Inquiry ID: ${row.id ?? 'N/A'}",
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.indigo,
@@ -70,9 +71,10 @@ class InquirySummaryCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,
                   ),
+                  
                 ),
                 InquiryActionButtons(
-                  token:token,
+                  token: token,
                   row: row,
                   onStatusChanged: onStatusChanged,
                 ),
@@ -80,17 +82,32 @@ class InquirySummaryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 10),
-            
 
             // Aadhaar Number
-            _buildLabelValueText(context,'Adhar Number',row.aadharNumber, Colors.teal,),
+            _buildLabelValueText(
+              context,
+              'Aadhaar Number',
+              row.aadharNumber ?? '',
+              Colors.teal,FontWeight.bold
+            ),
 
             const SizedBox(height: 6),
 
             // PAN Number
-            _buildLabelValueText(context,'PAN Number',row.panNumber,Colors.blue,
+            _buildLabelValueText(
+              context,
+              'PAN Number',
+              row.panNumber ?? '',
+              Colors.blue,FontWeight.bold
             ),
+            const SizedBox(height: 6),
 
+            _buildLabelValueText(
+              context,
+              'Service Id',
+              row.serviceId ?? '',
+              Colors.blue,FontWeight.bold
+            ),
             const SizedBox(height: 6),
 
             // Status
@@ -104,7 +121,7 @@ class InquirySummaryCard extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: row.status,
+                    text: row.status ?? 'N/A',
                     style: textTheme.bodyMedium?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.w600,
@@ -126,6 +143,7 @@ class InquirySummaryCard extends StatelessWidget {
     String label,
     String value,
     Color valueColor,
+    FontWeight Fontweigh,
   ) {
     final textTheme = Theme.of(context).textTheme;
     return Text.rich(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/consts/appColors.dart';
-import 'InquiryModel/inquirymodel.dart';
+import '/models/inquiryModel.dart';
 
 class InqueryDetails extends StatelessWidget {
   final InquiryModel row;
@@ -17,8 +17,12 @@ class InqueryDetails extends StatelessWidget {
       case 'mobile':
         return Icons.phone_android;
       case 'investment type':
+      case 'investment - type':
         return Icons.category_outlined;
       case 'amount':
+      case 'investment - amount':
+      case 'loan - amount':
+      case 'insurance - amount':
         return Icons.attach_money_outlined;
       case 'aadhar number':
         return Icons.credit_card;
@@ -51,8 +55,8 @@ class InqueryDetails extends StatelessWidget {
     }
   }
 
-  Color getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+  Color getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
       case 'in progress':
         return Colors.orange;
       case 'pending':
@@ -71,32 +75,33 @@ class InqueryDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Prepare data map for display
+    // Prepare data map dynamically including all nested models
     final Map<String, String> displayData = {
-      'ID': row.id,
-      'Email': row.email,
-      'Mobile': row.mobile,
-      'Investment Type': row.investmentType,
-      'Amount': row.amount,
-      'Aadhar Number': row.aadharNumber,
-      'Aadhaar Card File': row.aadhaarCardFileKey,
-      'PAN Number': row.panNumber,
-      'PAN Card File': row.panCardFileKey,
-      'Bank Proof File': row.bankProofFileKey,
+      'ID': row.id ?? 'N/A',
+      'Email': row.email ?? 'N/A',
+      'Mobile': row.mobile ?? 'N/A',
+      'Investment Type': row.investmentType ?? 'N/A',
+      'Amount': row.amount ?? 'N/A',
+      'Aadhar Number': row.aadharNumber ?? 'N/A',
+      'PAN Number': row.panNumber ?? 'N/A',
+      'PAN Card File': row.panCardFileKey ?? 'N/A',
+      'Bank Proof File': row.bankProofFileKey ?? 'N/A',
       'Salary Slips File': row.salarySlipsFileKey ?? 'N/A',
       'ITR Documents File': row.itrDocumentsFileKey ?? 'N/A',
-      'Place of Birth': row.placeOfBirth.isNotEmpty
-          ? "${row.placeOfBirth['city'] ?? ''}, ${row.placeOfBirth['state'] ?? ''}"
+      'Place of Birth': row.placeOfBirth != null && row.placeOfBirth!.isNotEmpty
+          ? "${row.placeOfBirth!['city'] ?? ''}, ${row.placeOfBirth!['state'] ?? ''}"
           : 'N/A',
-      'Income': row.income,
-      'Occupation': row.occupation,
+      'Income': row.income ?? 'N/A',
+      'Occupation': row.occupation ?? 'N/A',
       'Nominee ID': row.nomineeId ?? 'N/A',
       'Nominee ID Type': row.nomineeIdType ?? 'N/A',
       'Nominee Mobile': row.nomineeMobile ?? 'N/A',
       'Nominee Relation': row.nomineeRelation ?? 'N/A',
-      'Status': row.status,
-      'Submit': row.submit.toString(),
+      'Status': row.status ?? 'N/A',
+      'Submit': row.submit?.toString() ?? 'N/A',
     };
+
+   
 
     final sortedEntries = displayData.entries.toList()
       ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
@@ -106,8 +111,7 @@ class InqueryDetails extends StatelessWidget {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: AppColors.background,
-        title:
-            const Text('Inquiry Details', style: TextStyle(color: Colors.white)),
+        title: const Text('Inquiry Details', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         elevation: 3,
       ),
@@ -152,12 +156,10 @@ class InqueryDetails extends StatelessWidget {
                               const SizedBox(height: 4),
                               GestureDetector(
                                 onTap: () {
-                                  Clipboard.setData(
-                                      ClipboardData(text: entry.value));
+                                  Clipboard.setData(ClipboardData(text: entry.value));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
-                                          '${capitalize(entry.key)} copied'),
+                                      content: Text('${capitalize(entry.key)} copied'),
                                       duration: const Duration(seconds: 1),
                                     ),
                                   );

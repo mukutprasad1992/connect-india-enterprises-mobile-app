@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'ViewInvestment.dart';
 import 'add_edit_pages/edit_investment_page.dart';
 import '/models/investmentModel.dart';
-import '/services/serviceType/deleteServiceTypeApi.dart';
+import '/services/serviceType/investmentServices/deleteServiceTypeApi.dart';
 
 class InvestmentActionButtons extends StatelessWidget {
   final Map<String, dynamic> investment;
@@ -125,24 +125,45 @@ class InvestmentActionButtons extends StatelessWidget {
   }
 
   Future<void> _deleteInvestment(BuildContext context) async {
-    try {
-      final id = investment['id']?.toString() ?? '';
-      if (id.isEmpty) {
-        _showSnackBar(context, 'Cannot delete: ID is missing', Colors.red);
-        return;
-      }
+    final id = investment['id']?.toString() ?? '';
+    if (id.isEmpty) {
+      _showSnackBar(context, 'Cannot delete: ID is missing', Colors.red);
+      return;
+    }
 
+    // Show loader dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Row(
+          children: const [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 16),
+            Expanded(child: Text("Deleting...")),
+          ],
+        ),
+      ),
+    );
+
+    try {
       final result = await ServiceTypeApi.DeleteServiceType(
         token: token,
         id: id,
       );
+
+      Navigator.of(context).pop(); // Close the loader dialog
 
       if (result["status"] == true) {
         onDelete();
         _showSnackBar(
           context,
           result["message"] ?? 'Investment Deleted Successfully!',
-          Colors.orangeAccent,
+          Colors.green,
         );
       } else {
         _showSnackBar(
@@ -152,6 +173,7 @@ class InvestmentActionButtons extends StatelessWidget {
         );
       }
     } catch (e) {
+      Navigator.of(context).pop(); 
       _showSnackBar(
         context,
         "Error deleting investment: $e",
