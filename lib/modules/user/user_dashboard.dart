@@ -16,7 +16,6 @@ import '/views/settings/settings.dart';
 import '/views/drawer/changepassword.dart';
 import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
-
 import 'package:badges/badges.dart' as badges;
 import '/services/notificationServices/notificationApi.dart';
 class UserDashboardPage extends StatefulWidget {
@@ -64,12 +63,8 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       _pages.addAll([
         Dashboard(),
         InsurancePage(token: token ?? ''),
-        //InsurancePage(),
-
         InvestmentPage(token: token ?? ''),
-        //LoanPage(),
         LoanPage(token: token ?? ''),
-        //PolicyPage(),
         PolicyPage(token: token ?? ''),
       ]);
     });

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/InvestmentSummaryCard.dart';
 import 'widgets/InvestmentSearchBar.dart';
 import '/models/investmentModel.dart';
-import '/services/serviceType/investmentServices/getdatabyserviceid.dart';
+import '../../../../services/user_module_service_Api/investmentServices/getdatabyserviceid.dart';
 import '/modules/user/widgets/investment/widgets/form_investment/investmentType.dart';
 
 class InvestmentPage extends StatefulWidget {
@@ -176,33 +176,36 @@ class _InvestmentPageState extends State<InvestmentPage> {
                     Expanded(
                       child: isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : filteredData.isEmpty
-                              ? const Center(
-                                  child: Text('No investment data available.'))
-                              : GridView.builder(
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: isWideScreen ? 2 : 1,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                    childAspectRatio: isWideScreen ? 2.8 : 2.1,
+                          : RefreshIndicator(
+                            onRefresh:_fetchInvestmentsFromApi,
+                            child: filteredData.isEmpty
+                                ? const Center(
+                                    child: Text('No investment data available.'))
+                                : GridView.builder(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: isWideScreen ? 2 : 1,
+                                      crossAxisSpacing: 12,
+                                      mainAxisSpacing: 12,
+                                      childAspectRatio: isWideScreen ? 2.8 : 2.1,
+                                    ),
+                                    itemCount: filteredData.length,
+                                    itemBuilder: (context, index) {
+                                      final investment = filteredData[index];
+                                      return InvestmentSummaryCard(
+                                        row: investment.toJson(),
+                                        index: index,
+                                        token: widget.token,
+                                        onUpdate: (updatedInvestment) =>
+                                            _updateInvestment(
+                                                index,
+                                                InvestmentModel.fromJson(
+                                                    updatedInvestment)),
+                                        onDelete: () => _deleteInvestment(index),
+                                      );
+                                    },
                                   ),
-                                  itemCount: filteredData.length,
-                                  itemBuilder: (context, index) {
-                                    final investment = filteredData[index];
-                                    return InvestmentSummaryCard(
-                                      row: investment.toJson(),
-                                      index: index,
-                                      token: widget.token,
-                                      onUpdate: (updatedInvestment) =>
-                                          _updateInvestment(
-                                              index,
-                                              InvestmentModel.fromJson(
-                                                  updatedInvestment)),
-                                      onDelete: () => _deleteInvestment(index),
-                                    );
-                                  },
-                                ),
+                          ),
                     ),
                   ],
                 ),
@@ -221,9 +224,14 @@ class _InvestmentPageState extends State<InvestmentPage> {
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (investmentData) {
-                          submitNewInvestment(
-                              investmentData); 
+                        onSubmit: (investmentData) async{
+                          setState(() => isLoading = true);
+                          try{
+                            submitNewInvestment(investmentData); 
+                            await Future.delayed(const Duration(seconds: 1)); 
+                          }finally{
+                            setState(() => isLoading = false);
+                          }
                         },
                       );
                     },

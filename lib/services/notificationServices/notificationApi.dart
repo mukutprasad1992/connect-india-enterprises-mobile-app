@@ -4,93 +4,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '/models/notification_model.dart';
 import '/consts/appConstants.dart';
 
-// class NotificationService {
-//   static const String baseUrl =
-//       "http://192.168.29.161:4000/notification/getAllUserNotification";
-
-//   /// 🔹 Get all notifications
-  
-//   static Future<List<AppNotification>> getNotifications() async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final token = prefs.getString(KEYTOKEN);
-
-//     if (token == null || token.isEmpty) {
-//       throw Exception('No token found. Please log in again.');
-//     }
-
-//     final response = await http.get(
-//       Uri.parse(baseUrl),
-//       headers: {
-//         'Authorization': 'Bearer $token',
-//         'Content-Type': 'application/json',
-//       },
-//     );
-//     //print('--------- Response status----------: ${response.statusCode}');
-//     //print('========Response body=======: ${response.body}');
-
-//     if (response.statusCode == 200) {
-//       final Map<String, dynamic> data = json.decode(response.body);
-//       //print('---------Decoded JSON-------: $data'); 
-//       if (data['status'] == true) {
-//         final List<dynamic> result = data['result'];
-//         return result.map((json) => AppNotification.fromJson(json)).toList();
-//       } else {
-//         throw Exception('API Error: ${data['message']}');
-//       }
-//     } else if (response.statusCode == 401) {
-//       throw Exception('Unauthorized: Token invalid or expired.');
-//     } else {
-//       throw Exception(
-//           'Failed to load notifications: ${response.statusCode}');
-//     }
-//   }
-
-//   /// 🔹 Mark a notification as read
-//   static Future<void> markAsRead(String notificationId) async {
-//     final prefs = await SharedPreferences.getInstance();
-//     final token = prefs.getString(KEYTOKEN);
-
-//     if (token == null || token.isEmpty) {
-//       throw Exception('No token found. Please log in again.');
-//     }
-//     //print('Mark as read request&&&&&&&&: ${json.encode({'notificationId': notificationId})}');
-//     //print('Token%%%%%%%%%%: $token');
-
-//     final response = await http.post(
-//       Uri.parse('http://192.168.29.161:4000/notification/markAsRead'),
-//       headers: {
-//         'Authorization': 'Bearer $token',
-//         'Content-Type': 'application/json',
-//       },
-//       body: json.encode({'notificationId': notificationId}),
-//     );
-//     //print('Response status @@@@@@@: ${response.statusCode}');
-//     //print('Response body#######: ${response.body}');
-
-//     if (response.statusCode != 200) {
-//       throw Exception('Failed to mark notification as read');
-//     }
-//   }
-  
-// }
-
-
-
 class NotificationService {
-  static const String baseUrl =
-      "http://192.168.29.161:4000/notification/getAllUserNotification";
-
-  // 🔹 Get all notifications
-  static Future<List<AppNotification>> getNotifications() async {
+  /// 🔹 Get stored Bearer token
+  static Future<String?> getKeyToken() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(KEYTOKEN);
+    return prefs.getString("KEYTOKEN");
+  }
 
+  /// 🔹 Fetch all user notifications
+  static Future<List<AppNotification>> getNotifications() async {
+    final token = await getKeyToken();
     if (token == null || token.isEmpty) {
       throw Exception('No token found. Please log in again.');
     }
 
+    final url = Uri.parse('$baseUrl/notification/getAllUserNotification');
+
     final response = await http.get(
-      Uri.parse(baseUrl),
+      url,
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -98,10 +29,10 @@ class NotificationService {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+      final data = json.decode(response.body);
       if (data['status'] == true) {
-        final List<dynamic> result = data['result'];
-        return result.map((json) => AppNotification.fromJson(json)).toList();
+        final List<dynamic> results = data['result'] ?? [];
+        return results.map((json) => AppNotification.fromJson(json)).toList();
       } else {
         throw Exception('API Error: ${data['message']}');
       }
@@ -110,20 +41,17 @@ class NotificationService {
     }
   }
 
-  // 🔹 Mark a notification as read
+  /// 🔹 Mark a notification as read
   static Future<void> markAsRead(String notificationId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(KEYTOKEN);
-
+    final token = await getKeyToken();
     if (token == null || token.isEmpty) {
       throw Exception('No token found. Please log in again.');
     }
 
-    final url =
-        'http://192.168.29.161:4000/notification/updateisRead/$notificationId';
+    final url = Uri.parse('$baseUrl/notification/updateisRead/$notificationId');
 
     final response = await http.get(
-      Uri.parse(url),
+      url,
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -131,10 +59,10 @@ class NotificationService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to mark notification as read');
+      throw Exception('Failed to mark notification as read (HTTP ${response.statusCode})');
     }
 
-    final Map<String, dynamic> data = json.decode(response.body);
+    final data = json.decode(response.body);
     if (data['status'] != true) {
       throw Exception('Failed to mark notification as read: ${data['message']}');
     }

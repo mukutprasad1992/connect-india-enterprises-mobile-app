@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/consts/appColors.dart';
+import '/models/customerModel.dart';
 
-class Customer_Details extends StatelessWidget {
-  final Map<String, String> row;
+class CustomerDetails extends StatelessWidget {
+  final CustomerModel row;
 
-  const Customer_Details({super.key, required this.row});
+  const CustomerDetails({super.key, required this.row});
 
   IconData _getIconForKey(String key) {
     switch (key.toLowerCase()) {
@@ -56,13 +57,21 @@ class Customer_Details extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sortedEntries = row.entries.toList()
-      ..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
-
+    final sortedEntries = <MapEntry<String, String>>[
+      MapEntry('id', row.id ?? ''),
+      MapEntry('name', row.name ?? ''),
+      MapEntry('email', row.email ?? ''),
+      MapEntry('phone', row.phone ?? ''),
+      MapEntry('address', row.address ?? ''),
+      MapEntry('pinCode', row.pinCode ?? ''),
+      MapEntry('businessName', row.businessName ?? ''),
+      MapEntry('businessRepresentative', row.businessRepresentative ?? ''),
+    ]..sort((a, b) => a.key.toLowerCase().compareTo(b.key.toLowerCase()));
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Customer Details ', style: TextStyle(color: Colors.white)),
+        title: const Text('Customer Details ',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: AppColors.background,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,

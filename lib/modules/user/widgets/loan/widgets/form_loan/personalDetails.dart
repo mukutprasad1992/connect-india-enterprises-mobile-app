@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/loanController/LoanFormController.dart';
-import '/services/serviceType/loanServices/createLoan.dart';
-import '/services/serviceType/loanServices/updateLoan.dart' as updateApi;
+import '../../../../../../services/user_module_service_Api/loanServices/createLoan.dart';
+import '../../../../../../services/user_module_service_Api/loanServices/updateLoan.dart' as updateApi;
 
 class Personaldetails extends StatefulWidget {
   final TextEditingController aadharController;
@@ -108,8 +108,7 @@ class _PersonaldetailsState extends State<Personaldetails> {
         );
 
         if (res['status'] == true) {
-          dbId =
-              res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
+          dbId = res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
           if (dbId == null) {
             if (mounted) _showError("Service created but DB ID missing");
             return;

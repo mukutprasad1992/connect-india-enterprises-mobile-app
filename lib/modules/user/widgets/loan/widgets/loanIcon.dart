@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'Viewloan.dart';
 import 'add_edit_pages/edit_loan_page.dart';
 import '/models/loanModel.dart';
-import '/services/serviceType/loanServices/deleteLoan.dart';
+import '../../../../../services/user_module_service_Api/loanServices/deleteLoan.dart';
 
 class LoanActionButtons extends StatelessWidget {
   final Map<String, dynamic> loan;
@@ -115,7 +115,7 @@ class LoanActionButtons extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              await _deleteLoan(context); // <-- call here
+              await _deleteLoan(context); 
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),

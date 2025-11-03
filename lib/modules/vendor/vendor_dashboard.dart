@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../vendor/bottomNavbarVendor/bottomNav.dart';
-import '../../Main_dashboard.dart';
+import '../vendor/widgets/bottomNavbarVendor/bottomNav.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '/Main_dashboard.dart';
 
 import '/views/notification/notification.dart';
 import '/views/drawer/my_drawer.dart';
@@ -10,11 +11,12 @@ import '/views/drawer/changepassword.dart';
 import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
 
-import '/modules/vendor/customer/vendorCustomer.dart';
-import '/modules/vendor/voucher/vendorVoucher.dart';
+import '/modules/vendor/widgets/customer/vendorCustomer.dart';
+import '/modules/vendor/widgets/voucher/vendorVoucher.dart';
 
 import 'package:badges/badges.dart' as badges;
 import '/services/notificationServices/notificationApi.dart';
+
 
 class VendorDashboardPage extends StatefulWidget {
   const VendorDashboardPage({super.key});
@@ -28,6 +30,10 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
 
+  String? userToken;
+  bool loadingToken = true;
+   String? vendorId;
+
   Future<int> fetchUnreadCount() async {
     try {
       final list = await NotificationService.getNotifications();
@@ -38,12 +44,33 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
     }
   }
 
-  final List<Widget> _pages = [
-    Dashboard(),
-    VendorCustomerPage(),
-    VendorVoucherpage(),
-  ];
+  final List<Widget> _pages = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('KEYTOKEN');
+
+    setState(() {
+      userToken = token;
+      loadingToken = false;
+
+      _pages.clear();
+      _pages.addAll([
+        Dashboard(),
+        VendorCustomerPage(vendorId:vendorId ?? ''),
+        VendorVoucherpage(Id:vendorId ?? ''),
+        
+      ]);
+    });
+  }
+
+  
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -60,7 +87,9 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
         if (_selectedIndex != 0) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const VendorVoucherpage()),
+            MaterialPageRoute(builder: (context) => VendorVoucherpage(
+              Id:vendorId ?? ''
+            )),
           );
         }
         break;
@@ -85,7 +114,7 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
         );
         break;
       case DrawerSections.logout:
-        // Logout handled inside drawer
+        
         break;
     }
   }

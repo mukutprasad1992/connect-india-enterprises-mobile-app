@@ -34,14 +34,13 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/InsuranceSummaryCard.dart';
 import 'widgets/InsuranceSearchBar.dart';
 import '/models/insuranceModel.dart';
-import '/services/serviceType/insuranceServices/getInsuranceData.dart';
+import '../../../../services/user_module_service_Api/insuranceServices/getInsuranceData.dart';
 import '/modules/user/widgets/insurance/widgets/form_insurance/insuranceType.dart';
 
 class PolicyPage extends StatefulWidget {
@@ -70,7 +69,9 @@ class _PolicyPageState extends State<PolicyPage> {
     setState(() => isLoading = true);
 
     try {
-      final token = widget.token.isNotEmpty? widget.token: (await SharedPreferences.getInstance()).getString("KEYTOKEN");
+      final token = widget.token.isNotEmpty
+          ? widget.token
+          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
 
       if (token == null) {
         _redirectToLogin();
@@ -94,9 +95,7 @@ class _PolicyPageState extends State<PolicyPage> {
                 InsuranceModel.fromJson(Map<String, dynamic>.from(json)))
             .toList();
       } else if (data is Map) {
-        loadedData = [
-          InsuranceModel.fromJson(Map<String, dynamic>.from(data))
-        ];
+        loadedData = [InsuranceModel.fromJson(Map<String, dynamic>.from(data))];
       }
 
       setState(() {
@@ -115,7 +114,8 @@ class _PolicyPageState extends State<PolicyPage> {
 
   Future<void> saveInsurance() async {
     final prefs = await SharedPreferences.getInstance();
-    final insuranceJsonList = insuranceData.map((e) => jsonEncode(e.toJson())).toList();
+    final insuranceJsonList =
+        insuranceData.map((e) => jsonEncode(e.toJson())).toList();
     await prefs.setStringList('insurance', insuranceJsonList);
   }
 
@@ -143,7 +143,8 @@ class _PolicyPageState extends State<PolicyPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       filteredData = insuranceData.where((insurance) {
-        return insurance.nomineeName.toLowerCase().contains(query) || insurance.aadharNumber.toLowerCase().contains(query);
+        return insurance.nomineeName.toLowerCase().contains(query) ||
+            insurance.aadharNumber.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -209,33 +210,39 @@ class _PolicyPageState extends State<PolicyPage> {
                     Expanded(
                       child: isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : filteredData.isEmpty
-                              ? const Center(
-                                  child: Text('No Insurance data available.'))
-                              : GridView.builder(
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: isWideScreen ? 2 : 1,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                    childAspectRatio: isWideScreen ? 2.8 : 2.1,
-                                  ),
-                                  itemCount: filteredData.length,
-                                  itemBuilder: (context, index) {
-                                    final insurance = filteredData[index];
-                                    return InsuranceSummaryCard(
-                                      row: insurance.toJson(),
-                                      index: index,
-                                      token: widget.token,
-                                      onUpdate: (updatedInsurance) =>
-                                          _updateInsurance(
-                                              index,
-                                              InsuranceModel.fromJson(
-                                                  updatedInsurance)),
-                                      onDelete: () => _deleteInsurance(index),
-                                    );
-                                  },
-                                ),
+                          : RefreshIndicator(
+                              onRefresh: _fetchInsuranceFromApi,
+                              child: filteredData.isEmpty
+                                  ? const Center(
+                                      child:
+                                          Text('No Insurance data available.'))
+                                  : GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: isWideScreen ? 2 : 1,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio:
+                                            isWideScreen ? 2.8 : 2.1,
+                                      ),
+                                      itemCount: filteredData.length,
+                                      itemBuilder: (context, index) {
+                                        final insurance = filteredData[index];
+                                        return InsuranceSummaryCard(
+                                          row: insurance.toJson(),
+                                          index: index,
+                                          token: widget.token,
+                                          onUpdate: (updatedInsurance) =>
+                                              _updateInsurance(
+                                                  index,
+                                                  InsuranceModel.fromJson(
+                                                      updatedInsurance)),
+                                          onDelete: () =>
+                                              _deleteInsurance(index),
+                                        );
+                                      },
+                                    ),
+                            ),
                     ),
                   ],
                 ),
@@ -254,9 +261,14 @@ class _PolicyPageState extends State<PolicyPage> {
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (insuranceData) {
-                          submitNewInsurance(
-                              insuranceData); 
+                        onSubmit: (insuranceData) async {
+                          setState(() => isLoading = true);
+                          try {
+                            submitNewInsurance(insuranceData);
+                            await Future.delayed(const Duration(seconds: 1));
+                          } finally {
+                            setState(() => isLoading = false);
+                          }
                         },
                       );
                     },

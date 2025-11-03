@@ -51,7 +51,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
     final parts = hasAsterisk ? label.split('*') : [label];
 
     return InputDecoration(
-      prefixIcon: Icon(icon, color: AppColors.background, size: 18),
+      prefixIcon: Icon(icon, color:Colors.deepPurple,size: 18),
       
       label: hasAsterisk
           ? RichText(

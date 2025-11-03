@@ -1,94 +1,87 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:myapp/models/createVouchermodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'widgets/generatepage.dart';
-import 'widgets/voucherSummaryCard.dart';
+import '/models/Vouchermodel.dart';
+import '/services/admin_module_service_Api/voucher/getAllvoucher.dart';
 import 'widgets/voucherSearchBar.dart';
+import 'widgets/voucherSummaryCard.dart';
+import 'widgets/generate_edit_page.dart';
 
 class VoucherTablePage extends StatefulWidget {
-  const VoucherTablePage({
-    super.key,
-    //voucherData: voucherData,
-  });
+  final Map<String, dynamic>? voucherModel;
+
+  const VoucherTablePage({super.key, this.voucherModel});
 
   @override
   State<VoucherTablePage> createState() => _VoucherTablePageState();
 }
 
 class _VoucherTablePageState extends State<VoucherTablePage> {
-  final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> voucherData = [];
-  List<Map<String, dynamic>> filteredData = [];
+  final TextEditingController searchController = TextEditingController();
+  List<VoucherModel> voucherData = [];
+  List<VoucherModel> filteredData = [];
+  List<CreateVoucherModel> voucherDetials = [];
+  List<CreateVoucherModel> filteredVoucherDetials = [];
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadVouchers();
-    _searchController.addListener(_applySearchFilter);
+    _loadVouchersFromApi();
+    searchController.addListener(_applySearchFilter);
   }
 
   Future<void> _saveVouchers() async {
     final prefs = await SharedPreferences.getInstance();
-    final voucherJsonList = voucherData.map(jsonEncode).toList();
+    final voucherJsonList =
+        voucherData.map((v) => jsonEncode(v.toJson())).toList();
     await prefs.setStringList('vouchers', voucherJsonList);
   }
 
-  Future<void> _loadVouchers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final voucherJsonList = prefs.getStringList('vouchers') ?? [];
-    final loadedData = voucherJsonList
-        .map((jsonStr) => Map<String, dynamic>.from(jsonDecode(jsonStr)))
-        .toList();
-
-    setState(() {
-      voucherData = loadedData;
-      filteredData = List.from(voucherData);
-    });
+  Future<void> _loadVouchersFromApi() async {
+    setState(() => isLoading = true);
+    try {
+      final vouchers = await GetAllVoucher.getAllCustomervoucher();
+      setState(() {
+        voucherData = vouchers;
+        filteredData = List.from(vouchers);
+      });
+      await _saveVouchers();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading vouchers: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   void _applySearchFilter() {
-    final query = _searchController.text.toLowerCase();
+    final query = searchController.text.toLowerCase();
     setState(() {
-      filteredData = voucherData.where((voucher) {
-        final name = voucher['CustomerName']?.toLowerCase() ?? '';
-        final code = voucher['VoucherCode']?.toLowerCase() ?? '';
-        return name.contains(query) || code.contains(query);
+      filteredData = voucherData.where((v) {
+        return (v.customerName ?? '').toLowerCase().contains(query) ||
+            (v.vendorBusinessName ?? '').toLowerCase().contains(query) ||
+            (v.status ?? '').toLowerCase().contains(query) ||
+            (v.voucherCode ?? '').toLowerCase().contains(query) ||
+            (v.amount ?? '').toLowerCase().contains(query);
       }).toList();
     });
   }
 
-  void _updateVoucher(int index, Map<String, dynamic> updatedVoucher) {
+  void updateVoucher(int index, CreateVoucherModel updatedVoucher) {
     setState(() {
-      voucherData[index] = updatedVoucher;
+      voucherDetials[index] = updatedVoucher;
+      filteredVoucherDetials[index] = updatedVoucher;
     });
     _saveVouchers();
-    _applySearchFilter();
   }
 
-  void _toggleBlockStatus(int index) {
-    setState(() {
-      final currentStatus = voucherData[index]['Status'] ?? 'Active';
-      voucherData[index]['Status'] =
-          currentStatus == 'Blocked' ? 'Active' : 'Blocked';
-    });
-    _saveVouchers();
-    _applySearchFilter();
-  }
-
-  void _addNewVoucher(Map<String, dynamic> newVoucher) {
-    setState(() {
-      voucherData.add(newVoucher);
-    });
-    _saveVouchers();
-    _applySearchFilter();
-  }
-
-  void _deleteVoucher(int index) {
-    setState(() {
-      voucherData.removeAt(index);
-    });
-    _saveVouchers();
-    _applySearchFilter();
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -96,91 +89,128 @@ class _VoucherTablePageState extends State<VoucherTablePage> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWideScreen = constraints.maxWidth > 600;
-
+          final isWide = constraints.maxWidth > 600;
           return Stack(
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // 🔍 Voucher Search Bar
                     VoucherSearchBar(
-                      onChanged: (value) {},
-                      voucherData: voucherData,
+                      onChanged: (_) {},
+                      voucherData: voucherData.map((v) => v.toJson()).toList(),
                       onSearchResult: (filteredList) {
                         setState(() {
-                          filteredData = filteredList;
+                          filteredData = filteredList
+                              .map((e) => VoucherModel.fromJson(e))
+                              .toList();
                         });
                       },
                       onMicPressed: () {},
-                      onSearchChanged: (searchText) {},
+                      onSearchChanged: (value) => _applySearchFilter(),
                     ),
-
-                    const SizedBox(height: 10),
-
-                    // 🧾 Voucher Grid/List
+                    const SizedBox(height: 12),
                     Expanded(
-                      child: filteredData.isEmpty
-                          ? const Center(
-                              child: Text('No voucher data available.'))
-                          : GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: isWideScreen ? 2 : 1,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: isWideScreen ? 2.2 : 1.9,
+                      child: RefreshIndicator(
+                        onRefresh: _loadVouchersFromApi,
+                        child: filteredData.isEmpty
+                            ? ListView(
+                                children: const [
+                                  SizedBox(height: 200),
+                                  Center(
+                                    child: Text('No vouchers found'),
+                                  ),
+                                ],
+                              )
+                            : GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: isWide ? 2 : 1,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: isWide ? 2.6 : 2.0,
+                                ),
+                                itemCount: filteredData.length,
+                                itemBuilder: (context, index) {
+                                  final voucher = filteredData[index];
+                                  return VoucherSummaryCard(
+                                    row: voucher.toJson(),
+                                    index: index,
+                                    onDelete: (i) {
+                                      setState(() {
+                                        filteredData.removeAt(i);
+                                        voucherData.removeAt(i);
+                                      });
+                                      _saveVouchers();
+                                    },
+                                    onUpdate: (i, updated) {
+                                      setState(() {
+                                        final updatedVoucher =
+                                            VoucherModel.fromJson(updated);
+                                        voucherData[i] = updatedVoucher;
+                                        filteredData[i] = updatedVoucher;
+                                      });
+                                      _saveVouchers();
+
+                                      Navigator.pop(context);
+                                    },
+                                    onStatusToggle: (i, updated) {
+                                      setState(() {
+                                        final updatedVoucher =
+                                            VoucherModel.fromJson(updated);
+                                        voucherData[i] = updatedVoucher;
+                                        filteredData[i] = updatedVoucher;
+                                      });
+                                    },
+                                    onReloadParent: _loadVouchersFromApi,
+                                  );
+                                },
                               ),
-                              itemCount: filteredData.length,
-                              itemBuilder: (context, index) {
-                                final row = filteredData[index];
-                                return VoucherSummaryCard(
-                                  row: row,
-                                  index: index,
-                                  onUpdate: (updatedRow) =>
-                                      _updateVoucher(index, updatedRow),
-                                  onBlockToggle: () =>
-                                      _toggleBlockStatus(index),
-                                  onDelete: () => _deleteVoucher(index),
-                                );
-                              },
-                            ),
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // ➕ Floating Add Button
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final newVoucher = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const GenerateVoucherPage()),
-                      );
-                      if (newVoucher != null &&
-                          newVoucher is Map<String, dynamic>) {
-                        _addNewVoucher(newVoucher);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.all(16),
-                      shape: const CircleBorder(),
-                    ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 28),
+              if (isLoading)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.black26,
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                 ),
-              ),
             ],
           );
         },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: FloatingActionButton.small(
+          backgroundColor: Colors.deepPurple,
+          elevation: 6,
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => GenerateEditVoucherPage(
+                  mode: 'add',
+                  CreateVoucherModel: {},
+                  onCompleted: (dbId) => _loadVouchersFromApi(),
+                ),
+              ),
+            );
+
+            if (result != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Voucher added successfully!"),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          },
+          child: const Icon(Icons.add, color: Colors.white, size: 24),
+        ),
       ),
     );
   }

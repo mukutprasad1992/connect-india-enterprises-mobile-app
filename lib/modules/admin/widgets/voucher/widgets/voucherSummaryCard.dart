@@ -4,17 +4,19 @@ import 'voucherIconbuttons.dart';
 class VoucherSummaryCard extends StatelessWidget {
   final Map<String, dynamic> row;
   final int index;
-  final VoidCallback onBlockToggle;
-  final ValueChanged<Map<String, dynamic>> onUpdate;
-  final VoidCallback onDelete;
+  final Function(int index, Map<String, dynamic> updatedVoucher) onUpdate;
+  final Function(int index, Map<String, dynamic> updatedVoucher) onStatusToggle;
+  final Function(int index) onDelete;
+  final VoidCallback? onReloadParent;
 
   const VoucherSummaryCard({
     super.key,
     required this.row,
     required this.index,
     required this.onDelete,
-    required this.onBlockToggle,
+    required this.onStatusToggle,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   @override
@@ -45,21 +47,26 @@ class VoucherSummaryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    row['customer'] ?? 'No Name',
+                    row['customerName'] ?? 'No Name',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.indigo,
                           fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                     overflow: TextOverflow.fade,
                     softWrap: false,
                   ),
                 ),
                 VoucherActionButtons(
+                  CreateVoucherModel: row,
                   row: row,
                   index: index,
+                  id: row['id'] ?? 0,
+                  status: row['status'] ?? 'enable',
                   onUpdate: onUpdate,
-                  onBlockToggle: onBlockToggle,
+                  onStatusToggle: onStatusToggle,
                   onDelete: onDelete,
+                  onReloadParent: onReloadParent,
                 ),
               ],
             ),
@@ -67,25 +74,25 @@ class VoucherSummaryCard extends StatelessWidget {
 
             _buildLabelValueText(
               context,
-              "Vendor Name",
-              row['vendor'] ?? '',
+              "Business Name",
+              row['vendorBusinessName'] ?? '',
               Colors.green,
             ),
             const SizedBox(height: 6),
             _buildLabelValueText(
               context,
               "Voucher Code",
-              row['code'] ?? '',
+              row['voucherCode'] ?? '',
               Colors.blue,
             ),
             const SizedBox(height: 6),
             _buildLabelValueText(
               context,
               'Voucher Status',
-              row['Redeemed']?.toString() == 'true'
-                  ? '🎉 Voucher Redeemed'
-                  : '❗ Unclaimed Voucher!',
-              row['Redeemed']?.toString() == 'true'
+              row['status']?.toString() == 'Disable'
+                  ? '🎉Voucher Redeemed'
+                  : '❗Unclaimed Voucher!',
+              row['status']?.toString() == 'Disable'
                   ? const Color(0xFF4CAF50)
                   : Colors.orange,
             ),
@@ -106,15 +113,17 @@ class VoucherSummaryCard extends StatelessWidget {
         children: [
           TextSpan(
             text: "$label: ",
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
+                  fontSize: 14
                 ),
           ),
           TextSpan(
             text: value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: valueColor,
+                  fontSize: 14
                 ),
           ),
         ],

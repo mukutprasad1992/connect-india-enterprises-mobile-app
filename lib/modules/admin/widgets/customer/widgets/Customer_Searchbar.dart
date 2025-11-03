@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '/models/customerModel.dart';
 
 class CustomerSearchBar extends StatefulWidget {
-  final List<Map<String, String>> customerData;
-  final Function(List<Map<String, String>>) onSearchResult;
+  final List<CustomerModel> customerData;
+  final Function(List<CustomerModel>) onSearchResult;
   final void Function(String searchText) onChanged;
   final Function(String) onSearchChanged;
   final VoidCallback onMicPressed;
@@ -36,21 +37,39 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
     });
   }
 
+  /// Filters the customer list based on the entered text.
   void _filterData() {
-    final query = _searchController.text.toLowerCase();
-    final filtered = widget.customerData.where((row) {
-      return row.values.any((val) => val.toLowerCase().contains(query));
+    final query = _searchController.text.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      widget.onSearchResult(widget.customerData);
+      return;
+    }
+
+    final filtered = widget.customerData.where((customer) {
+      return [
+        customer.id?.toString(),
+        customer.name,
+        customer.email,
+        customer.phone,
+        customer.address,
+        customer.pinCode,
+        customer.businessName,
+        customer.businessRepresentative
+      ].any((field) => field?.toLowerCase().contains(query) ?? false);
     }).toList();
+
     widget.onSearchResult(filtered);
     widget.onChanged(query);
   }
 
+  /// Clears the current search query and resets the list
   void _clearSearch() {
     _searchController.clear();
     widget.onChanged('');
-    widget.onSearchResult(widget.customerData); // Reset to original data
+    widget.onSearchResult(widget.customerData);
     _focusNode.requestFocus();
-    setState(() {}); // to show mic and logo again
+    setState(() {}); // Refresh UI
   }
 
   @override
@@ -66,6 +85,7 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
       builder: (context, constraints) {
         double availableWidth = constraints.maxWidth;
         double inputWidth = _isFocused ? availableWidth * 0.9 : 200;
+
         return Row(
           children: [
             if (!_isFocused)
@@ -81,7 +101,7 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
                 ),
               ),
 
-            // 🔍 Search Bar
+            // 🔍 Animated Search Bar
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: inputWidth.clamp(150.0, availableWidth),
@@ -115,9 +135,7 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
                           icon: const Icon(Icons.arrow_back),
                           onPressed: () {
                             _focusNode.unfocus();
-                            _searchController.clear();
-                            widget.onSearchChanged('');
-                            setState(() {});
+                            _clearSearch();
                           },
                         )
                       : const Icon(Icons.search),
@@ -125,12 +143,10 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (_searchController.text.isEmpty) ...[
-                        // Mic Icon
                         IconButton(
                           icon: const Icon(Icons.mic, size: 18),
                           onPressed: widget.onMicPressed,
                         ),
-                        // Logo
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Image.asset(
@@ -150,8 +166,7 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
                   isDense: true,
                   contentPadding: _isFocused
                       ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
-                      : const EdgeInsets.only(
-                          top: 18, left: 12), // top padding when not focused
+                      : const EdgeInsets.only(top: 18, left: 12),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(

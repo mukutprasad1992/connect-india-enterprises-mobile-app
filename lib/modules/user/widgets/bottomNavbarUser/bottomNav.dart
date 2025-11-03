@@ -17,8 +17,14 @@ class CustomBottomNavBar extends StatelessWidget {
       onTap: onTap,
       type: BottomNavigationBarType.fixed, 
       backgroundColor: Colors.white,
+
       selectedItemColor: Colors.red[800],
       unselectedItemColor: Colors.grey,
+
+      iconSize: 20, 
+      selectedFontSize: 11, 
+      unselectedFontSize: 10, 
+      
       items: const [
         BottomNavigationBarItem(
           icon: Tooltip(message: 'Dashboard', child: Icon(Icons.dashboard_rounded)),

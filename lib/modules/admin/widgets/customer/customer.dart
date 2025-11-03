@@ -1,162 +1,178 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../services/admin_module_service_Api/customer/getAllCustomer.dart';
+import '/models/customerModel.dart';
 import 'widgets/Customer_Searchbar.dart';
 import 'widgets/customerSummaryCard.dart';
 
 class CustomerTablePage extends StatefulWidget {
-  const CustomerTablePage({super.key});
+  final String token;
+  const CustomerTablePage({super.key, required this.token});
 
   @override
   State<CustomerTablePage> createState() => _CustomerTablePageState();
 }
 
 class _CustomerTablePageState extends State<CustomerTablePage> {
-  List<Map<String, String>> customerData = [];
-  List<Map<String, String>> filteredData = [];
+  List<CustomerModel> customerData = [];
+  List<CustomerModel> filteredData = [];
+  bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _loadDummyCustomerData();
+    _fetchCustomerData();
   }
 
-  void _loadDummyCustomerData() {
-    customerData = [
-      {
-        'ID': 'CUST-001',
-        'Name': 'John Smith',
-        'Email': 'john.smith@example.com',
-        'Phone': '+1 555 111 2222',
-        'Address': '101 Elm Street, Springfield',
-        'Pin Code': '622001',
-      },
-      {
-        'ID': 'CUST-002',
-        'Name': 'Anil Kumar',
-        'Email': 'anil.kumar@example.com',
-        'Phone': '+91 98765 43210',
-        'Address': '22 Gandhi Nagar, Delhi',
-        'Pin Code': '110001',
-      },
-      {
-        'ID': 'CUST-003',
-        'Name': 'Sophia Lee',
-        'Email': 'sophia.lee@example.com',
-        'Phone': '+1 555 333 4444',
-        'Address': '456 Maple Ave, Los Angeles',
-        'Pin Code': '90001',
-      },
-      {
-        'ID': 'CUST-004',
-        'Name': 'Rajesh Mehta',
-        'Email': 'rajesh.mehta@example.com',
-        'Phone': '+91 91234 56789',
-        'Address': 'B-12 Nehru Street, Mumbai',
-        'Pin Code': '400001',
-      },
-      {
-        'ID': 'CUST-005',
-        'Name': 'Emma Watson',
-        'Email': 'emma.watson@example.com',
-        'Phone': '+44 7700 900123',
-        'Address': '10 Queen’s Road, London',
-        'Pin Code': 'W1A 1AA',
-      },
-      {
-        'ID': 'CUST-006',
-        'Name': 'Michael Jordan',
-        'Email': 'mjordan@example.com',
-        'Phone': '+1 555 555 5555',
-        'Address': '23 Legend Street, Chicago',
-        'Pin Code': '60601',
-      },
-      {
-        'ID': 'CUST-007',
-        'Name': 'Nina Sharma',
-        'Email': 'nina.sharma@example.com',
-        'Phone': '+91 99887 77665',
-        'Address': '45 Lotus Park, Pune',
-        'Pin Code': '411001',
-      },
-      {
-        'ID': 'CUST-008',
-        'Name': 'Carlos Rivera',
-        'Email': 'carlos.rivera@example.com',
-        'Phone': '+34 612 345 678',
-        'Address': 'Calle Mayor 7, Madrid',
-        'Pin Code': '28013',
-      },
-      {
-        'ID': 'CUST-009',
-        'Name': 'Chen Wei',
-        'Email': 'chen.wei@example.cn',
-        'Phone': '+86 138 0013 8000',
-        'Address': '88 Beijing Road, Shanghai',
-        'Pin Code': '200001',
-      },
-      {
-        'ID': 'CUST-010',
-        'Name': 'Fatima Zahra',
-        'Email': 'fatima.zahra@example.ma',
-        'Phone': '+212 661 234567',
-        'Address': 'Rue Hassan II, Casablanca',
-        'Pin Code': '20250',
-      },
-    ];
-    //List<Map<String, String>> _filteredCustomerData = [];
-    filteredData = customerData;
+  Future<void> _fetchCustomerData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token =
+          widget.token.isNotEmpty ? widget.token : prefs.getString("KEYTOKEN");
+
+      if (token == null || token.isEmpty) {
+        _redirectToLogin();
+        return;
+      }
+
+      final response = await GetAllCustomer.getAllCustomer(token: token);
+      final data = response["data"];
+
+      List<CustomerModel> loadedData = [];
+
+      if (data is List) {
+        loadedData = data.map((json) => CustomerModel.fromJson(json)).toList();
+      } else if (data is Map) {
+        loadedData = [CustomerModel.fromJson(Map<String, dynamic>.from(data))];
+      }
+
+      setState(() {
+        customerData = loadedData;
+        filteredData = List.from(customerData);
+      });
+
+      await _saveCustomerCache();
+    } catch (e) {
+      debugPrint("API fetch failed: $e");
+      await _loadCustomerCache();
+      setState(() {
+        errorMessage = "⚠️ Failed to load live data, showing cached results.";
+      });
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _saveCustomerCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final customerJsonList =
+        customerData.map((e) => jsonEncode(e.toJson())).toList();
+    await prefs.setStringList('cached_customers', customerJsonList);
+  }
+
+  Future<void> _loadCustomerCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final customerJsonList = prefs.getStringList('cached_customers') ?? [];
+
+    final loadedData = customerJsonList
+        .map((jsonStr) => CustomerModel.fromJson(jsonDecode(jsonStr)))
+        .toList();
+
+    setState(() {
+      customerData = loadedData;
+      filteredData = List.from(customerData);
+    });
+  }
+
+  void _filterCustomer(String query) {
+    setState(() {
+      
+      filteredData = customerData.where((item) {
+        return item.id.toString().contains(query) ||
+            (item.phone ?? '').toLowerCase().contains(query) ||
+            (item.businessRepresentative ?? '').toLowerCase().contains(query) ||
+            (item.businessName ?? '').toLowerCase().contains(query) ||
+            (item.email ?? '').toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
+  void _redirectToLogin() {
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, "/login");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWideScreen = constraints.maxWidth > 600;
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // 🕵️‍♂️ Search Bar
-                CustomerSearchBar(
-                  customerData: customerData,
-                  onSearchResult: (filteredList) {
-                    setState(() {
-                      filteredData = filteredList;
-                    });
-                  },
-                  onChanged: (text) {},
-                  onMicPressed: () {},
-                  onSearchChanged: (searchText) {},
-                ),
-                const SizedBox(height: 10),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // 🔍 Search Bar
+            CustomerSearchBar(
+              customerData: customerData,
+              onSearchResult: (filteredList) {
+                setState(() {
+                  filteredData = filteredList;
+                });
+              },
+              onChanged: (text) {},
+              onMicPressed: () {},
+              onSearchChanged: (searchText) {},
+            ),
 
-                // 🧾 Grid List
-                Expanded(
-                  child: filteredData.isEmpty
+            const SizedBox(height: 10),
+
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
+
+            // 📋 Customer Grid
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredData.isEmpty
                       ? const Center(child: Text('No customer data found.'))
-                      : GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: isWideScreen ? 2 : 1,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: isWideScreen ? 2.2 : 1.9,
-                          ),
-                          itemCount: filteredData.length,
-                          itemBuilder: (context, index) {
-                            final row = filteredData[index];
-                            return CustomerSummaryCard(
-                              row: row,
-                              index: index,
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth > 600;
+                            return GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: isWide ? 2 : 1,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: isWide ? 2.2 : 1.9,
+                              ),
+                              itemCount: filteredData.length,
+                              itemBuilder: (context, index) {
+                                final customer = filteredData[index];
+                                return CustomerSummaryCard(
+                                  row: customer,
+                                  index: index,
+                                );
+                              },
                             );
                           },
                         ),
-                ),
-              ],
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

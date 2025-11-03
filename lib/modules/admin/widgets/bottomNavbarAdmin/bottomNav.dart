@@ -15,29 +15,52 @@ class CustomBottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
-      type: BottomNavigationBarType.fixed, 
+      type: BottomNavigationBarType.fixed,
       backgroundColor: Colors.white,
+
+      // 🔹 Colors
       selectedItemColor: Colors.red[800],
       unselectedItemColor: Colors.grey,
+
+      // 🔹 Sizes
+      iconSize: 20, 
+      selectedFontSize: 11, 
+      unselectedFontSize: 10, 
+
       items: const [
         BottomNavigationBarItem(
-          icon: Tooltip(message: 'Dashboard', child: Icon(Icons.dashboard_rounded)),
+          icon: Tooltip(
+            message: 'Dashboard',
+            child: Icon(Icons.dashboard_rounded),
+          ),
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Tooltip(message: 'Vendor', child: Icon(Icons.store_rounded)),
+          icon: Tooltip(
+            message: 'Vendor',
+            child: Icon(Icons.store_rounded),
+          ),
           label: 'Vendor',
         ),
         BottomNavigationBarItem(
-          icon: Tooltip(message: 'Customer', child: Icon(Icons.support_agent_rounded)),
+          icon: Tooltip(
+            message: 'Customer',
+            child: Icon(Icons.support_agent_rounded),
+          ),
           label: 'Customer',
         ),
         BottomNavigationBarItem(
-          icon: Tooltip(message: 'Inquiry', child: Icon(Icons.people_alt_rounded)),
+          icon: Tooltip(
+            message: 'Inquiry',
+            child: Icon(Icons.people_alt_rounded),
+          ),
           label: 'Inquiry',
         ),
         BottomNavigationBarItem(
-          icon: Tooltip(message: 'Voucher', child: Icon(Icons.receipt_long_rounded)),
+          icon: Tooltip(
+            message: 'Voucher',
+            child: Icon(Icons.receipt_long_rounded),
+          ),
           label: 'Voucher',
         ),
       ],

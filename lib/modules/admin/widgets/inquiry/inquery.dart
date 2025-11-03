@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/Inquiry_Searchbar.dart';
 import 'widgets/InquerySummaryCard.dart';
-import '/services/adminServiceApi/Inquiry/getAllServiceTypeInquirydata.dart'; 
+import '../../../../services/admin_module_service_Api/Inquiry/getAllServiceTypeInquirydata.dart';
 import '/models/inquiryModel.dart';
 
 class InqueryTablePage extends StatefulWidget {
@@ -19,6 +19,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
   List<InquiryModel> filteredData = [];
   bool isLoading = true;
   String errorMessage = '';
+  String searchText = '';
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
     _fetchInquiryData();
   }
 
+  
   Future<void> _fetchInquiryData() async {
     setState(() {
       isLoading = true;
@@ -34,9 +36,8 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = widget.token.isNotEmpty
-          ? widget.token
-          : prefs.getString("KEYTOKEN");
+      final token =
+          widget.token.isNotEmpty ? widget.token : prefs.getString("KEYTOKEN");
 
       if (token == null || token.isEmpty) {
         _redirectToLogin();
@@ -60,20 +61,20 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
 
       setState(() {
         inquiryData = loadedData;
-        filteredData = List.from(inquiryData);
+        filteredData = List.from(loadedData);
       });
 
       await _saveInquiry();
     } catch (e) {
-      print("API fetch failed: $e");
       await _loadInquiry();
       setState(() {
-        errorMessage = "Failed to load live data, showing cached results.";
+        errorMessage = " Failed to load live data. Showing cached results.";
       });
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
+
 
   Future<void> _saveInquiry() async {
     final prefs = await SharedPreferences.getInstance();
@@ -92,9 +93,10 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
 
     setState(() {
       inquiryData = loadedData;
-      filteredData = List.from(inquiryData);
+      filteredData = List.from(loadedData);
     });
   }
+
 
   void _redirectToLogin() {
     if (mounted) {
@@ -102,61 +104,95 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
     }
   }
 
+
+  void _filterInquiries(String query) {
+    setState(() {
+      searchText = query.toLowerCase();
+      filteredData = inquiryData.where((item) {
+        return 
+          item.id.toString().contains(query) ||
+          (item.aadharNumber ?? '').toLowerCase().contains(query) ||
+          (item.id ?? '').toLowerCase().contains(query) ||
+          (item.panNumber ?? '').toLowerCase().contains(query) ||
+          (item.status ?? '').toLowerCase().contains(query)||
+          (item.serviceId ?? '').toLowerCase().contains(query);
+
+      }).toList();
+    });
+  }
+
+
+  void _onStatusChanged() {
+    _fetchInquiryData(); 
+  }
+
+  
+  void _setLoading(bool value) {
+    if (mounted) {
+      setState(() => isLoading = value);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWideScreen = constraints.maxWidth > 600;
-
-          if (isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (errorMessage.isNotEmpty && inquiryData.isEmpty) {
-            return Center(child: Text(errorMessage));
-          }
-
-          return Padding(
+      body: Stack(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 InquerySearchBar(
                   inquiryData: inquiryData,
-                  onChanged: (text) {},
+                  onChanged: _filterInquiries,
                   onSearchResult: (filteredList) {
                     setState(() => filteredData = filteredList);
                   },
                   onMicPressed: () {},
-                  onSearchChanged: (searchText) {},
+                  onSearchChanged: _filterInquiries,
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: filteredData.isEmpty
-                      ? const Center(child: Text('No inquiry data available.'))
-                      : GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: isWideScreen ? 2 : 1,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: isWideScreen ? 2.3 : 1.7,
-                          ),
-                          itemCount: filteredData.length,
-                          itemBuilder: (context, index) {
-                            final row = filteredData[index];
-                            return InquirySummaryCard(
-                              token: widget.token,
-                              row: row,
-                              onStatusChanged: () => setState(() {}),
-                            );
-                          },
-                        ),
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : filteredData.isEmpty
+                          ? Center(
+                              child: Text(
+                                errorMessage.isNotEmpty
+                                    ? errorMessage
+                                    : 'No inquiry data available.',
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: _fetchInquiryData,
+                              child: GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: isWideScreen ? 2 : 1,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: isWideScreen ? 2.8 : 2,
+                                ),
+                                itemCount: filteredData.length,
+                                itemBuilder: (context, index) {
+                                  final row = filteredData[index];
+                                  return InquirySummaryCard(
+                                    token: widget.token,
+                                    row: row,
+                                    onStatusChanged: _onStatusChanged,
+                                    setLoading: _setLoading,
+                                  );
+                                },
+                              ),
+                            ),
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

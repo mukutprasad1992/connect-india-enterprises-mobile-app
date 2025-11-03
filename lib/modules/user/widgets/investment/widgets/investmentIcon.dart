@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'ViewInvestment.dart';
 import 'add_edit_pages/edit_investment_page.dart';
 import '/models/investmentModel.dart';
-import '/services/serviceType/investmentServices/deleteServiceTypeApi.dart';
+import '../../../../../services/user_module_service_Api/investmentServices/deleteServiceTypeApi.dart';
 
 class InvestmentActionButtons extends StatelessWidget {
   final Map<String, dynamic> investment;

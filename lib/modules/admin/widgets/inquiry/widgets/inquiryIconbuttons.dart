@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'inquery_details.dart';
 import '/models/inquiryModel.dart';
-import '/services/adminServiceApi/Inquiry/inqueryStatusApi.dart';
+import '/services/admin_module_service_Api/Inquiry/inqueryStatusApi.dart';
 
 class InquiryActionButtons extends StatelessWidget {
   final InquiryModel row;
   final VoidCallback onStatusChanged;
   final String token;
 
+  final Function(bool isLoading)? setLoading;
+
   const InquiryActionButtons({
     super.key,
+    this.setLoading,
     required this.row,
     required this.onStatusChanged,
     required this.token,
@@ -153,22 +156,27 @@ class InquiryActionButtons extends StatelessWidget {
 
   Future<void> _updateStatus(BuildContext context, String newStatus) async {
     try {
-      final response = await ServiceTypeApi.UpdateStatus(
+      setLoading?.call(true);
+
+      final response = await InquiryService.UpdateAllStatus(
         token: token,
         serviceId: row.serviceId ?? '',
         id: row.id.toString(),
         status: newStatus,
       );
+      await Future.delayed(const Duration(seconds: 2));
+      setLoading?.call(false);
 
       if (response['status'] == true) {
-        onStatusChanged(); // parent refreshes the list
+        onStatusChanged(); 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Inquiry updated to ${response['data']['status']} successfully!',
+              'Status updated to ${response['data']['status']} successfully ✅',
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
           ),
         );
       } else {
@@ -180,6 +188,8 @@ class InquiryActionButtons extends StatelessWidget {
         );
       }
     } catch (e) {
+      setLoading?.call(false);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),

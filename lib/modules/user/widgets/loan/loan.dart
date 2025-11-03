@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/loanSearchBar.dart';
 import 'widgets/loanSummaryCard.dart';
 import '/models/loanModel.dart';
-import '/services/serviceType/loanServices/getAllLoan.dart';
+import '../../../../services/user_module_service_Api/loanServices/getAllLoan.dart';
 import '/modules/user/widgets/loan/widgets/form_loan/loanType.dart';
 
 class LoanPage extends StatefulWidget {
@@ -48,12 +48,12 @@ class _LoanPageState extends State<LoanPage> {
         return;
       }
       const serviceId = "4";
-      final response = await GetAllLoan .getAllLoanByServiceId(
+      final response = await GetAllLoan.getAllLoanByServiceId(
         serviceId: serviceId,
         token: token,
       );
 
-      print("API response: $response");
+      //print("API response: $response");
 
       final data = response["data"];
       List<LoanModel> loadedData = [];
@@ -73,7 +73,7 @@ class _LoanPageState extends State<LoanPage> {
 
       await saveLoan();
     } catch (e) {
-      debugPrint("Loan API fetch failed: $e");
+      //debugPrint("Loan API fetch failed: $e");
       await _loadLoan();
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -205,37 +205,41 @@ class _LoanPageState extends State<LoanPage> {
                     Expanded(
                       child: isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : filteredData.isEmpty
-                              ? const Center(
-                                  child: Text('No Loan data available.'))
-                              : GridView.builder(
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: isWideScreen ? 2 : 1,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                    childAspectRatio: isWideScreen ? 2.8 : 2.1,
-                                  ),
-                                  itemCount: filteredData.length,
-                                  itemBuilder: (context, index) {
-                                    //print("Loan JSON: ${loan.toJson()}"); 
-                                    final loan = filteredData[index];
-                                    return LoanSummaryCard(
-                                      row: loan.toJson(),
-                                      index: index,
-                                      token: widget.token,
-                                      onUpdate: (updatedLoan) => _updateLoan(
-                                          index,
-                                          LoanModel.fromJson(updatedLoan)),
-                                      onDelete: () => _deleteLoan(index),
-                                    );
-                                  },
-                                ),
+                          : RefreshIndicator(
+                              onRefresh:_fetchLoanFromApi, // Swipe down to refresh
+                              child: filteredData.isEmpty
+                                  ? const Center(
+                                      child: Text('No Loan data available.'))
+                                  : GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: isWideScreen ? 2 : 1,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio:
+                                            isWideScreen ? 2.8 : 2.1,
+                                      ),
+                                      itemCount: filteredData.length,
+                                      itemBuilder: (context, index) {
+                                        final loan = filteredData[index];
+                                        return LoanSummaryCard(
+                                          row: loan.toJson(),
+                                          index: index,
+                                          token: widget.token,
+                                          onUpdate: (updatedLoan) =>
+                                              _updateLoan(
+                                            index,
+                                            LoanModel.fromJson(updatedLoan),
+                                          ),
+                                          onDelete: () => _deleteLoan(index),
+                                        );
+                                      },
+                                    ),
+                            ),
                     ),
                   ],
                 ),
               ),
-
               // Floating Add Button
               Positioned(
                 bottom: 20,
@@ -243,14 +247,23 @@ class _LoanPageState extends State<LoanPage> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      showLoanTypeDialog(
+                    onPressed: () async {
+                      await showLoanTypeDialog(
                         context: context,
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (loandata) {
-                          submitNewLoan(loandata);
+                        onSubmit: (loandata) async {
+                          // Show temporary loader
+                          setState(() => isLoading = true);
+
+                          try {
+                            submitNewLoan(loandata);
+                            await Future.delayed(const Duration(seconds: 1)); 
+                          } 
+                          finally {
+                            setState(() => isLoading = false);
+                          }
                         },
                       );
                     },

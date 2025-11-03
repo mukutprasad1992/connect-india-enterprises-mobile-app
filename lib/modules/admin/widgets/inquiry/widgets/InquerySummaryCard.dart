@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'inquiryIconbuttons.dart';
 import '/models/inquiryModel.dart';
 
@@ -7,27 +6,51 @@ class InquirySummaryCard extends StatelessWidget {
   final InquiryModel row;
   final VoidCallback onStatusChanged;
   final String token;
+  final Function(bool isLoading)? setLoading;
+
 
   const InquirySummaryCard({
     super.key,
+    required this.setLoading,
     required this.token,
     required this.row,
     required this.onStatusChanged,
   });
 
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase() ?? '') {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.redAccent;
-      case 'in progress':
+  /// Status icon mapping
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return Icons.hourglass_empty;
+      case "in progress":
+        return Icons.autorenew;
+      case "approved":
+        return Icons.check_circle;
+      case "rejected":
+        return Icons.cancel;
+      case "blocked":
+        return Icons.block;
+      case "active":
+        return Icons.check_circle_outline;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  /// Status color mapping
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return Colors.blue;
+      case "in progress":
         return Colors.orange;
-      case 'pending':
-        return const Color.fromARGB(255, 173, 156, 3);
-      case 'blocked':
+      case "approved":
+        return Colors.green;
+      case "rejected":
         return Colors.red;
-      case 'active':
+      case "blocked":
+        return Colors.redAccent;
+      case "active":
         return Colors.teal;
       default:
         return Colors.grey;
@@ -36,13 +59,14 @@ class InquirySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(row.status);
     final textTheme = Theme.of(context).textTheme;
+    final statusColor = _getStatusColor(row.status ?? '');
+    final statusIcon = _getStatusIcon(row.status ?? '');
 
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -57,7 +81,7 @@ class InquirySummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: ID and action buttons
+            /// Top Row: Inquiry ID + Action buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -67,70 +91,63 @@ class InquirySummaryCard extends StatelessWidget {
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Colors.indigo,
+                      fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
-                    softWrap: false,
                   ),
-                  
                 ),
                 InquiryActionButtons(
                   token: token,
                   row: row,
                   onStatusChanged: onStatusChanged,
+                  setLoading: setLoading, 
                 ),
               ],
             ),
-
-            const SizedBox(height: 10),
-
-            // Aadhaar Number
-            _buildLabelValueText(
-              context,
-              'Aadhaar Number',
-              row.aadharNumber ?? '',
-              Colors.teal,FontWeight.bold
-            ),
-
             const SizedBox(height: 6),
 
-            // PAN Number
-            _buildLabelValueText(
-              context,
-              'PAN Number',
-              row.panNumber ?? '',
-              Colors.blue,FontWeight.bold
-            ),
+            _buildLabelValueText("Aadhaar Number", row.aadharNumber ?? '', Colors.teal),
+            const SizedBox(height: 4),
+            _buildLabelValueText("PAN Number", row.panNumber ?? '', Colors.blue),
+            const SizedBox(height: 4),
+            _buildLabelValueText("Service Id", row.serviceId ?? '', Colors.blue),
             const SizedBox(height: 6),
 
-            _buildLabelValueText(
-              context,
-              'Service Id',
-              row.serviceId ?? '',
-              Colors.blue,FontWeight.bold
-            ),
-            const SizedBox(height: 6),
-
-            // Status
-            Text.rich(
-              TextSpan(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextSpan(
-                    text: 'Inquiry Status: ',
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextSpan(
-                    text: row.status ?? 'N/A',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
+                  Icon(statusIcon, size: 14, color: statusColor),
+                  const SizedBox(width: 6),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(
+                          text: "Status: ",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        TextSpan(
+                          text: row.status ?? 'N/A',
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.fade,
             ),
           ],
         ),
@@ -138,29 +155,29 @@ class InquirySummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildLabelValueText(
-    BuildContext context,
-    String label,
-    String value,
-    Color valueColor,
-    FontWeight Fontweigh,
-  ) {
-    final textTheme = Theme.of(context).textTheme;
-    return Text.rich(
-      TextSpan(
+  /// Label-value builder
+  Widget _buildLabelValueText(String label, String value, Color valueColor) {
+    return RichText(
+      text: TextSpan(
         children: [
           TextSpan(
-            text: '$label: ',
-            style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            text: "$label: ",
+            style: const TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
           ),
           TextSpan(
             text: value.isEmpty ? 'N/A' : value,
-            style: textTheme.bodyMedium?.copyWith(color: valueColor),
+            style: TextStyle(
+              color: valueColor,
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
-      maxLines: 2,
-      overflow: TextOverflow.fade,
     );
   }
 }

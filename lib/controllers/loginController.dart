@@ -46,13 +46,13 @@ class LoginController {
       if (response != null && response['status'] == true) {
         final data = response['data'];
         final prefs = await SharedPreferences.getInstance();
-
         // Save essential login data
 
         await prefs.setString('user_email', data['email']);
-        await prefs.setString(KEYTOKEN, data['accessToken']);
-        await prefs.setBool(KEYLOGIN, true);
-        await prefs.setInt(KEYROLEID, data['roleId']);
+        await prefs.setString('KEYTOKEN', data['accessToken']);
+        await prefs.setBool('KEYLOGIN', true);
+        await prefs.setInt('KEYROLEID', data['roleId']);
+        await prefs.setInt('KEYLOGINID', data['id']);
 
         // Optional: store extra profile info if needed
         // await prefs.setString('firstName', data['firstName']);

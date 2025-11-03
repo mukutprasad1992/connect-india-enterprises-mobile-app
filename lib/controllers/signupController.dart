@@ -92,10 +92,10 @@ class SignupController {
           final data = loginResponse['data'];
           final prefs = await SharedPreferences.getInstance();
 
-          await prefs.setBool(KEYLOGIN, true);
+          await prefs.setBool('KEYLOGIN', true);
           await prefs.setString('user_email', data['email']);
-          await prefs.setString(KEYTOKEN, data['accessToken']);
-          await prefs.setInt(KEYROLEID, data['roleId']);
+          await prefs.setString('KEYTOKEN', data['accessToken']);
+          await prefs.setInt('KEYROLEID', data['roleId']);
 
           // 3️⃣ Redirect based on role
           AuthController.checkLoginStatus(context);

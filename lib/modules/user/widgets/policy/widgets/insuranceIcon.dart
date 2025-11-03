@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'ViewInsurance.dart';
 import '/models/insuranceModel.dart';
 import 'add_edit_pages/edit_insurance_page.dart';
-import '/services/serviceType/insuranceServices/deleteInsurance.dart';
+import '../../../../../services/user_module_service_Api/insuranceServices/deleteInsurance.dart';
 
 // isko updates karna hai isme abhi investment ki delete api call hai
 

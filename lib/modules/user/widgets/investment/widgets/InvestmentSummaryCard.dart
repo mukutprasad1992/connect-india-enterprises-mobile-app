@@ -176,7 +176,7 @@ class InvestmentSummaryCard extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w500,
-                    fontSize: 12, // reduced size
+                    fontSize: 12, 
                   ),
                 ),
                 TextSpan(
@@ -184,7 +184,7 @@ class InvestmentSummaryCard extends StatelessWidget {
                   style: TextStyle(
                     color: valueColor, 
                     fontWeight: FontWeight.w600,
-                    fontSize: 12, // reduced size
+                    fontSize: 12,
                   ),
                 ),
               ],

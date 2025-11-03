@@ -4,41 +4,35 @@ import 'app_fonts.dart';
 
 class AppTextStyles {
   static const TextStyle heading = TextStyle(
-    fontSize: 24,
-    fontWeight: AppFontWeights.semiBold,
-    fontFamily: AppFonts.primaryFont,
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
     color: AppColors.textDark,
   );
 
   static const TextStyle subHeading = TextStyle(
     fontSize: 14,
     color: AppColors.textLight,
-    fontFamily: AppFonts.primaryFont,
   );
 
   static const TextStyle label = TextStyle(
     fontSize: 12,
-    fontWeight: AppFontWeights.semiBold,
+    fontWeight: FontWeight.w600,
     color: AppColors.primary,
-    fontFamily: AppFonts.primaryFont,
   );
 
   static const TextStyle button = TextStyle(
     fontSize: 14,
-    fontWeight: AppFontWeights.semiBold,
-    color: AppColors.wbackground,
-    fontFamily: AppFonts.primaryFont,
+    fontWeight: FontWeight.w600,
+    //color: AppColors.white,
   );
 
   static const TextStyle hint = TextStyle(
     fontSize: 13,
-    fontWeight: AppFontWeights.semiBold,
-    fontFamily: AppFonts.primaryFont,
+    color: AppColors.textLight,
   );
 
   static const TextStyle error = TextStyle(
+    fontSize: 13,
     color: AppColors.accent,
-    fontSize: 14,
-    fontFamily: AppFonts.primaryFont,
   );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/bottomNavbarAdmin/bottomNav.dart';
-import '../../Main_dashboard.dart';
+import '/Main_dashboard.dart';
 import '/modules/admin/widgets/customer/customer.dart';
 import '/modules/admin/widgets/vendor/vendor.dart';
 import '/modules/admin/widgets/voucher/voucher.dart';
@@ -20,6 +20,7 @@ import 'package:badges/badges.dart' as badges;
 import '/services/notificationServices/notificationApi.dart';
 
 class AdminDashboardPage extends StatefulWidget {
+  
   const AdminDashboardPage({super.key});
 
   @override
@@ -30,6 +31,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
+  
 
   String? userToken;
   bool loadingToken = true;
@@ -63,7 +65,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       _pages.addAll([
         Dashboard(),
         VendorTablePage(token: token ?? ''),
-        CustomerTablePage(),
+        CustomerTablePage(token: token ?? ''),
         InqueryTablePage(token: token ?? ''),
         VoucherTablePage(),
       ]);

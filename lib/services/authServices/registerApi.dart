@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import '/consts/appConstants.dart';
 class RegisterApi {
-  static const String baseUrl = "http://192.168.29.161:4000/user/register";
+  //static const String baseUrl = "http://192.168.29.161:4000";
 
   static Future<Map<String, dynamic>> registerUser({
     required String email,
@@ -15,9 +15,8 @@ class RegisterApi {
     String? address,
     required String status,
   }) async {
-    final url = Uri.parse(baseUrl);
+    final url = Uri.parse('$baseUrl/user/register');
 
-    // ✅ Build map safely — ensure no null keys or invalid types
     final Map<String, dynamic> bodyData = {
       "email": email,
       "mobileNo": mobileNo,
@@ -44,7 +43,7 @@ class RegisterApi {
         body: jsonEncode(bodyData),
       );
 
-      print("📥 Response (${response.statusCode}): ${response.body}");
+      //print("📥 Response (${response.statusCode}): ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);

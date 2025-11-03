@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/consts/appColors.dart';
 import '/services/cityApi/CityApi.dart';
-import '/services/serviceType/investmentServices/createServiceType.dart';
-import '/services/serviceType/investmentServices/updateServiceType.dart'
+import '../../../../../../services/user_module_service_Api/investmentServices/createServiceType.dart';
+import '../../../../../../services/user_module_service_Api/investmentServices/updateServiceType.dart'
     as updateApi;
 import '/models/investmentModel.dart';
 import '/models/citymodel.dart';
@@ -34,6 +34,7 @@ class StepperFormPage extends StatefulWidget {
 class _StepperFormPageState extends State<StepperFormPage> {
   bool isDeclared = false;
   int get lastStep => 5;
+  Set<int> completedSteps = {};
   int get firstStep => widget.mode == "edit" ? 1 : 0;
 
   String? selectedRelation, occupation, investmentType, selectIDType;
@@ -184,36 +185,39 @@ class _StepperFormPageState extends State<StepperFormPage> {
     bankProofFile = inv.bankProofFileKey;
     salarySlipFile = inv.salarySlipsFileKey;
     itrFile = inv.itrDocumentsFileKey;
-    // Investment Type
     investmentType = inv.investmentType;
 
-    //Step Detection ===== it means we check data fill in which section if data not fill open that section in edit mode
-
-    if (_aadharController.text.isEmpty || _panController.text.isEmpty) {
-      _currentStep = 1;
-    } else if (_emailController.text.isEmpty ||
-        _mobileController.text.isEmpty ||
-        _selectedCity == null ||
-        occupation == null ||
-        _incomeController.text.isEmpty) {
-      _currentStep = 2;
-    } else if (_nomineeIdController.text.isEmpty ||
-        _nomineeMobileController.text.isEmpty ||
-        (selectedRelation == null || selectedRelation!.isEmpty)) {
-      _currentStep = 3;
-    } else if ((aadharFile == null || aadharFile!.isEmpty) ||
-        (panFile == null || panFile!.isEmpty) ||
-        (bankProofFile == null || bankProofFile!.isEmpty) ||
-        (occupation == "JOB" &&
-            (salarySlipFile == null || salarySlipFile!.isEmpty)) ||
-        (occupation == "BUSINESS" && (itrFile == null || itrFile!.isEmpty))) {
-      _currentStep = 4;
-    } else {
-      _currentStep = 5;
+    void detectStep() {
+      if (_aadharController.text.isEmpty || _panController.text.isEmpty) {
+        _currentStep = 1;
+      } else if (_emailController.text.isEmpty ||
+          _mobileController.text.isEmpty ||
+          _selectedCity == null ||
+          occupation == null ||
+          _incomeController.text.isEmpty) {
+        _currentStep = 2;
+        completedSteps.add(1);
+      } else if (_nomineeIdController.text.isEmpty ||
+          _nomineeMobileController.text.isEmpty ||
+          (selectedRelation == null || selectedRelation!.isEmpty)) {
+        _currentStep = 3;
+        completedSteps.addAll({1, 2});
+      } else if ((aadharFile == null || aadharFile!.isEmpty) ||
+          (panFile == null || panFile!.isEmpty) ||
+          (bankProofFile == null || bankProofFile!.isEmpty) ||
+          (occupation == "JOB" &&
+              (salarySlipFile == null || salarySlipFile!.isEmpty)) ||
+          (occupation == "BUSINESS" && (itrFile == null || itrFile!.isEmpty))) {
+        _currentStep = 4;
+        completedSteps.addAll({1, 2, 3});
+      } else {
+        _currentStep = 5;
+        completedSteps.addAll({1, 2, 3, 4});
+      }
+      _viewStep = _currentStep;
     }
-    //debugPrint("Aadhar from API 📤: ${inv.aadharCardFileKey}");
 
-    _viewStep = _currentStep;
+    detectStep();
   }
 
   // Show error message
@@ -225,7 +229,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
 
   // Back button in stepper
   void _onStepCancel() {
-    if (_currentStep > 1) {
+    if (_currentStep > firstStep) {
       setState(() {
         _currentStep--;
         _viewStep = _currentStep;
@@ -322,6 +326,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         if (res['status'] == true) {
           String message = "";
           switch (section) {
+            
             case "personalDetails":
               message = "Personal Details saved successfully!";
               break;
@@ -387,6 +392,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           );
 
           if (res['status'] == true) {
+            completedSteps.add(_currentStep);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(widget.mode == "add"
@@ -410,6 +416,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         case 1:
           if (_basicFormKey.currentState!.validate()) {
             DBId = await saveSection(section: "basicDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -421,6 +428,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
               return;
             }
             DBId = await saveSection(section: "personalDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -432,6 +440,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
               return;
             }
             DBId = await saveSection(section: "nomineeDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -452,6 +461,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
             return;
           }
           DBId = await saveSection(section: "documents");
+          completedSteps.add(_currentStep);
           break;
       }
       // ===== Move to next step only after API success =====
@@ -502,7 +512,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (_currentStep > 1 && _currentStep < lastStep)
+                        if (_currentStep > 1 && _currentStep <= lastStep)
                           ElevatedButton(
                             onPressed: _onStepCancel,
                             style: ElevatedButton.styleFrom(
@@ -587,57 +597,66 @@ class _StepperFormPageState extends State<StepperFormPage> {
 
   Widget _buildHorizontalStepperAligned() {
     const stepCount = 5;
-    final iconRadius = 16.0;
-    final titleHeight = 20.0;
+    final iconRadius = 12.0;
+    final titleHeight = 16.0;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final totalLineWidth = screenWidth - 4 * iconRadius;
+
+    // ✅ Progress width based on completed steps
+    final progressWidth = completedSteps.isEmpty
+        ? 0.0
+        : (completedSteps.length - 1) /
+            (stepCount - 1) *
+            (totalLineWidth - 2 * iconRadius);
 
     return SizedBox(
-      height: 100,
+      height: 80,
       child: Stack(
         children: [
-          // Base line
+          // Base line (gray)
           Positioned(
             top: iconRadius,
-            left: iconRadius,
-            right: iconRadius,
+            left: 2 * iconRadius,
+            width: totalLineWidth - 2 * iconRadius,
             child: Container(
-              height: 3,
+              height: 2,
               color: Colors.grey[300],
             ),
           ),
-          // Progress line
+
+          // ✅ Green progress line
           Positioned(
             top: iconRadius,
-            left: iconRadius,
-            width: (_currentStep - 1) /
-                (stepCount - 1) *
-                (MediaQuery.of(context).size.width - 2 * iconRadius),
+            left: 2 * iconRadius,
+            width: progressWidth,
             child: Container(
-              height: 3,
+              height: 2,
               color: Colors.green,
             ),
           ),
-          // Step icons + titles
+
+          // ✅ Step icons + titles
           Row(
             children: List.generate(stepCount, (i) {
               int index = i + 1;
 
-              // 👉 Clickable Logic
-              bool isClickable;
-              if (widget.mode == "add") {
-                // Add mode → sequential only
-                isClickable = index <= _currentStep;
-              } else {
-                // Edit mode → based on filled/unfilled detection
-                if (index <= _currentStep) {
-                  isClickable = true; // filled ya current tak ke steps
-                } else {
-                  isClickable = false; // future steps locked
-                }
-              }
-
+              // ✅ New core logic (same visuals)
+              bool isCompleted = completedSteps.contains(index);
               bool isActive = _viewStep == index;
-              bool isCompleted = _currentStep > index;
-              bool isNextIncomplete = index == _currentStep;
+
+              // find first incomplete step
+              int firstIncomplete = completedSteps.isEmpty
+                  ? 1
+                  : (completedSteps.length < stepCount
+                      ? completedSteps.length + 1
+                      : stepCount);
+
+              // ✅ allow click till one step ahead of completed
+              bool isClickable = index <= firstIncomplete;
+
+              // highlight first incomplete step with blue
+              bool isNextIncomplete = index == firstIncomplete && !isCompleted;
 
               return Expanded(
                 child: InkWell(
@@ -646,35 +665,45 @@ class _StepperFormPageState extends State<StepperFormPage> {
                       ? Colors.blue.withOpacity(0.2)
                       : Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: isClickable
-                      ? () {
-                          setState(() => _viewStep = index);
-                        }
-                      : () {
-                          _showError("Please complete previous steps first");
-                        },
+                  onTap: () {
+                    if (isClickable) {
+                      setState(() {
+                        _viewStep = index;
+                        _currentStep = index;
+                      });
+                    } else {
+                      _showError("Please complete previous steps first");
+                    }
+                  },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Circle Icon
+                      // ✅ Step Circle
                       CircleAvatar(
                         radius: iconRadius,
                         backgroundColor: isCompleted
                             ? Colors.green
-                            : (isActive ? Colors.orange : Colors.grey[300]),
+                            : (isActive
+                                ? Colors.orange
+                                : (isNextIncomplete
+                                    ? Colors.blue
+                                    : Colors.grey[300])),
                         child: (isCompleted && !isActive)
                             ? const Icon(Icons.check,
-                                color: Colors.white, size: 16)
+                                color: Colors.white, size: 12)
                             : Icon(
                                 _getStepIcon(index),
-                                size: 12,
+                                size: 10,
                                 color: isCompleted
                                     ? Colors.white
-                                    : (isActive ? Colors.white : Colors.grey),
+                                    : (isActive || isNextIncomplete
+                                        ? Colors.white
+                                        : Colors.grey),
                               ),
                       ),
-                      const SizedBox(height: 6),
-                      // Title
+                      const SizedBox(height: 4),
+
+                      // ✅ Step Title
                       SizedBox(
                         height: titleHeight,
                         child: Center(
@@ -682,16 +711,16 @@ class _StepperFormPageState extends State<StepperFormPage> {
                             getStepTitle(index),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: isActive
-                                  ? FontWeight.bold
+                                  ? FontWeight.w600
                                   : FontWeight.normal,
                               color: isActive
                                   ? Colors.orange
                                   : (isCompleted
                                       ? Colors.green
                                       : (isNextIncomplete
-                                          ? Colors.orange
+                                          ? Colors.blue
                                           : Colors.black87)),
                             ),
                           ),
@@ -728,11 +757,11 @@ class _StepperFormPageState extends State<StepperFormPage> {
   String getStepTitle(int index) {
     switch (index) {
       case 1:
-        return "Basic Details";
+        return "Basic";
       case 2:
-        return "Personal Details";
+        return "Personal";
       case 3:
-        return "Nominee Details";
+        return "Nominee";
       case 4:
         return "Document";
       case 5:

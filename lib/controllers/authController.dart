@@ -7,7 +7,6 @@ import '/modules/vendor/vendor_dashboard.dart';
 import '/modules/user/user_dashboard.dart';
 import '/views/login/login_page.dart';
 
-import '/consts/appConstants.dart';
 
 class AuthController {
 
@@ -18,9 +17,9 @@ class AuthController {
 
     // Saved values
 
-    final isLoggedIn = prefs.getBool(KEYLOGIN) ?? false;
-    final token = prefs.getString(KEYTOKEN);
-    final roleId = prefs.getInt(KEYROLEID) ?? 0;
+    final isLoggedIn = prefs.getBool('KEYLOGIN') ?? false;
+    final token = prefs.getString('KEYTOKEN');
+    final roleId = prefs.getInt('KEYROLEID') ?? 0;
 
     
     final hasNoToken = token == null || token.isEmpty;

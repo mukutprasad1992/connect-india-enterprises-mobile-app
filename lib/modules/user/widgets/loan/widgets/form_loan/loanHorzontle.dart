@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/consts/appColors.dart';
-import '/services/serviceType/loanServices/createLoan.dart';
-import '/services/serviceType/loanServices/updateLoan.dart' as updateApi;
+import '../../../../../../services/user_module_service_Api/loanServices/createLoan.dart';
+import '../../../../../../services/user_module_service_Api/loanServices/updateLoan.dart' as updateApi;
 import '/models/loanModel.dart';
 // Sections
 import 'personalDetails.dart';
@@ -32,6 +32,7 @@ class StepperFormPage extends StatefulWidget {
 class _StepperFormPageState extends State<StepperFormPage> {
   bool isDeclared = false;
   int get lastStep => 6;
+  Set<int> completedSteps = {};
   int get firstStep => widget.mode == "edit" ? 1 : 0;
   String? DBId;
   String? aadharFile,
@@ -117,31 +118,25 @@ class _StepperFormPageState extends State<StepperFormPage> {
   @override
   void initState() {
     super.initState();
-    _loadLoanData();
+    if (widget.mode == "edit" && widget.loan != null) {
+      loadLoanData();
+    }
   }
 
-  /// Prefill + Auto Step Detection
+  // Prefill + Auto Step Detection
 
-  void _loadLoanData() {
-    if (widget.mode != "edit" || widget.loan == null) {
-      _currentStep = 1;
-      _viewStep = 1;
-      return;
-    }
-
+  void loadLoanData() {
     final inv = widget.loan!;
     DBId = inv.id;
 
-    // Personal Details
-
+    // Personal
     _aadharController.text = inv.aadharNumber ?? '';
     _panController.text = inv.panNumber ?? '';
     _motherNameController.text = inv.motherName ?? '';
     _maritalStatusController.text = inv.maritalStatus ?? '';
     _currentAddressController.text = inv.currentAddress ?? '';
 
-    // Contact Details
-
+    // Contact
     yearsOfCityController.text = inv.yearsOfCity?.toString() ?? '';
     landmarkController.text = inv.landmark ?? '';
     alternateNoController.text = inv.alternateNo ?? '';
@@ -151,8 +146,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           : inv.alternateNo!;
     }
 
-    // employment Details
-
+    // Employment
     designationController.text = inv.designation ?? '';
     companyExpController.text = inv.companyExp?.toString() ?? '';
     totalWorkExpController.text = inv.totalWorkExp?.toString() ?? '';
@@ -164,18 +158,15 @@ class _StepperFormPageState extends State<StepperFormPage> {
           : inv.officeMobile!;
     }
 
-    // reference Details
-
+    // Reference
     ref1NameController.text = inv.ref1Name ?? '';
     ref1AddressController.text = inv.ref1Address ?? '';
     ref1MobileController.text = inv.ref1Mobile ?? '';
-
     ref2NameController.text = inv.ref2Name ?? '';
     ref2AddressController.text = inv.ref2Address ?? '';
     ref2MobileController.text = inv.ref2Mobile ?? '';
 
-    // documents
-
+    // Documents
     aadharFile = inv.aadharCardFileKey;
     panFile = inv.panCardFileKey;
     bankProofFile = inv.bankStatementFileKey;
@@ -183,46 +174,52 @@ class _StepperFormPageState extends State<StepperFormPage> {
     photoFile = inv.photoFileKey;
     loanType = inv.loanType;
 
-    //Step Detection ===== it means we check data fill in which section if data not fill open that section in edit mode
-
-    if (_aadharController.text.isEmpty ||
-        _panController.text.isEmpty ||
-        _motherNameController.text.isEmpty ||
-        _maritalStatusController.text.isEmpty ||
-        _currentAddressController.text.isEmpty) {
-      _currentStep = 1;
-    } else if (yearsOfCityController.text.isEmpty ||
-        landmarkController.text.isEmpty ||
-        alternateNoController.text.isEmpty) {
-      _currentStep = 2;
-    } else if (designationController.text.isEmpty ||
-        companyExpController.text.isEmpty ||
-        totalWorkExpController.text.isEmpty ||
-        officeAddressController.text.isEmpty ||
-        officeMobileController.text.isEmpty) {
-      _currentStep = 3;
-    } else if (ref1NameController.text.isEmpty ||
-        ref1AddressController.text.isEmpty ||
-        ref1MobileController.text.isEmpty ||
-        ref2NameController.text.isEmpty ||
-        ref2AddressController.text.isEmpty ||
-        ref2MobileController.text.isEmpty) {
-      _currentStep = 4;
-    } else if ((aadharFile == null || aadharFile!.isEmpty) ||
-        (panFile == null || panFile!.isEmpty) ||
-        (bankProofFile == null || bankProofFile!.isEmpty) ||
-        (salarySlipFile == null || salarySlipFile!.isEmpty) ||
-        (photoFile == null || photoFile!.isEmpty)) {
-      _currentStep = 5;
-    } else {
-      _currentStep = 6;
+    // Step detection
+    void detectStep() {
+      if (_aadharController.text.isEmpty ||
+          _panController.text.isEmpty ||
+          _motherNameController.text.isEmpty ||
+          _maritalStatusController.text.isEmpty ||
+          _currentAddressController.text.isEmpty) {
+        _currentStep = 1;
+        //completedSteps.add(1);
+      } else if (yearsOfCityController.text.isEmpty ||
+          landmarkController.text.isEmpty ||
+          alternateNoController.text.isEmpty) {
+        _currentStep = 2;
+        completedSteps.add(1);
+      } else if (designationController.text.isEmpty ||
+          companyExpController.text.isEmpty ||
+          totalWorkExpController.text.isEmpty ||
+          officeAddressController.text.isEmpty ||
+          officeMobileController.text.isEmpty) {
+        _currentStep = 3;
+        completedSteps.addAll({1, 2});
+      } else if (ref1NameController.text.isEmpty ||
+          ref1AddressController.text.isEmpty ||
+          ref1MobileController.text.isEmpty ||
+          ref2NameController.text.isEmpty ||
+          ref2AddressController.text.isEmpty ||
+          ref2MobileController.text.isEmpty) {
+        _currentStep = 4;
+        completedSteps.addAll({1, 2, 3});
+      } else if ((aadharFile == null || aadharFile!.isEmpty) ||
+          (panFile == null || panFile!.isEmpty) ||
+          (bankProofFile == null || bankProofFile!.isEmpty) ||
+          (salarySlipFile == null || salarySlipFile!.isEmpty) ||
+          (photoFile == null || photoFile!.isEmpty)) {
+        _currentStep = 5;
+        completedSteps.addAll({1, 2, 3, 4});
+      } else {
+        _currentStep = 6;
+        completedSteps.addAll({1, 2, 3, 4, 5});
+      }
+      _viewStep = _currentStep;
     }
-    //debugPrint("Aadhar from API 📤: ${inv._loadLoanData}");
 
-    _viewStep = _currentStep;
+    detectStep();
   }
 
-  // Show error message
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg), backgroundColor: Colors.orange[600]),
@@ -231,7 +228,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
 
   // Back button in stepper
   void _onStepCancel() {
-    if (_currentStep > 1) {
+    if (_currentStep > firstStep) {
       setState(() {
         _currentStep--;
         _viewStep = _currentStep;
@@ -261,8 +258,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         );
 
         if (res['status'] == true) {
-          DBId =
-              res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
+          DBId = res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -272,10 +268,10 @@ class _StepperFormPageState extends State<StepperFormPage> {
               ),
             );
           }
-          debugPrint("✅ Created Loan DBId = $DBId");
+          //debugPrint("✅ Created Loan DBId = $DBId");
         } else {
           _showError(res['message'] ?? "Create API failed");
-          debugPrint("🚨 CreateLoan failed: $res");
+          //debugPrint("🚨 CreateLoan failed: $res");
           return null;
         }
         return DBId;
@@ -352,7 +348,12 @@ class _StepperFormPageState extends State<StepperFormPage> {
         if (res['status'] == true) {
           String message = "";
           switch (section) {
+            case "personalDetails":
+              message = "Personal Details updated successfully!";
+              break;
             case "contactDetails":
+            //  if (widget.mode == "edit")
+            //       ? message = "Contact Details update successfully!";
               message = "Contact Details saved successfully!";
               break;
             case "employmentDetails":
@@ -422,6 +423,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           );
 
           if (res['status'] == true) {
+            completedSteps.add(_currentStep);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(widget.mode == "add"
@@ -445,6 +447,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         case 1:
           if (_personalFormKey.currentState!.validate()) {
             DBId = await saveSection(section: "personalDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -452,6 +455,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         case 2:
           if (_contactFormKey.currentState!.validate()) {
             DBId = await saveSection(section: "contactDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -459,12 +463,14 @@ class _StepperFormPageState extends State<StepperFormPage> {
         case 3:
           if (_employmentFormKey.currentState!.validate()) {
             DBId = await saveSection(section: "employmentDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
         case 4:
           if (_referenceFormKey.currentState!.validate()) {
             DBId = await saveSection(section: "referenceDetails");
+            completedSteps.add(_currentStep);
           } else
             return;
           break;
@@ -480,6 +486,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           }
 
           DBId = await saveSection(section: "documents");
+          completedSteps.add(_currentStep);
           break;
       }
       // ===== Move to next step only after API success =====
@@ -529,7 +536,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (_currentStep > 1 && _currentStep < lastStep)
+                        if (_currentStep > 1 && _currentStep <= lastStep)
                           ElevatedButton(
                             onPressed: _onStepCancel,
                             style: ElevatedButton.styleFrom(
@@ -565,17 +572,15 @@ class _StepperFormPageState extends State<StepperFormPage> {
                                   ),
                                 )
                               : Text(
-                                  _currentStep < lastStep
-                                      ? "Next"
-                                      : (widget.mode == "add"
+                                  _currentStep == lastStep
+                                      ? (widget.mode == "add"
                                           ? "Submit"
-                                          : "Update"),
+                                          : "Update")
+                                      : "Next",
                                 ),
                         ),
                       ],
                     ),
-
-                    // 👇 Add this below the Row (outside it)
                     if (isLoading)
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
@@ -614,52 +619,66 @@ class _StepperFormPageState extends State<StepperFormPage> {
 
   Widget _buildHorizontalStepperAligned() {
     const stepCount = 6;
-    final iconRadius = 16.0;
-    final titleHeight = 20.0;
+    final iconRadius = 12.0;
+    final titleHeight = 16.0;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final totalLineWidth = screenWidth - 4 * iconRadius;
+
+    // ✅ Progress width based on completed steps
+    final progressWidth = completedSteps.isEmpty
+        ? 0.0
+        : (completedSteps.length - 1) /
+            (stepCount - 1) *
+            (totalLineWidth - 2 * iconRadius);
 
     return SizedBox(
-      height: 100,
+      height: 80,
       child: Stack(
         children: [
-          // Base line
+          // Base line (gray)
           Positioned(
             top: iconRadius,
-            left: iconRadius,
-            right: iconRadius,
+            left: 2 * iconRadius,
+            width: totalLineWidth - 2 * iconRadius,
             child: Container(
-              height: 3,
+              height: 2,
               color: Colors.grey[300],
             ),
           ),
-          // Progress line
+
+          // ✅ Green progress line
           Positioned(
             top: iconRadius,
-            left: iconRadius,
-            width: (_currentStep - 1) /
-                (stepCount - 1) *
-                (MediaQuery.of(context).size.width - 2 * iconRadius),
+            left: 2 * iconRadius,
+            width: progressWidth,
             child: Container(
-              height: 3,
+              height: 2,
               color: Colors.green,
             ),
           ),
-          // Step icons + titles
+
+          // ✅ Step icons + titles
           Row(
             children: List.generate(stepCount, (i) {
               int index = i + 1;
-              bool isClickable;
-              if (widget.mode == "add") {
-                isClickable = index <= _currentStep;
-              } else {
-                if (index <= _currentStep) {
-                  isClickable = true;
-                } else {
-                  isClickable = false;
-                }
-              }
+
+              // ✅ New core logic (same visuals)
+              bool isCompleted = completedSteps.contains(index);
               bool isActive = _viewStep == index;
-              bool isCompleted = _currentStep > index;
-              bool isNextIncomplete = index == _currentStep;
+
+              // find first incomplete step
+              int firstIncomplete = completedSteps.isEmpty
+                  ? 1
+                  : (completedSteps.length < stepCount
+                      ? completedSteps.length + 1
+                      : stepCount);
+
+              // ✅ allow click till one step ahead of completed
+              bool isClickable = index <= firstIncomplete;
+
+              // highlight first incomplete step with blue
+              bool isNextIncomplete = index == firstIncomplete && !isCompleted;
 
               return Expanded(
                 child: InkWell(
@@ -668,33 +687,45 @@ class _StepperFormPageState extends State<StepperFormPage> {
                       ? Colors.blue.withOpacity(0.2)
                       : Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: isClickable
-                      ? () {
-                          setState(() => _viewStep = index);
-                        }
-                      : () {
-                          _showError("Please complete previous steps first");
-                        },
+                  onTap: () {
+                    if (isClickable) {
+                      setState(() {
+                        _viewStep = index;
+                        _currentStep = index;
+                      });
+                    } else {
+                      _showError("Please complete previous steps first");
+                    }
+                  },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // ✅ Step Circle
                       CircleAvatar(
                         radius: iconRadius,
                         backgroundColor: isCompleted
                             ? Colors.green
-                            : (isActive ? Colors.orange : Colors.grey[300]),
+                            : (isActive
+                                ? Colors.orange
+                                : (isNextIncomplete
+                                    ? Colors.blue
+                                    : Colors.grey[300])),
                         child: (isCompleted && !isActive)
                             ? const Icon(Icons.check,
-                                color: Colors.white, size: 16)
+                                color: Colors.white, size: 12)
                             : Icon(
                                 _getStepIcon(index),
-                                size: 12,
+                                size: 10,
                                 color: isCompleted
                                     ? Colors.white
-                                    : (isActive ? Colors.white : Colors.grey),
+                                    : (isActive || isNextIncomplete
+                                        ? Colors.white
+                                        : Colors.grey),
                               ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
+
+                      // ✅ Step Title
                       SizedBox(
                         height: titleHeight,
                         child: Center(
@@ -702,16 +733,16 @@ class _StepperFormPageState extends State<StepperFormPage> {
                             getStepTitle(index),
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: isActive
-                                  ? FontWeight.bold
+                                  ? FontWeight.w600
                                   : FontWeight.normal,
                               color: isActive
                                   ? Colors.orange
                                   : (isCompleted
                                       ? Colors.green
                                       : (isNextIncomplete
-                                          ? Colors.orange
+                                          ? Colors.blue
                                           : Colors.black87)),
                             ),
                           ),

@@ -135,7 +135,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             icon: const Icon(Icons.check_circle_outline, color: Colors.white),
             label: const Text('Update', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.SubmitButtom,
+              backgroundColor: AppColors.background,
             ),
           ),
         ),
@@ -153,7 +153,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       appBar: AppBar(
         title: const Text('Change Password',
             style: TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.background,
+        backgroundColor:Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),
