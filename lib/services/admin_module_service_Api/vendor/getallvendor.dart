@@ -4,17 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '/models/Vendor_model.dart';
 import '/consts/appConstants.dart';
 
-class VendorApi {
-  //static const String baseUrl = "http://192.168.29.161:4000";
+class GetAllVendorApi {
 
-  static Future<List<Vendor>> fetchVendorsData() async {
+  static Future<String?> getKeyToken() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('KEYTOKEN');
+    return prefs.getString("KEYTOKEN");
+  }
 
-    if (token == null) {
-      throw Exception("No token found. Please login again.");
-    }
-
+  static Future<List<VendorModel>> getAllvendor() async {
+    final token = await getKeyToken();
     final response = await http.get(
       Uri.parse('$baseUrl/user/getAllVendor'),
       headers: {
@@ -26,7 +24,7 @@ class VendorApi {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final List vendors = data['data'];
-      return vendors.map((json) => Vendor.fromJson(json)).toList();
+      return vendors.map((json) => VendorModel.fromJson(json)).toList();
     } else {
       throw Exception("Failed to load vendors: ${response.body}");
     }

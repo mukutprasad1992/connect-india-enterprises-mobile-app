@@ -171,8 +171,6 @@ class _DocumentSectionState extends State<DocumentSection> {
         salarySlipsFileKey: salarySlipFile,
       );
 
-      //print("UpdateServiceType Response (documents): $res");
-
       if (res['status'] == true) {
         final data = res['data'];
         final dbId = data?['_id']?.toString() ?? data?['id']?.toString();

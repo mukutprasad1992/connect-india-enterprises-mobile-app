@@ -35,7 +35,6 @@ class GetAllVoucher {
         final vouchers = result.map((e) => VoucherModel.fromJson(e)).toList();
 
         // 🧩 Optional debug log
-        print("<-- Vouchers Fetched --> ${vouchers.length}");
 
         return vouchers;
       } else {
@@ -45,7 +44,6 @@ class GetAllVoucher {
         );
       }
     } catch (e) {
-      print(" Error in GetAllVoucher: $e");
       throw Exception("Error fetching vouchers: $e");
     }
   }

@@ -84,8 +84,6 @@ class _PolicyPageState extends State<PolicyPage> {
         token: token,
       );
 
-      //print("API response: $response");
-
       final data = response["data"];
       List<InsuranceModel> loadedData = [];
 
@@ -105,7 +103,6 @@ class _PolicyPageState extends State<PolicyPage> {
 
       await saveInsurance();
     } catch (e) {
-      //debugPrint(" API fetch failed: $e");
       await _loadInsurance();
     } finally {
       if (mounted) setState(() => isLoading = false);

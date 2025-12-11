@@ -108,8 +108,6 @@ class _PersonalDetailsSectionState extends State<PersonalDetailsSection> {
             : null,
       );
 
-      //print("📥 API Response: $res");
-
       if (res['status'] == true) {
         final dbId =
             res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();

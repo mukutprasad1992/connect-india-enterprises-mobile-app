@@ -38,17 +38,24 @@ class CustomerSummaryCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               // Name + Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.black,
+                    backgroundImage: AssetImage('assets/images/profileimg.jpg'),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       row.name?.isNotEmpty == true ? row.name! : 'No Name',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

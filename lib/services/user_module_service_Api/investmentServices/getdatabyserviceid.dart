@@ -18,7 +18,7 @@ class ServiceTypeApi {
         },
         
       );
-      //print("🔹 Raw API Response: ${response.body}");
+      //print("<----response.body----->${response.body}");
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);

@@ -1,53 +1,9 @@
-// import 'package:html/parser.dart' as html_parser;
-
-// class AppNotification {
-//   final String id;
-//   final String message;
-//   int isRead;
-//   final DateTime createdAt;
-//   final String email;
-
-//   AppNotification({
-//     required this.id,
-//     required this.message,
-//     required this.isRead,
-//     required this.createdAt,
-//     required this.email,
-//   });
-
-//   factory AppNotification.fromJson(Map<String, dynamic> json) {
-//     return AppNotification(
-//       id: json['_id'].toString(),
-//       message: json['message'] ?? '',
-//       isRead: int.parse(json['isRead'].toString()),
-//       createdAt: DateTime.parse(json['createdAt']),
-//       email: json['email'] ?? '',
-//     );
-//   }
-
-//   /// Extract <h3> content for title
-//   String extractH3() {
-//     final document = html_parser.parse(message);
-//     final h3 = document.getElementsByTagName('h3');
-//     if (h3.isNotEmpty) {
-//       return h3.first.text.trim();
-//     }
-//     return 'Notification';
-//   }
-
-//   /// Convert HTML to plain text
-//   String toPlainText() {
-//     final document = html_parser.parse(message);
-//     return document.body?.text.replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
-//   }
-// }
-
 import 'package:html/parser.dart' as html_parser;
 
 class AppNotification {
   final String id;
   final String message;
-  int isRead;
+  int isRead; // mutable so UI can update
   final DateTime createdAt;
   final String email;
 
@@ -59,27 +15,36 @@ class AppNotification {
     required this.email,
   });
 
+  /// Convert API JSON → Model
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     return AppNotification(
-      id: json['id'].toString(), 
+      id: json['id'].toString(),
       message: json['message'] ?? '',
-      isRead: int.parse(json['isRead'].toString()),
+      isRead: int.tryParse(json['isRead']?.toString() ?? "0") ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
       email: json['email'] ?? '',
     );
   }
 
-  /// Extract <h3> content for title
+  /// Extract only <h3> title from HTML message
   String extractH3() {
     final document = html_parser.parse(message);
-    final h3 = document.getElementsByTagName('h3');
-    if (h3.isNotEmpty) return h3.first.text.trim();
+    final h3Elements = document.getElementsByTagName('h3');
+
+    if (h3Elements.isNotEmpty) {
+      return h3Elements.first.text.trim();
+    }
+
+    // Fallback default title
     return 'Notification';
   }
 
-  /// Convert HTML to plain text
+  /// Convert HTML message → Plain text
   String toPlainText() {
     final document = html_parser.parse(message);
-    return document.body?.text.replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
+    final bodyText = document.body?.text ?? '';
+
+    // Remove extra whitespace
+    return bodyText.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 }

@@ -119,8 +119,8 @@ class _LoanSearchBarState extends State<LoanSearchBar> {
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(
                     color: _isFocused
-                        ? Colors.deepPurple.withOpacity(0.7)
-                        : Colors.grey.shade300,
+                        ? Colors.black
+                        : Colors.black,
                     width: _isFocused ? 1.5 : 1,
                   ),
                   boxShadow: _isFocused
@@ -140,7 +140,7 @@ class _LoanSearchBarState extends State<LoanSearchBar> {
                     hintText:
                         'Search by name, type, PAN, Aadhaar, or mobile...',
                     hintStyle: TextStyle(
-                      fontSize: _isFocused ? 14 : 12,
+                      fontSize: _isFocused ? 12 : 12,
                       color: Colors.grey.shade500,
                     ),
                     prefixIcon: _isFocused

@@ -53,8 +53,6 @@ class _LoanPageState extends State<LoanPage> {
         token: token,
       );
 
-      //print("API response: $response");
-
       final data = response["data"];
       List<LoanModel> loadedData = [];
 
@@ -73,7 +71,6 @@ class _LoanPageState extends State<LoanPage> {
 
       await saveLoan();
     } catch (e) {
-      //debugPrint("Loan API fetch failed: $e");
       await _loadLoan();
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -159,6 +156,7 @@ class _LoanPageState extends State<LoanPage> {
     });
     saveLoan();
     _applySearchFilter();
+    _fetchLoanFromApi();
   }
 
   /// Delete loan
@@ -168,11 +166,13 @@ class _LoanPageState extends State<LoanPage> {
     });
     saveLoan();
     _applySearchFilter();
+    _fetchLoanFromApi();
   }
 
   void submitNewLoan(Map<String, dynamic> loandata) {
     final newLoan = LoanModel.fromJson(loandata);
     addNewLoan(newLoan);
+    _fetchLoanFromApi();
   }
 
   @override
@@ -232,6 +232,9 @@ class _LoanPageState extends State<LoanPage> {
                                             LoanModel.fromJson(updatedLoan),
                                           ),
                                           onDelete: () => _deleteLoan(index),
+                                          onReloadParent: () async {
+                                            await _fetchLoanFromApi();
+                                          },
                                         );
                                       },
                                     ),
@@ -247,26 +250,54 @@ class _LoanPageState extends State<LoanPage> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
+                    // onPressed: () async {
+                    //   await showLoanTypeDialog(
+                    //     context: context,
+                    //     mode: "add",
+                    //     token: widget.token,
+                    //     submit: "1",
+                    //     onSubmit: (loandata) async {
+                    //       // Show temporary loader
+                    //       setState(() => isLoading = true);
+
+                    //       try {
+                    //         submitNewLoan(loandata);
+                    //         await Future.delayed(const Duration(seconds: 1)); 
+                    //       } 
+                    //       finally {
+                    //         setState(() => isLoading = false);
+                    //       }
+                    //     },
+                    //   );
+                    // },
+
                     onPressed: () async {
-                      await showLoanTypeDialog(
+                      // Open the dialog + stepper and wait for its result (true = final submit success)
+                      final bool? created = await showLoanTypeDialog(
                         context: context,
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (loandata) async {
-                          // Show temporary loader
-                          setState(() => isLoading = true);
-
-                          try {
-                            submitNewLoan(loandata);
-                            await Future.delayed(const Duration(seconds: 1)); 
-                          } 
-                          finally {
-                            setState(() => isLoading = false);
-                          }
+                        onSubmit: (loandata) {
+                          // optional optimistic local insert
+                          submitNewLoan(loandata);
+                        },
+                        // This callback will be called by Stepper whenever any section is saved successfully
+                        onAnySectionSaved: () async {
+                          if (mounted) setState(() => isLoading = true);
+                          await _fetchLoanFromApi();
+                          if (mounted) setState(() => isLoading = false);
                         },
                       );
+
+                      // If the Stepper reported final success (user submitted), ensure we refresh once more
+                      if (created == true) {
+                        if (mounted) setState(() => isLoading = true);
+                        await _fetchLoanFromApi();
+                        if (mounted) setState(() => isLoading = false);
+                      }
                     },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       padding: const EdgeInsets.all(10),

@@ -45,7 +45,6 @@ class ChangePasswordController {
     final token = prefs.getString('token'); // token saved at login
 
     if (token == null || token.isEmpty) {
-      debugPrint("❌ No token found. User might not be logged in.");
       return false;
     }
 
@@ -59,10 +58,8 @@ class ChangePasswordController {
         (response['statusCode'] == 200 || response['success'] == true)) {
       // Update password locally only if API success
       await prefs.setString('password', newPassword);
-      debugPrint("✅ Password updated successfully.");
       return true;
     } else {
-      debugPrint("❌ Password change failed: ${response?['message']}");
       return false;
     }
   }

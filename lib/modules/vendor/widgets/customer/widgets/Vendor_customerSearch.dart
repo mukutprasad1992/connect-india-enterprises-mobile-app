@@ -32,8 +32,10 @@ class _VendorCustomerSearchState extends State<VendorCustomerSearch> {
       filterData();
       setState(() {});
     });
-    _focusNode.addListener(() => setState(() => _isFocused = _focusNode.hasFocus));
+    _focusNode
+        .addListener(() => setState(() => _isFocused = _focusNode.hasFocus));
   }
+
   void filterData() {
     final query = searchController.text.toLowerCase();
     final filtered = widget.vendorData.where((row) {
@@ -44,13 +46,12 @@ class _VendorCustomerSearchState extends State<VendorCustomerSearch> {
     widget.onChanged(query);
   }
 
-   @override
+  @override
   void dispose() {
     searchController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
-
 
   void _clearSearch() {
     searchController.clear();
@@ -74,7 +75,9 @@ class _VendorCustomerSearchState extends State<VendorCustomerSearch> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Customers',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600,),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
               ),
@@ -83,28 +86,21 @@ class _VendorCustomerSearchState extends State<VendorCustomerSearch> {
               width: inputWidth.clamp(150.0, availableWidth),
               height: _isFocused ? 42 : 34,
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade300),
-                boxShadow: _isFocused
-                    ? [
-                        const BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ]
-                    : [],
+                color: Colors.white,
               ),
               child: TextField(
                 controller: searchController,
                 focusNode: _focusNode,
                 onChanged: widget.onSearchChanged,
+                style: const TextStyle(
+                  fontSize: 12, 
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search...',
-                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  hintStyle: TextStyle(
+                    fontSize: 12,
                     color: Colors.grey,
-                    height: _isFocused ? 1.4 : 2.0,
                   ),
                   prefixIcon: _isFocused
                       ? IconButton(
@@ -141,19 +137,25 @@ class _VendorCustomerSearchState extends State<VendorCustomerSearch> {
                         ),
                     ],
                   ),
-                  isDense: true,
-                  contentPadding: _isFocused
-                      ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
-                      : const EdgeInsets.only(top: 18, left: 12),
                   filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+                  fillColor: Colors.white,
+                  //  Smooth Solid Black Border
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.black, width: 1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.black, width: 1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+
+                  isDense: true,
+                  contentPadding:const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 ),
               ),
-            ),
+            )
           ],
         );
       },

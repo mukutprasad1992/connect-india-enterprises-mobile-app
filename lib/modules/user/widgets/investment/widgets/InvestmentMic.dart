@@ -9,8 +9,6 @@
 
 //   Future<void> startListening(Function(String) onResult) async {
 //     bool available = await _speech.initialize(
-//       onStatus: (status) => debugPrint('Speech status: $status'),
-//       onError: (error) => debugPrint('Speech error: $error'),
 //     );
 
 //     if (available) {
@@ -24,7 +22,6 @@
 //         cancelOnError: true,
 //       );
 //     } else {
-//       debugPrint('Speech recognition not available');
 //     }
 //   }
 

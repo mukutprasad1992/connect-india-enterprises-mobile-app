@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:myapp/services/googleSignupApi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '/controllers/loginController.dart';
 import '/views/signup/signup_page.dart';
 import 'forgotPassword.dart';
-//import '/services/googleSignService.dart';
-//import '/services/facebookSignService.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,6 +18,43 @@ class _LoginPageState extends State<LoginPage> {
   bool obscurePassword = true;
   bool rememberMe = true;
   bool isLoading = false;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    //clientId:"1007258031441-mv2bo8niqpd9p2qup7ir9f98a43tqqg7.apps.googleusercontent.com",
+    //clientId:"1007258031441-pmp7mv2053bstn0b2eg112v3tv6olkjj.apps.googleusercontent.com"
+    clientId:"424023306099-aog8spb50lf32d8t0l6pn3c0q3a4ktk5.apps.googleusercontent.com"
+  );
+
+  Future<void> handleGoogleLogin(BuildContext context) async {
+    try {
+
+      // Step 1: Sign In popup
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return;
+      }
+      // Step 2: Authentication tokens
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        throw Exception("Google returned null ID Token");
+      }
+
+      // Step 3: Send id_token to backend API
+      final result = await GoogleLoginService.googleLogin(idToken);
+
+      // Step 4: Navigate / show success
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Google Login Successful!")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login failed: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,25 +218,29 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 42,
               width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: Image.asset('assets/images/G-logo.png',
-                    height: 18, width: 18),
-                label: const Text(
-                  "Sign in with Google",
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6)),
-                  side: const BorderSide(color: Colors.grey),
-                  backgroundColor: Colors.white,
-                ),
-              ),
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : OutlinedButton.icon(
+                      onPressed: () {
+                        handleGoogleLogin(context);
+                      },
+                      icon: Image.asset('assets/images/G-logo.png',
+                          height: 18, width: 18),
+                      label: const Text(
+                        "Sign in with Google",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)),
+                        side: const BorderSide(color: Colors.grey),
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
             ),
 
             const SizedBox(height: 24),

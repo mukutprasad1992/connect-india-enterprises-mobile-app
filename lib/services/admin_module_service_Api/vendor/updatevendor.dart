@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '/consts/appConstants.dart';
 
 class UpdateVendor {
-  //static const String baseUrl = 'http://192.168.29.161:4000';
+  static Future<String?> getKeyToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("KEYTOKEN");
+  }
 
   static Future<Map<String, dynamic>> updateVendorById({
     required String id,
@@ -14,7 +18,7 @@ class UpdateVendor {
     String? businessRepresentative,
     String? vendorCode,
     String? address,
-    required String token,
+   
   }) async {
     final url = Uri.parse('$baseUrl/user/updateUser/$id');
 
@@ -31,9 +35,7 @@ class UpdateVendor {
     };
 
     try {
-      //print("🔹 PUT URL: $url");
-      //print("🔹 Request Body: ${jsonEncode(body)}");
-
+      final token = await getKeyToken();
       final response = await http.put(
         url,
         headers: {
@@ -42,10 +44,6 @@ class UpdateVendor {
         },
         body: jsonEncode(body),
       );
-
-      //print("🔹 Response Code: ${response.statusCode}");
-      //print("🔹 Response Body: ${response.body}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {

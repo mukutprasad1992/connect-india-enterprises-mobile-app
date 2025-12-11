@@ -34,8 +34,7 @@ class _VoucherTablePageState extends State<VoucherTablePage> {
 
   Future<void> _saveVouchers() async {
     final prefs = await SharedPreferences.getInstance();
-    final voucherJsonList =
-        voucherData.map((v) => jsonEncode(v.toJson())).toList();
+    final voucherJsonList = voucherData.map((v) => jsonEncode(v.toJson())).toList();
     await prefs.setStringList('vouchers', voucherJsonList);
   }
 

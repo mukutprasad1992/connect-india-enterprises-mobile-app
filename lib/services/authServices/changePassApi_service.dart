@@ -25,7 +25,6 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print("Change password error: $e");
       return null;
     }
   }

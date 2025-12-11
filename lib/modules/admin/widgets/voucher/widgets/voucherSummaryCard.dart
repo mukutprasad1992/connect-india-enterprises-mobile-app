@@ -45,13 +45,19 @@ class VoucherSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.black,
+                  backgroundImage: AssetImage('assets/images/profileimg.jpg'),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     row['customerName'] ?? 'No Name',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.indigo,
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: 12,
                         ),
                     overflow: TextOverflow.fade,
                     softWrap: false,
@@ -114,17 +120,16 @@ class VoucherSummaryCard extends StatelessWidget {
           TextSpan(
             text: "$label: ",
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  fontSize: 14
-                ),
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                fontSize: 12),
           ),
           TextSpan(
             text: value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: valueColor,
-                  fontSize: 14
-                ),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: valueColor, fontSize: 12),
           ),
         ],
       ),

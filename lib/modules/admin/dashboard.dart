@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'widgets/investment/investment.dart';
-import 'widgets/policy/policy.dart';
-import 'widgets/insurance/insurance.dart';
-import 'widgets/loan/loan.dart';
-
-import '../user/widgets/bottomNavbarUser/bottomNav.dart';
-import '/Main_dashboard.dart';
-
-import '/views/notification/notification.dart';
+import 'widgets/bottomNavbarAdmin/bottomNav.dart';
+//import '/Main_dashboard.dart';
+import '/admin_dashboard/adminDashboard.dart';
+import '/modules/admin/widgets/customer/customer.dart';
+import '/modules/admin/widgets/vendor/vendor.dart';
+import '/modules/admin/widgets/voucher/voucher.dart';
+import '/modules/admin/widgets/inquiry/inquery.dart';
+//import '/modules/admin/widgets/wishlist/wishlist_page.dart';
+import '/views//notification/notification.dart';
 import '/views/drawer/my_drawer.dart';
 import '/views/drawer/drawer_sections.dart';
 import '/views/settings/settings.dart';
 import '/views/drawer/changepassword.dart';
 import '/views/drawer/myprofile.dart';
 import '/consts/appColors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:badges/badges.dart' as badges;
+
 import '/services/notificationServices/notificationApi.dart';
-class UserDashboardPage extends StatefulWidget {
-  const UserDashboardPage({super.key});
+
+class AdminDashboardPage extends StatefulWidget {
+  
+  const AdminDashboardPage({super.key});
 
   @override
-  State<UserDashboardPage> createState() => _UserDashboardPageState();
+  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
 }
 
-class _UserDashboardPageState extends State<UserDashboardPage> {
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
   DrawerSections currentPage = DrawerSections.dashboard;
+  
 
   String? userToken;
   bool loadingToken = true;
@@ -38,12 +42,9 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
       final list = await NotificationService.getNotifications();
       return list.where((n) => n.isRead == 0).length;
     } catch (e) {
-      debugPrint("Error fetching unread count: $e");
       return 0;
     }
   }
-
-  final List<Widget> _pages = [];
 
   @override
   void initState() {
@@ -51,21 +52,22 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
     _loadToken();
   }
 
+  final List<Widget> _pages = [];
+
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('KEYTOKEN');
-
     setState(() {
       userToken = token;
       loadingToken = false;
 
       _pages.clear();
       _pages.addAll([
-        Dashboard(),
-        InsurancePage(token: token ?? ''),
-        InvestmentPage(token: token ?? ''),
-        LoanPage(token: token ?? ''),
-        PolicyPage(token: token ?? ''),
+        DashboardCardsPage(),
+        VendorTablePage(),
+        CustomerTablePage(),
+        InqueryTablePage(),
+        VoucherTablePage(),
       ]);
     });
   }
@@ -86,20 +88,23 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
         if (_selectedIndex != 0) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const UserDashboardPage()),
+            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
           );
         }
+        Navigator.pop(context);
         break;
       case DrawerSections.myprofile:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MyProfilePage()),
+          MaterialPageRoute(
+            builder: (context) => MyProfilePage(),
+          ),
         );
         break;
       case DrawerSections.changepassword:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+          MaterialPageRoute(builder: (context) => ChangePasswordPage()),
         );
         break;
       case DrawerSections.settings:
@@ -116,12 +121,6 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loadingToken) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       key: _scaffoldKey,
       drawer: MyDrawer(
@@ -173,12 +172,13 @@ class _UserDashboardPageState extends State<UserDashboardPage> {
                   child: IconButton(
                     icon: const Icon(Icons.notifications, color: Colors.white),
                     onPressed: () async {
-                      // NotificationPage kholne par
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const NotificationPage()),
+                          builder: (context) =>  NotificationPage(),
+                        ),
                       );
+                      // Refresh badge count after returning
                       setState(() {});
                     },
                   ),

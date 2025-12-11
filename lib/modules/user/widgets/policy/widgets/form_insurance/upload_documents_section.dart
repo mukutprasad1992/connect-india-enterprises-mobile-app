@@ -172,8 +172,6 @@ class _UploadDocumentSectionState extends State<UploadDocumentSection> {
         itrDocumentsFileKey: itrFile,
       );
 
-      //print("UpdateServiceType Response (documents): $res");
-
       if (res['status'] == true) {
         final data = res['data'];
         final dbId = data?['_id']?.toString() ?? data?['id']?.toString();

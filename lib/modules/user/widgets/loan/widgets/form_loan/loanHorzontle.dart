@@ -16,6 +16,7 @@ class StepperFormPage extends StatefulWidget {
   final String token;
   final LoanModel? loan;
   final String submit;
+  final Function()? onAnySectionSaved;
 
   StepperFormPage({
     super.key,
@@ -23,6 +24,7 @@ class StepperFormPage extends StatefulWidget {
     required this.mode,
     this.loan,
     required this.token,
+    this.onAnySectionSaved,
   });
 
   @override
@@ -258,6 +260,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         );
 
         if (res['status'] == true) {
+          widget.onAnySectionSaved?.call();
           DBId = res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
 
           if (mounted) {
@@ -268,10 +271,9 @@ class _StepperFormPageState extends State<StepperFormPage> {
               ),
             );
           }
-          //debugPrint("✅ Created Loan DBId = $DBId");
+          
         } else {
           _showError(res['message'] ?? "Create API failed");
-          //debugPrint("🚨 CreateLoan failed: $res");
           return null;
         }
         return DBId;
@@ -343,9 +345,9 @@ class _StepperFormPageState extends State<StepperFormPage> {
               (salarySlipFile?.isNotEmpty ?? false) ? salarySlipFile! : "",
         );
 
-        //debugPrint("Update API response: $res");
 
         if (res['status'] == true) {
+          widget.onAnySectionSaved?.call();
           String message = "";
           switch (section) {
             case "personalDetails":
@@ -389,7 +391,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
         return DBId;
       }
     } catch (e) {
-      //debugPrint("Exception in saveSection for $section: $e ");
       _showError("Failed to save $section: ${e.toString()}");
       return DBId;
     }
@@ -423,6 +424,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           );
 
           if (res['status'] == true) {
+            widget.onAnySectionSaved?.call();
             completedSteps.add(_currentStep);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

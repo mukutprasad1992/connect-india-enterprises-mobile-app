@@ -17,7 +17,6 @@ class VoucherActionButtons extends StatefulWidget {
   final VoidCallback? onReloadParent;
 
   /// NEW: callback to show/hide loader in parent
-  
 
   const VoucherActionButtons({
     super.key,
@@ -31,7 +30,6 @@ class VoucherActionButtons extends StatefulWidget {
     required this.onDelete,
     this.setLoading,
     this.onReloadParent,
-    
   });
 
   @override
@@ -73,41 +71,44 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
             _showSnackBar(
                 context, "Voucher updated successfully!", Colors.green);
           }
-          // if (updatedVoucher != null) {
-          //   widget.onUpdate(widget.index, updatedVoucher); // ✅ update locally
-          // }
+        } else if (value == 'status') {
+          final currentStatus = widget.row['status']?.toString() ?? 'Enable';
+          final isRedeemed = currentStatus == 'Disable';
 
-          // if (updatedVoucher != null &&
-          //     updatedVoucher is Map<String, dynamic>) {
-          //   widget.onUpdate(widget.index, updatedVoucher);
-          //   _showSnackBar(
-          //       context, "Voucher updated successfully!", Colors.green);
-          //   // setState(() {});
-          // }
-        } 
-        else if (value == 'status') {
-          //  Enable / Disable voucher
-          final isDisabled = ['status'] == 'Disable';
-          final actionStatus = isDisabled ? 'Enable' : 'Disable';
-
+          if (isRedeemed) {
+            //  Already redeemed — show info message
+            _showSnackBar(
+              context,
+              'User has already redeemed this voucher.',
+              Colors.orange,
+            );
+            return;
+          }
+          //  Redeem confirmation dialog
           final confirm = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: Text(isDisabled ? 'Enable Voucher' : 'Disable Voucher',style: TextStyle(fontSize:16,fontWeight: FontWeight.bold)),
-              content: Text(isDisabled
-                  ? 'Are you sure you want to enable this voucher?'
-                  : 'Are you sure you want to disable this voucher?',style: TextStyle(fontSize:14,)),
+              title: const Text(
+                'Redeem Voucher',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              content: const Text(
+                'Are you sure you want to redeem this voucher?',
+                style: TextStyle(fontSize: 14),
+              ),
               actions: [
                 TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel')),
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
+                  child: const Text(
+                    'Redeem',
+                    style: TextStyle(color: Colors.white),
                   ),
-                  child: Text(isDisabled ? 'Enable' : 'Disable',
-                      style: const TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -118,49 +119,54 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
           widget.setLoading?.call(true);
 
           try {
+            // 🔄 Update status to "Disable" (redeemed)
             final result = await UpdateVoucherStatus.updateVoucherStatusById(
               id: widget.id.toString(),
-              status: actionStatus,
+              status: 'Disable',
             );
 
             if (result["status"] == true) {
+              // 🟢 Update local UI state
               final updatedVoucher = Map<String, dynamic>.from(widget.row);
-              updatedVoucher['status'] = actionStatus;
+              updatedVoucher['status'] = 'Disable';
               widget.onStatusToggle(widget.index, updatedVoucher);
 
               _showSnackBar(
-                  context,
-                  isDisabled
-                      ? 'Voucher Enabled Successfully!'
-                      : 'Voucher Disabled Successfully!',
-                  Colors.green);
+                context,
+                'Voucher redeemed successfully!',
+                Colors.green,
+              );
             } else {
               _showSnackBar(
-                  context,
-                  result["message"] ?? "Failed to update status",
-                  Colors.redAccent);
+                context,
+                result["message"] ?? "Failed to redeem voucher",
+                Colors.redAccent,
+              );
             }
           } catch (e) {
             _showSnackBar(context, "Error: $e", Colors.red);
           } finally {
             widget.setLoading?.call(false);
           }
-        }
-        else if (value == 'delete') {
+        } else if (value == 'delete') {
           //  Delete voucher
           final confirmDelete = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text("Delete Voucher",style: TextStyle(fontSize:16,fontWeight: FontWeight.bold)),
-              content:
-                  const Text("Are you sure you want to delete this voucher?",style: TextStyle(fontSize:14)),
+              title: const Text("Delete Voucher",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              content: const Text(
+                  "Are you sure you want to delete this voucher?",
+                  style: TextStyle(fontSize: 14)),
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(context, false),
                     child: const Text('Cancel')),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo,),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                  ),
                   child: const Text('Delete',
                       style: TextStyle(color: Colors.white)),
                 ),
@@ -191,7 +197,8 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
           } finally {
             widget.setLoading?.call(false);
           }
-        } else if (value == 'view') {
+        } 
+        else if (value == 'view') {
           openPdf(context, widget.row['pdfURL'] ?? '');
         }
       },
@@ -213,15 +220,15 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
               Icon(
                 widget.row['status'] == 'Disable'
                     ? Icons.lock_open
-                    : Icons.block,
+                    : Icons.redeem, 
                 color: widget.row['status'] == 'Disable'
-                    ? Colors.green
-                    : Colors.red,
+                    ? Colors.grey
+                    : Colors.green,
                 size: 20,
               ),
               const SizedBox(width: 5),
               Text(
-                widget.row['status'] == 'Disable' ? 'Enable' : 'Disable',
+                widget.row['status'] == 'Disable' ? 'Redeemed' : 'Redeem',
                 style: const TextStyle(fontSize: 15),
               ),
             ],
@@ -262,8 +269,6 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
   }
 
   Future<void> openPdf(BuildContext context, String pdfUrl) async {
-    print("📄 Opening PDF URL: $pdfUrl");
-
     if (pdfUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -289,7 +294,6 @@ class _VoucherActionButtonsState extends State<VoucherActionButtons> {
         }
       }
     } catch (e) {
-      print(" Error launching URL: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error opening PDF: $e")),
       );

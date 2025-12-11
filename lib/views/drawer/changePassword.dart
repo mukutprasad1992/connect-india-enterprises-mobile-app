@@ -68,7 +68,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final parts = hasAsterisk ? label.split('*') : [label];
 
     return InputDecoration(
-      prefixIcon: Icon(icon, color: AppColors.background, size: 18),
+      prefixIcon: Icon(icon, color: Colors.deepPurple, size: 18),
       label: RichText(
         text: TextSpan(
           text: parts[0],
@@ -135,7 +135,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             icon: const Icon(Icons.check_circle_outline, color: Colors.white),
             label: const Text('Update', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.background,
+              backgroundColor:AppColors.background,
             ),
           ),
         ),
@@ -153,7 +153,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       appBar: AppBar(
         title: const Text('Change Password',
             style: TextStyle(color: Colors.white)),
-        backgroundColor:Colors.deepPurple,
+        backgroundColor:AppColors.background,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
       ),

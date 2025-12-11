@@ -316,7 +316,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
                   ? itrFile!
                   : "Null",
         );
-        //debugPrint("Building UI → AadharFile📤: $aadharFile");
 
         if (res['status'] == true) {
           String message = "";
@@ -354,7 +353,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
         return DBId;
       }
     } catch (e) {
-      //debugPrint(" Error updating section [$section]: $e");
       _showError("Failed to save $section: ${e.toString()}");
       return DBId;
     }

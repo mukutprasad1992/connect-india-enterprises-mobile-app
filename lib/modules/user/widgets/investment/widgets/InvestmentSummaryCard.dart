@@ -7,6 +7,7 @@ class InvestmentSummaryCard extends StatelessWidget {
   final String token;
   final ValueChanged<Map<String, dynamic>> onUpdate;
   final VoidCallback onDelete;
+  final Future<void> Function()? onReloadParent;
 
   const InvestmentSummaryCard({
     super.key,
@@ -15,6 +16,7 @@ class InvestmentSummaryCard extends StatelessWidget {
     required this.index,
     required this.onDelete,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   IconData _getStatusIcon(String status) {
@@ -94,10 +96,15 @@ class InvestmentSummaryCard extends StatelessWidget {
                         index: index,
                         onUpdate: onUpdate,
                         onDelete: onDelete,
+                        onReloadParent:onReloadParent
+                        // onReloadParent: () async {
+                        //   await _fetchInvestmentsFromApi();
+                        // },
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
+
                   /// Aadhaar
                   _buildInfoChip("Aadhaar", row['aadharNumber'] ?? '',
                       Icons.credit_card, Colors.deepOrange),
@@ -107,6 +114,7 @@ class InvestmentSummaryCard extends StatelessWidget {
                   _buildInfoChip("PAN", row['panNumber'] ?? '', Icons.badge,
                       Colors.indigo),
                   const SizedBox(height: 6),
+
                   /// Status
                   Container(
                     padding:
@@ -176,13 +184,13 @@ class InvestmentSummaryCard extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w500,
-                    fontSize: 12, 
+                    fontSize: 12,
                   ),
                 ),
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: valueColor, 
+                    color: valueColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),

@@ -10,6 +10,8 @@ class InvestmentActionButtons extends StatelessWidget {
   final VoidCallback onDelete;
   final ValueChanged<Map<String, dynamic>> onUpdate;
   final String token;
+  //final VoidCallback? onReloadParent;
+  final Future<void> Function()? onReloadParent;
 
   const InvestmentActionButtons({
     super.key,
@@ -18,6 +20,7 @@ class InvestmentActionButtons extends StatelessWidget {
     required this.index,
     required this.onDelete,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   @override
@@ -38,26 +41,81 @@ class InvestmentActionButtons extends StatelessWidget {
             );
             break;
 
+          // case 'edit':
+          //   if (investment is Map<String, dynamic>)
+          //   {
+          //     final updatedInvestment = await Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (_) => EditInvestmentPage(
+          //           investment: InvestmentModel.fromJson(investment),
+          //           token: token,
+          //           onReloadParent: onReloadParent,
+          //         ),
+          //       ),
+          //     );
+          //     if (updatedInvestment != null) {
+          //       onUpdate(updatedInvestment);
+          //       _showSnackBar(
+          //         context,
+          //         'Investment Updated Successfully!',
+          //         Colors.green,
+          //       );
+          //     }
+
+          //   }
+          //   else {
+          //     _showSnackBar(
+          //       context,
+          //       'Invalid investment data received.',
+          //       Colors.red,
+          //     );
+          //   }
+          //   break;
+
           case 'edit':
             if (investment is Map<String, dynamic>) {
-              final updatedInvestment = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditInvestmentPage(
-                    investment: InvestmentModel.fromJson(investment),
-                    token: token,
+              try {
+                // Wait for edit page result (it should return updated Map on successful save)
+                final Map<String, dynamic>? updatedInvestment =
+                  await Navigator.push<Map<String, dynamic>?>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditInvestmentPage(
+                      investment: InvestmentModel.fromJson(investment),
+                      token: token,
+                      onReloadParent:onReloadParent, 
+                    ),
                   ),
-                ),
-              );
-              if (updatedInvestment != null) {
-                onUpdate(updatedInvestment);
+                );
+
+                // If edit returned updated data, update local item immediately
+                if (updatedInvestment != null) {
+                  onUpdate(updatedInvestment);
+                  _showSnackBar(
+                    context,
+                    'Investment Updated Successfully!',
+                    Colors.green,
+                  );
+                }
+
+                // ALWAYS attempt to reload parent from server to ensure fresh data.
+                // This covers the case where user pressed Back without returning updated data.
+                if (onReloadParent != null) {
+                  // optional debug
+                  // print("Calling onReloadParent from InvestmentActionButtons after edit");
+                  await onReloadParent!();
+                }
+              } 
+              catch (e) {
                 _showSnackBar(
                   context,
-                  'Investment Updated Successfully!',
-                  Colors.green,
+                  'Error while editing: ${e.toString()}',
+                  Colors.red,
                 );
               }
-            } else {
+            } 
+            else {
               _showSnackBar(
                 context,
                 'Invalid investment data received.',
@@ -65,6 +123,7 @@ class InvestmentActionButtons extends StatelessWidget {
               );
             }
             break;
+
           case 'delete':
             if (investment['id'] != null) {
               _confirmDelete(context);
@@ -173,7 +232,7 @@ class InvestmentActionButtons extends StatelessWidget {
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
       _showSnackBar(
         context,
         "Error deleting investment: $e",

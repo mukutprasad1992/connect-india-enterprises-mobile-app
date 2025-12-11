@@ -1,21 +1,25 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '/consts/appConstants.dart';
 class UpdateVendorStatus {
   //static const String baseUrl = 'http://192.168.29.161:4000';
+
+  static Future<String?> getKeyToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("KEYTOKEN");
+  }
   static Future<Map<String, dynamic>> updateVendorStatusById({
     required String id,
     required String status,
-    required String token,
+    
   }) async {
+
     final url = Uri.parse('$baseUrl/user/updateUserStatusById/$id');
     final Map<String, dynamic> body = {"status": status.trim()};
 
     try {
-      //print("🔹 API CALL: $url");
-      //print("🔹 Status to update: $status");
-      //print("🔑 Token: $token");
-
+      final token = await getKeyToken();
       final response = await http.put(
         url,
         headers: {
@@ -24,16 +28,6 @@ class UpdateVendorStatus {
         },
         body: jsonEncode(body),
       );
-
-      //print("🔹 Response Code: ${response.statusCode}");
-      //print("🔹 Response Body: ${response.body}");
-
-      if (response.statusCode == 401) {
-        return {
-          "status": false,
-          "message": "Unauthorized — Invalid or expired token"
-        };
-      }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);

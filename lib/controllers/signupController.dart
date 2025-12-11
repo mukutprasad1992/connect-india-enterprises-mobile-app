@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/views/login/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../services/authServices/registerApi.dart';
 import '/services/authServices/loginApi_service.dart';
 import '/controllers/authController.dart';
 import '/consts/appConstants.dart';
+
 class SignupController {
   final formKey = GlobalKey<FormState>();
 
@@ -12,7 +13,7 @@ class SignupController {
   String phone = '';
   String password = '';
   String confirmPassword = '';
-  String enteredPassword = ''; // ✅ for live matching check
+  String enteredPassword = '';
 
   bool obscurePassword = true;
   bool obscureConfirm = true;
@@ -58,67 +59,86 @@ class SignupController {
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) return 'Please confirm your password';
-    if (value != enteredPassword) return 'Passwords do not match'; // ✅ Live check
+    if (value != enteredPassword) return 'Passwords do not match';
     return null;
   }
-
+  
   /// Submit signup form
-  Future<void> submitForm(BuildContext context, Function refreshUI) async {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
 
-      // 1️⃣ Register
-      final registerResponse = await RegisterApi.registerUser(
-        email: email,
-        mobileNo: phone,
-        roleId: 1,
-        password: password,
+
+Future<void> submitForm(BuildContext context, Function refreshUI) async {
+    // 1. Validate
+    if (!formKey.currentState!.validate()) {
+      refreshUI();
+      return;
+    }
+
+    // 2. Save form fields (ensure your TextFormFields have onSaved handlers)
+    formKey.currentState!.save();
+
+    // 3. Trim inputs defensively
+    final trimmedEmail = email.trim();
+    final trimmedPhone = phone.trim();
+    final trimmedPassword = password.trim();
+
+    // 4. Call register API (do NOT pass optional fields unless non-empty)
+    Map<String, dynamic>? registerResponse;
+    try {
+      registerResponse = await RegisterApi.registerUser(
+        email: trimmedEmail,
+        mobileNo: trimmedPhone,
+        roleId: 3,
+        password: trimmedPassword,
         status: "Enable",
+        // omit businessName/vendorCode/address here unless you have values
+      );
+    } catch (e) {
+      // unexpected error from RegisterApi
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Registration error: ${e.toString()}'),
+            backgroundColor: Colors.red),
+      );
+      return;
+    }
 
+    // 5. Debug: print full response to inspect server message
+    print('Register response: $registerResponse');
+
+    // 6. Handle response
+    if (registerResponse != null && registerResponse['status'] == true) {
+      // success -> show message and redirect to Login page (no auto-login)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful! Please log in to continue.'),
+          backgroundColor: Colors.green,
+        ),
       );
 
-      if (registerResponse['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Registration successful! Logging you in...'),
-            backgroundColor: Colors.green,
-          ),
-        );
+      // Optional: small delay so user sees the snackbar (remove if you prefer immediate navigation)
+      await Future.delayed(const Duration(milliseconds: 500));
 
-        // 2️⃣ Login
-        final loginResponse = await ApiService().loginUser(email, password);
+      // Navigate to Login page (replace with your actual LoginPage widget)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
 
-        if (loginResponse != null && loginResponse['status'] == true) {
-          final data = loginResponse['data'];
-          final prefs = await SharedPreferences.getInstance();
-
-          await prefs.setBool('KEYLOGIN', true);
-          await prefs.setString('user_email', data['email']);
-          await prefs.setString('KEYTOKEN', data['accessToken']);
-          await prefs.setInt('KEYROLEID', data['roleId']);
-
-          // 3️⃣ Redirect based on role
-          AuthController.checkLoginStatus(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  loginResponse?['message'] ?? 'Login failed after registration'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } else {
-        // ❌ Registration failed
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(registerResponse['message']),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      return;
     } else {
-      refreshUI();
+      // registration failed -> show server message and stop
+      final msg =
+          (registerResponse != null && registerResponse['message'] != null)
+              ? registerResponse['message'].toString()
+              : 'Registration failed';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
   }
 }
+

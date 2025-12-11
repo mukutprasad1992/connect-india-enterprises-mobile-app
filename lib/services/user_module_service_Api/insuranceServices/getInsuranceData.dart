@@ -20,10 +20,6 @@ class getAllInsurance {
         },
       );
 
-      // Debug logs
-      //print("🔹 Status Code: ${response.statusCode}");
-      //print("🔹 Response Body: ${response.body}");
-
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else if (response.statusCode == 401) {

@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'inquiryIconbuttons.dart';
 import '/models/inquiryModel.dart';
+//import 'user_prefs.dart';
 
 class InquirySummaryCard extends StatelessWidget {
   final InquiryModel row;
   final VoidCallback onStatusChanged;
-  final String token;
   final Function(bool isLoading)? setLoading;
-
 
   const InquirySummaryCard({
     super.key,
     required this.setLoading,
-    required this.token,
     required this.row,
     required this.onStatusChanged,
   });
+
+  /// Combined future to fetch profile image and first name from SharedPreferences
+  static Future<Map<String, String?>> _loadProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'profileImg': prefs.getString('profileImg'),
+      'firstName': prefs.getString('firstName'),
+    };
+  }
 
   /// Status icon mapping
   IconData _getStatusIcon(String status) {
@@ -81,36 +90,141 @@ class InquirySummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Top Row: Inquiry ID + Action buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    "Inquiry ID: ${row.id ?? 'N/A'}",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.indigo,
-                      fontSize: 14,
+            // Use FutureBuilder to load SharedPreferences values as fallback
+            FutureBuilder<Map<String, String?>>(
+              future: _loadProfileData(),
+              builder: (context, snapshot) {
+                String? prefImg;
+                String? prefName;
+
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  prefImg = snapshot.data?['profileImg'];
+                  prefName = snapshot.data?['firstName'];
+                }
+
+                // priority: row.profileImgUrl -> prefs.profileImg -> asset fallback
+                final rowImgUrl =
+                    row.profileImgUrl; // model getter (may be null)
+                final chosenImg = (rowImgUrl != null && rowImgUrl.isNotEmpty)
+                    ? rowImgUrl
+                    : (prefImg != null && prefImg.isNotEmpty ? prefImg : null);
+
+                ImageProvider avatarProvider;
+                if (chosenImg != null && chosenImg.isNotEmpty) {
+                  avatarProvider = NetworkImage(chosenImg);
+                } else {
+                  avatarProvider =
+                      const AssetImage('assets/images/profileimg.jpg');
+                }
+
+                // name priority: row.displayName -> prefs.firstName -> Guest Name
+                final displayName = (row.displayName.isNotEmpty)
+                    ? row.displayName
+                    : (prefName != null && prefName.isNotEmpty
+                        ? prefName
+                        : 'Guest Name');
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: avatarProvider,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                InquiryActionButtons(
-                  token: token,
-                  row: row,
-                  onStatusChanged: onStatusChanged,
-                  setLoading: setLoading, 
-                ),
-              ],
+
+                    // Gap between image and name
+                    const SizedBox(width: 10),
+
+                    // Name (use Expanded so action buttons align right)
+                    Expanded(
+                      child: Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                    // Action buttons (kept at end)
+                    InquiryActionButtons(
+                      row: row,
+                      onStatusChanged: onStatusChanged,
+                      setLoading: setLoading,
+                    ),
+                  ],
+                );
+              },
             ),
+
+            // import user_prefs
+//import 'user_prefs.dart';
+
+// inside the build() where top row is rendered, replace the FutureBuilder with:
+// ValueListenableBuilder<String?>(
+//   valueListenable: UserPrefs.instance.profileImg,
+//   builder: (context, prefImg, _) {
+//     // priority: row.profileImgUrl -> prefImg -> asset fallback
+//     final rowImgUrl = row.profileImgUrl;
+//     final chosenImg = (rowImgUrl != null && rowImgUrl.isNotEmpty) ? rowImgUrl : (prefImg != null && prefImg.isNotEmpty ? prefImg : null);
+
+//     final ImageProvider avatarProvider = (chosenImg != null && chosenImg.isNotEmpty)
+//         ? NetworkImage(chosenImg)
+//         : const AssetImage('assets/images/profileimg.jpg');
+
+//     // name priority: row.displayName -> UserPrefs.firstName (ValueNotifier)
+//     return ValueListenableBuilder<String?>(
+//       valueListenable: UserPrefs.instance.firstName,
+//       builder: (context, prefName, __) {
+//         final displayName = (row.displayName.isNotEmpty)
+//             ? row.displayName
+//             : (prefName != null && prefName.isNotEmpty ? prefName : 'Guest Name');
+
+//         return Row(
+//           crossAxisAlignment: CrossAxisAlignment.center,
+//           children: [
+//             CircleAvatar(
+//               radius: 18,
+//               backgroundColor: Colors.grey.shade200,
+//               backgroundImage: avatarProvider,
+//             ),
+//             const SizedBox(width: 10),
+//             Expanded(
+//               child: Text(
+//                 displayName,
+//                 style: const TextStyle(
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.black,
+//                   fontSize: 14,
+//                 ),
+//                 overflow: TextOverflow.ellipsis,
+//               ),
+//             ),
+//             InquiryActionButtons(
+//               row: row,
+//               onStatusChanged: onStatusChanged,
+//               setLoading: setLoading,
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   },
+// ),
+
             const SizedBox(height: 6),
 
-            _buildLabelValueText("Aadhaar Number", row.aadharNumber ?? '', Colors.teal),
+            _buildLabelValueText(
+                "Aadhaar Number", row.aadharNumber ?? '', Colors.teal),
             const SizedBox(height: 4),
-            _buildLabelValueText("PAN Number", row.panNumber ?? '', Colors.blue),
+            _buildLabelValueText(
+                "PAN Number", row.panNumber ?? '', Colors.blue),
             const SizedBox(height: 4),
-            _buildLabelValueText("Service Id", row.serviceId ?? '', Colors.blue),
+            _buildLabelValueText("Email", row.email ?? '', Colors.blue),
             const SizedBox(height: 6),
 
             Container(

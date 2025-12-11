@@ -108,7 +108,6 @@ class updateLoanService {
         body: jsonEncode(body),
         
       );
-      print(jsonEncode(body));
 
       // 🔹 Handle response
       if (response.statusCode == 200) {

@@ -4,17 +4,14 @@ import 'Vendor_Icon_buttons.dart';
 class VendorSummaryCard extends StatelessWidget {
   final Map<String, dynamic> row;
   final int index;
-  final String token;
   final void Function(int, Map<String, dynamic>) onUpdate;
   final void Function(int, Map<String, dynamic>) onBlockToggle;
   final Function(bool isLoading)? setLoading;
   final VoidCallback? onReloadParent;
-  
 
   const VendorSummaryCard({
     super.key,
     required this.setLoading,
-    required this.token,
     required this.row,
     required this.index,
     required this.onUpdate,
@@ -63,14 +60,19 @@ class VendorSummaryCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.black,
+                  backgroundImage: AssetImage('assets/images/profileimg.jpg'),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     row['businessName'] ?? 'No Name',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue,
-                          fontSize: 14
-                        ),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue,
+                        fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -79,23 +81,24 @@ class VendorSummaryCard extends StatelessWidget {
                   vendor: row,
                   id: row['id'] ?? 0,
                   status: row['status'] ?? 'enable',
-                  token: token,
                   index: index,
                   onUpdate: onUpdate,
                   onBlockToggle: onBlockToggle,
-                  setLoading: setLoading, 
+                  setLoading: setLoading,
                   onReloadParent: onReloadParent,
                 ),
               ],
             ),
-            const SizedBox(height: 4), 
+            const SizedBox(height: 4),
 
             // Representative
-            _buildInfoRow(context, 'Representative', row['businessRepresentative'] ?? '', Colors.teal),
-            const SizedBox(height: 4), 
+            _buildInfoRow(context, 'Representative',
+                row['businessRepresentative'] ?? '', Colors.teal),
+            const SizedBox(height: 4),
             // Vendor Code
-            _buildInfoRow(context, 'Vendor Code', row['vendorCode'] ?? '', Colors.blue),
-            const SizedBox(height: 4), 
+            _buildInfoRow(
+                context, 'Vendor Code', row['vendorCode'] ?? '', Colors.blue),
+            const SizedBox(height: 4),
             // Status Row
             Container(
               margin: const EdgeInsets.only(top: 6),
@@ -141,7 +144,8 @@ class VendorSummaryCard extends StatelessWidget {
   }
 
   /// Info row with black label and colored value
-  Widget _buildInfoRow(BuildContext context, String label, String value, Color valueColor) {
+  Widget _buildInfoRow(
+      BuildContext context, String label, String value, Color valueColor) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Row(

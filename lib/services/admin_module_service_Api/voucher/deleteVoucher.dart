@@ -23,7 +23,6 @@ class deleteVoucher{
       },
       //body: jsonEncode({"status": status}),
     );
-    //print("🔹 API Response: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);

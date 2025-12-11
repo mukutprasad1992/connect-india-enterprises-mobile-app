@@ -8,7 +8,6 @@ class VendorActionButtons extends StatefulWidget {
   final Map<String, dynamic> vendor;
   final int index;
   final int id;
-  final String token;
   final String status;
   final Function(int index, Map<String, dynamic> updatedVendor) onUpdate;
   final Function(int index, Map<String, dynamic> updatedVendor) onBlockToggle;
@@ -24,7 +23,6 @@ class VendorActionButtons extends StatefulWidget {
     required this.vendor,
     required this.id,
     required this.status,
-    required this.token,
     required this.index,
     required this.onUpdate,
     required this.onBlockToggle,
@@ -54,7 +52,6 @@ class _VendorActionButtonsState extends State<VendorActionButtons> {
             context,
             MaterialPageRoute(
               builder: (context) => NewVendorPage(
-                token: widget.token,
                 mode: "edit",
                 vendor: widget.row,
                 dbId: widget.row["id"]?.toString(),
@@ -112,7 +109,6 @@ class _VendorActionButtonsState extends State<VendorActionButtons> {
             final result = await UpdateVendorStatus.updateVendorStatusById(
               id: widget.id.toString(),
               status: actionStatus,
-              token: widget.token,
             );
 
             if (result["status"] == true) {
@@ -213,7 +209,7 @@ class _VendorActionButtonsState extends State<VendorActionButtons> {
 
     try {
       final result = await UpdateVendorStatus.updateVendorStatusById(
-        token: widget.token,
+
         id: id,
         status: newStatus,
       );

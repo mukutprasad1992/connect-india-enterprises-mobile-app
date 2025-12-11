@@ -3,12 +3,14 @@ import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzo
 
 class AddInvestmentPage extends StatelessWidget {
   final String token;
+  final VoidCallback? onReloadParent;
   //final String tempSelection;
 
   const AddInvestmentPage({
     super.key, 
     //required this.tempSelection,
     required this.token,
+    this.onReloadParent,
   });
 
   @override

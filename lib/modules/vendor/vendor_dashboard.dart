@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../vendor/widgets/bottomNavbarVendor/bottomNav.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/Main_dashboard.dart';
 
 import '/views/notification/notification.dart';
 import '/views/drawer/my_drawer.dart';
@@ -17,7 +16,6 @@ import '/modules/vendor/widgets/voucher/vendorVoucher.dart';
 import 'package:badges/badges.dart' as badges;
 import '/services/notificationServices/notificationApi.dart';
 
-
 class VendorDashboardPage extends StatefulWidget {
   const VendorDashboardPage({super.key});
 
@@ -28,18 +26,17 @@ class VendorDashboardPage extends StatefulWidget {
 class _VendorDashboardPageState extends State<VendorDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
-  DrawerSections currentPage = DrawerSections.dashboard;
+  DrawerSections currentPage = DrawerSections.myprofile;
 
   String? userToken;
   bool loadingToken = true;
-   String? vendorId;
+  String? vendorId;
 
   Future<int> fetchUnreadCount() async {
     try {
       final list = await NotificationService.getNotifications();
       return list.where((n) => n.isRead == 0).length;
     } catch (e) {
-      debugPrint("Error fetching unread count: $e");
       return 0;
     }
   }
@@ -62,15 +59,12 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
 
       _pages.clear();
       _pages.addAll([
-        Dashboard(),
-        VendorCustomerPage(vendorId:vendorId ?? ''),
-        VendorVoucherpage(Id:vendorId ?? ''),
-        
+        VendorCustomerPage(vendorId: vendorId ?? ''),
+        VendorVoucherpage(Id: vendorId ?? ''),
       ]);
     });
   }
 
-  
   void _onNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -81,40 +75,34 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
     setState(() {
       currentPage = section;
     });
-
     switch (section) {
       case DrawerSections.dashboard:
-        if (_selectedIndex != 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => VendorVoucherpage(
-              Id:vendorId ?? ''
-            )),
-          );
-        }
+        Navigator.pop(context); 
         break;
+
       case DrawerSections.myprofile:
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => MyProfilePage(),
-          ),
+          MaterialPageRoute(builder: (context) => MyProfilePage()),
         );
         break;
+
       case DrawerSections.changepassword:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+          MaterialPageRoute(builder: (context) => ChangePasswordPage()),
         );
         break;
+
       case DrawerSections.settings:
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const SettingsPage()),
         );
         break;
+
       case DrawerSections.logout:
-        
+        // logout code here
         break;
     }
   }
@@ -176,7 +164,7 @@ class _VendorDashboardPageState extends State<VendorDashboardPage> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const NotificationPage()),
+                            builder: (context) => NotificationPage()),
                       );
                       setState(() {});
                     },

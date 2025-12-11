@@ -105,7 +105,7 @@ class _InsuranceSearchBarState extends State<InsuranceSearchBar> {
                   border: Border.all(
                       color: _isFocused
                           ? Colors.black.withOpacity(0.7)
-                          : Colors.grey.shade300,
+                          : Colors.black,
                       width: _isFocused ? 1.5 : 1),
                   boxShadow: _isFocused
                       ? [
@@ -123,7 +123,7 @@ class _InsuranceSearchBarState extends State<InsuranceSearchBar> {
                   decoration: InputDecoration(
                     hintText: 'Search by type, PAN, Aadhaar...',
                     hintStyle: TextStyle(
-                      fontSize: _isFocused ? 14 : 12,
+                      fontSize: _isFocused ? 12 : 12,
                       color: Colors.grey.shade500,
                     ),
                     prefixIcon: _isFocused

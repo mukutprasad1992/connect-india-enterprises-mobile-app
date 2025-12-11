@@ -20,7 +20,6 @@ class UpdateVoucher {
     required String validityFrom,
     required String validityTo,
   }) async {
-    print("<----id--->$id");
     final url = Uri.parse('$baseUrl/voucher/updateVoucherById/$id');
 
     final Map<String, dynamic> bodyData = {

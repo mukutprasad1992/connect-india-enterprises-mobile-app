@@ -53,7 +53,9 @@ class LoginController {
         await prefs.setBool('KEYLOGIN', true);
         await prefs.setInt('KEYROLEID', data['roleId']);
         await prefs.setInt('KEYLOGINID', data['id']);
-
+        await prefs.setString('profileImg', data['profileImageURL']);
+        await prefs.setString('firstName', data['firstName']);
+        
         // Optional: store extra profile info if needed
         // await prefs.setString('firstName', data['firstName']);
         // await prefs.setString('lastName', data['lastName']);

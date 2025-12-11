@@ -48,8 +48,6 @@ class _InvestmentPageState extends State<InvestmentPage> {
         token: token,
       );
 
-      //print("API response: $response");
-
       final data = response["data"];
       List<InvestmentModel> loadedData = [];
 
@@ -71,7 +69,6 @@ class _InvestmentPageState extends State<InvestmentPage> {
 
       await saveInvestments();
     } catch (e) {
-      //debugPrint(" API fetch failed: $e");
       await _loadInvestments();
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -110,7 +107,6 @@ class _InvestmentPageState extends State<InvestmentPage> {
     setState(() {
       filteredData = investmentData.where((investment) {
         return investment.amount.toString().toLowerCase().contains(query);
-            
       }).toList();
     });
   }
@@ -122,6 +118,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
     });
     saveInvestments();
     _applySearchFilter();
+    _fetchInvestmentsFromApi();
   }
 
   /// Update investment
@@ -131,6 +128,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
     });
     saveInvestments();
     _applySearchFilter();
+    _fetchInvestmentsFromApi();
   }
 
   /// Delete investment
@@ -140,6 +138,7 @@ class _InvestmentPageState extends State<InvestmentPage> {
     });
     saveInvestments();
     _applySearchFilter();
+    _fetchInvestmentsFromApi();
   }
 
   void submitNewInvestment(Map<String, dynamic> investmentData) {
@@ -177,63 +176,120 @@ class _InvestmentPageState extends State<InvestmentPage> {
                       child: isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : RefreshIndicator(
-                            onRefresh:_fetchInvestmentsFromApi,
-                            child: filteredData.isEmpty
-                                ? const Center(
-                                    child: Text('No investment data available.'))
-                                : GridView.builder(
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: isWideScreen ? 2 : 1,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: isWideScreen ? 2.8 : 2.1,
+                              onRefresh: _fetchInvestmentsFromApi,
+                              child: filteredData.isEmpty
+                                  ? const Center(
+                                      child:
+                                          Text('No investment data available.'))
+                                  : GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: isWideScreen ? 2 : 1,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio:
+                                            isWideScreen ? 2.8 : 2.1,
+                                      ),
+                                      itemCount: filteredData.length,
+                                      itemBuilder: (context, index) {
+                                        final investment = filteredData[index];
+                                        return InvestmentSummaryCard(
+                                          row: investment.toJson(),
+                                          index: index,
+                                          token: widget.token,
+                                          onUpdate: (updatedInvestment) =>
+                                              _updateInvestment(
+                                                  index,
+                                                  InvestmentModel.fromJson(
+                                                      updatedInvestment)),
+                                          onDelete: () =>
+                                              _deleteInvestment(index),
+                                          //onReloadParent: _fetchInvestmentsFromApi,
+                                          onReloadParent: () async {
+                                            await _fetchInvestmentsFromApi();
+                                          },
+                                        );
+                                      },
                                     ),
-                                    itemCount: filteredData.length,
-                                    itemBuilder: (context, index) {
-                                      final investment = filteredData[index];
-                                      return InvestmentSummaryCard(
-                                        row: investment.toJson(),
-                                        index: index,
-                                        token: widget.token,
-                                        onUpdate: (updatedInvestment) =>
-                                            _updateInvestment(
-                                                index,
-                                                InvestmentModel.fromJson(
-                                                    updatedInvestment)),
-                                        onDelete: () => _deleteInvestment(index),
-                                      );
-                                    },
-                                  ),
-                          ),
+                            ),
                     ),
                   ],
                 ),
               ),
 
               // Floating Add Button
+              // Positioned(
+              //   bottom: 20,
+              //   left: 0,
+              //   right: 0,
+              //   child: Center(
+              //     child: ElevatedButton(
+              //       onPressed: () async {
+              //         showInvestmentTypeDialog(
+              //           context: context,
+              //           mode: "add",
+              //           token: widget.token,
+              //           submit: "1",
+              //           onSubmit: (investmentData) async {
+              //             setState(() => isLoading = true);
+              //             try {
+              //               submitNewInvestment(investmentData);
+              //               await _fetchInvestmentsFromApi();
+              //               await Future.delayed(const Duration(seconds: 1));
+              //             } finally {
+              //               setState(() => isLoading = false);
+              //             }
+              //             await _fetchInvestmentsFromApi();
+              //           },
+              //         );
+              //         _fetchInvestmentsFromApi();
+              //         // if (created == true) {
+              //         //   if (mounted) setState(() => isLoading = true);
+              //         //   await _fetchInvestmentsFromApi(); // <-- make sure this is actually called
+              //         //   if (mounted) setState(() => isLoading = false);
+              //         // }
+              //       },
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: Colors.deepPurple,
+              //         padding: const EdgeInsets.all(10),
+              //         shape: const CircleBorder(),
+              //       ),
+              //       child: const Icon(Icons.add, color: Colors.white, size: 24),
+              //     ),
+              //   ),
+              // )
+
               Positioned(
                 bottom: 20,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      showInvestmentTypeDialog(
+                    onPressed: () async {
+                      // Open the dialog + stepper and wait for its result (true = final submit success)
+                      final bool? created = await showInvestmentTypeDialog(
                         context: context,
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (investmentData) async{
-                          setState(() => isLoading = true);
-                          try{
-                            submitNewInvestment(investmentData); 
-                            await Future.delayed(const Duration(seconds: 1)); 
-                          }finally{
-                            setState(() => isLoading = false);
-                          }
+                        onSubmit: (investmentData) {
+                          // optional optimistic local insert
+                          submitNewInvestment(investmentData);
+                        },
+                        // This callback will be called by Stepper whenever any section is saved successfully
+                        onAnySectionSaved: () async {
+                          if (mounted) setState(() => isLoading = true);
+                          await _fetchInvestmentsFromApi();
+                          if (mounted) setState(() => isLoading = false);
                         },
                       );
+
+                      // If the Stepper reported final success (user submitted), ensure we refresh once more
+                      if (created == true) {
+                        if (mounted) setState(() => isLoading = true);
+                        await _fetchInvestmentsFromApi();
+                        if (mounted) setState(() => isLoading = false);
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,

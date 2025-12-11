@@ -7,11 +7,13 @@ import '/models/investmentModel.dart';
 class EditInvestmentPage extends StatefulWidget {
   final InvestmentModel investment;
   final String token;
+  final VoidCallback? onReloadParent;
 
   const EditInvestmentPage({
     super.key,
     required this.investment,
-    required this.token
+    required this.token,
+    this.onReloadParent,
   });
 
   @override

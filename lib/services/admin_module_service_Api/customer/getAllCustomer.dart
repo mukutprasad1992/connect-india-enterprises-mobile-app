@@ -1,14 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '/consts/appConstants.dart';
 
 class GetAllCustomer {
   //static const String baseUrl = 'http://192.168.29.161:4000';
 
-  static Future<Map<String, dynamic>> getAllCustomer({
-    required String token,
-  }) async {
+  static Future<String?> getKeyToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("KEYTOKEN");
+  }
+
+  static Future<Map<String, dynamic>> getAllCustomer() async {
     try {
+      final token = await getKeyToken();
       final Uri url = Uri.parse('$baseUrl/customer/getAllCustomer');
 
       final response = await http.get(

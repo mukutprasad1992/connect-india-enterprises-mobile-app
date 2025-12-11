@@ -422,7 +422,6 @@ class _DocumentViewerPageState extends State<DocumentViewerPage> {
         throw Exception("Failed to load PDF");
       }
     } catch (e) {
-      //print("❌ Error loading PDF: $e");
       setState(() => isLoading = false);
     }
   }

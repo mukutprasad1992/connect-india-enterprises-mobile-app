@@ -69,13 +69,21 @@ class _NewVendorCustomerPageState extends State<NewVendorCustomerPage> {
 
         if (response["status"] == true || response["success"] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Customer created successfully!",style:TextStyle(color: Colors.green))),
+            const SnackBar(
+              content: Text("Customer created successfully!"),
+              backgroundColor: Colors.green,
+            ),
+            
           );
           widget.onCompleted(response["id"]?.toString() ?? '');
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response["message"] ?? "Failed to create")),
+            SnackBar(
+              content: Text(response["message"] ?? "Failed to create"),
+              backgroundColor: Colors.red,
+            ),
+
           );
         }
       } else if (widget.mode == "edit") {
@@ -93,19 +101,30 @@ class _NewVendorCustomerPageState extends State<NewVendorCustomerPage> {
 
         if (response["status"] == true || response["success"] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Customer updated successfully!",style:TextStyle(color: Colors.green))),
+            const SnackBar(
+              content: Text("Customer updated successfully!"),
+              backgroundColor: Colors.green,
+            ), 
           );
+          
           widget.onCompleted(id.toString());
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response["message"] ?? "Failed to update")),
+            SnackBar(
+              content: Text(response["message"] ?? "Failed to update"),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+
       );
     } finally {
       setState(() => _isLoading = false);
@@ -193,12 +212,9 @@ class _NewVendorCustomerPageState extends State<NewVendorCustomerPage> {
             label: Text(
               _isLoading
                   ? "Processing..."
-                  : widget.mode == "add"
-                      ? "Submit"
-                      : "Update",
-              style: const TextStyle(
-                  color: Color.fromARGB(255, 31, 19, 19),
-                  fontWeight: FontWeight.w600),
+                  : widget.mode == "add"? "Submit": "Update",
+                  
+              style: const TextStyle(color: Colors.white,fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor:

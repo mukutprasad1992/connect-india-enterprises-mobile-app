@@ -48,8 +48,6 @@ class _InsurancePageState extends State<InsurancePage> {
         token: token,
       );
 
-      //print("API response: $response");
-
       final data = response["data"];
       List<InsuranceModel> loadedData = [];
 
@@ -69,7 +67,6 @@ class _InsurancePageState extends State<InsurancePage> {
 
       await saveInsurance();
     } catch (e) {
-      //debugPrint(" API fetch failed: $e");
       await _loadInsurance();
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -120,6 +117,7 @@ class _InsurancePageState extends State<InsurancePage> {
     });
     saveInsurance();
     _applySearchFilter();
+    _fetchInsuranceFromApi();
   }
 
   /// Update Insurance
@@ -129,6 +127,7 @@ class _InsurancePageState extends State<InsurancePage> {
     });
     saveInsurance();
     _applySearchFilter();
+    _fetchInsuranceFromApi();
   }
 
   /// Delete Insurance
@@ -138,6 +137,7 @@ class _InsurancePageState extends State<InsurancePage> {
     });
     saveInsurance();
     _applySearchFilter();
+    _fetchInsuranceFromApi();
   }
 
   void submitNewInsurance(Map<String, dynamic> insuranceData) {
@@ -201,8 +201,10 @@ class _InsurancePageState extends State<InsurancePage> {
                                                   index,
                                                   InsuranceModel.fromJson(
                                                       updatedInsurance)),
-                                          onDelete: () =>
-                                              _deleteInsurance(index),
+                                          onDelete: () =>_deleteInsurance(index),
+                                          onReloadParent: () async {
+                                            await _fetchInsuranceFromApi();
+                                          },
                                         );
                                       },
                                     ),
@@ -219,23 +221,49 @@ class _InsurancePageState extends State<InsurancePage> {
                 right: 0,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      showInsuranceTypeDialog(
+                    onPressed: () async {
+                      // Open the dialog + stepper and wait for its result (true = final submit success)
+                      final bool? created = await showInsuranceTypeDialog(
                         context: context,
                         mode: "add",
                         token: widget.token,
                         submit: "1",
-                        onSubmit: (insuranceData) async {
-                          setState(() => isLoading = true);
-                          try {
-                            submitNewInsurance(insuranceData);
-                            await Future.delayed(const Duration(seconds: 1));
-                          } finally {
-                            setState(() => isLoading = false);
-                          }
+                        onSubmit: (insuranceData) {
+                          // optional optimistic local insert
+                          submitNewInsurance(insuranceData);
+                        },
+                        // This callback will be called by Stepper whenever any section is saved successfully
+                        onAnySectionSaved: () async {
+                          if (mounted) setState(() => isLoading = true);
+                          await _fetchInsuranceFromApi();
+                          if (mounted) setState(() => isLoading = false);
                         },
                       );
+
+                      // If the Stepper reported final success (user submitted), ensure we refresh once more
+                      if (created == true) {
+                        if (mounted) setState(() => isLoading = true);
+                        await _fetchInsuranceFromApi();
+                        if (mounted) setState(() => isLoading = false);
+                      }
                     },
+                    // onPressed: () async {
+                    //   showInsuranceTypeDialog(
+                    //     context: context,
+                    //     mode: "add",
+                    //     token: widget.token,
+                    //     submit: "1",
+                    //     onSubmit: (insuranceData) async {
+                    //       setState(() => isLoading = true);
+                    //       try {
+                    //         submitNewInsurance(insuranceData);
+                    //         await Future.delayed(const Duration(seconds: 1));
+                    //       } finally {
+                    //         setState(() => isLoading = false);
+                    //       }
+                    //     },
+                    //   );
+                    // },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       padding: const EdgeInsets.all(10),
@@ -245,6 +273,7 @@ class _InsurancePageState extends State<InsurancePage> {
                   ),
                 ),
               )
+
             ],
           );
         },

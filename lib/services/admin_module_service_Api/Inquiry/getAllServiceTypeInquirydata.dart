@@ -1,16 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '/consts/appConstants.dart';
 
 class InquiryService {
   //static const String baseUrl = 'http://192.168.29.161:4000';
 
-  static Future<Map<String, dynamic>> getAllServiceTypes({
-    required String token,
-  }) async {
+  static Future<String?> getKeyToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("KEYTOKEN");
+  }
+
+  static Future<Map<String, dynamic>> getAllServiceTypes() async {
     try {
       final Uri url = Uri.parse('$baseUrl/serviceType/getAllServiceType');
-
+      final token = await getKeyToken(); 
       final response = await http.get(
         url,
         headers: {
@@ -20,12 +24,10 @@ class InquiryService {
       );
 
       // Debugging log
-      //print("🔹 API Response Status: ${response.statusCode}");
-      //print("🔹 API Response Body: ${response.body}");
+
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        //print("--responseData-------${responseData}");
         return responseData;
       } else if (response.statusCode == 401) {
         throw Exception("Unauthorized: Token is invalid or expired");

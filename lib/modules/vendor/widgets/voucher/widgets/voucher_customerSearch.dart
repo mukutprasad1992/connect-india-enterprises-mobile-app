@@ -31,7 +31,7 @@ class _VoucherCustomerSearchState extends State<VoucherCustomerSearch> {
 
     searchController.addListener(() {
       _filterData();
-      setState(() {}); // To update suffix icons dynamically
+      setState(() {});
     });
 
     _focusNode.addListener(() {
@@ -83,13 +83,14 @@ class _VoucherCustomerSearchState extends State<VoucherCustomerSearch> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Customers',
+                    'Vouchers',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                 ),
               ),
+
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: inputWidth.clamp(160.0, availableWidth),
@@ -115,9 +116,9 @@ class _VoucherCustomerSearchState extends State<VoucherCustomerSearch> {
                 decoration: InputDecoration(
                   hintText: 'Search...',
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                        height: _isFocused ? 1.4 : 2.0,
-                      ),
+                    color: Colors.grey,
+                    height: _isFocused ? 1.4 : 2.0,
+                  ),
                   prefixIcon: _isFocused
                       ? IconButton(
                           icon: const Icon(Icons.arrow_back),
@@ -129,6 +130,7 @@ class _VoucherCustomerSearchState extends State<VoucherCustomerSearch> {
                           },
                         )
                       : const Icon(Icons.search),
+
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -153,15 +155,17 @@ class _VoucherCustomerSearchState extends State<VoucherCustomerSearch> {
                         ),
                     ],
                   ),
+
                   isDense: true,
                   contentPadding: _isFocused
                       ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
                       : const EdgeInsets.only(top: 18, left: 12),
+
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+                    
                   ),
                 ),
               ),

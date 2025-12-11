@@ -81,8 +81,6 @@ class _ContactDetailsState extends State<ContactDetails> {
         alternateNo: widget.alternateNoController.text.trim(),
         landmark: widget.landmarkController.text.trim(),
       );
-      print("📥 API Response --------------: $res");
-
       if (res['status'] == true) {
         final dbId =
             res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();

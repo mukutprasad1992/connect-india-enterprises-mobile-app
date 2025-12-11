@@ -5,11 +5,13 @@ import '/models/loanModel.dart';
 class EditLoanPage extends StatefulWidget {
   final LoanModel loan;
   final String token;
+  final VoidCallback? onReloadParent;
 
   const EditLoanPage({
     super.key,
     required this.loan,
-    required this.token
+    required this.token,
+    this.onReloadParent,
   });
 
   @override

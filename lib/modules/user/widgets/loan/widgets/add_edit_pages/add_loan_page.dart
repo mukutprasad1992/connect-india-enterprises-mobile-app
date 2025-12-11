@@ -3,12 +3,14 @@ import '/modules/user/widgets/loan/widgets/form_loan/loanHorzontle.dart';
 
 class AddLoanPage extends StatelessWidget {
   final String token;
+  final VoidCallback? onReloadParent;
   //final String tempSelection;
 
   const AddLoanPage({
     super.key, 
     //required this.tempSelection,
     required this.token,
+    this.onReloadParent,
   });
 
   @override

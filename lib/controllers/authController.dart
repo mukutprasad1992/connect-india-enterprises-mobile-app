@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-import '/modules/admin/admin_dashboard.dart';
+import '../modules/admin/dashboard.dart';
 import '/modules/vendor/vendor_dashboard.dart';
-import '/modules/user/user_dashboard.dart';
+import '../modules/user/dashboard.dart';
 import '/views/login/login_page.dart';
 
 
@@ -20,13 +20,13 @@ class AuthController {
     final isLoggedIn = prefs.getBool('KEYLOGIN') ?? false;
     final token = prefs.getString('KEYTOKEN');
     final roleId = prefs.getInt('KEYROLEID') ?? 0;
-
+  
     
     final hasNoToken = token == null || token.isEmpty;
     final isTokenExpired = token != null && JwtDecoder.isExpired(token);
 
     //  If not logged in, no token, or token expired → logout
-
+   
     if (!isLoggedIn || hasNoToken || isTokenExpired) {
       _logoutAndRedirect(context, prefs);
       return;

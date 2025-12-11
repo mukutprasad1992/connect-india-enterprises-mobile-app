@@ -5,11 +5,13 @@ import '/models/insuranceModel.dart';
 class EditInsurancePage extends StatefulWidget {
   final InsuranceModel insurance;
   final String token;
+  final VoidCallback? onReloadParent;
 
   const EditInsurancePage({
     super.key,
     required this.insurance,
-    required this.token
+    required this.token,
+    this.onReloadParent,
   });
 
   @override

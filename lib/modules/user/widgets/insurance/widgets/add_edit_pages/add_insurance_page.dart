@@ -3,10 +3,12 @@ import '/modules/user/widgets/insurance/widgets/form_insurance/insuranceHorzontl
 
 class AddInsurancePage extends StatelessWidget {
   final String token;
+  final VoidCallback? onReloadParent;
 
   const AddInsurancePage({
     super.key, 
     required this.token,
+    this.onReloadParent,
   });
 
   @override

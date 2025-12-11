@@ -18,6 +18,7 @@ class StepperFormPage extends StatefulWidget {
   final String token;
   final InsuranceModel? insurance;
   final String submit;
+  final Function()? onAnySectionSaved;
 
   StepperFormPage({
     super.key,
@@ -25,6 +26,7 @@ class StepperFormPage extends StatefulWidget {
     required this.mode,
     this.insurance,
     required this.token,
+    this.onAnySectionSaved,
   });
 
   @override
@@ -248,6 +250,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
         );
 
         if (res['status'] == true) {
+          widget.onAnySectionSaved?.call();
           DBId =
               res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
 
@@ -316,9 +319,9 @@ class _StepperFormPageState extends State<StepperFormPage> {
                   ? itrFile!
                   : "Null",
         );
-        //debugPrint("Building UI → AadharFile📤: $aadharFile");
 
         if (res['status'] == true) {
+          widget.onAnySectionSaved?.call();
           String message = "";
           switch (section) {
             case "personalDetails":
@@ -354,7 +357,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
         return DBId;
       }
     } catch (e) {
-      //debugPrint(" Error updating section [$section]: $e");
       _showError("Failed to save $section: ${e.toString()}");
       return DBId;
     }
@@ -387,6 +389,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           );
 
           if (res['status'] == true) {
+            widget.onAnySectionSaved?.call();
             completedSteps.add(currentStep);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

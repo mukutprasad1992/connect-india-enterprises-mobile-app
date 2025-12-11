@@ -10,6 +10,7 @@ class LoanActionButtons extends StatelessWidget {
   final VoidCallback onDelete;
   final ValueChanged<Map<String, dynamic>> onUpdate;
   final String token;
+  final Future<void> Function()? onReloadParent;
 
   const LoanActionButtons({
     super.key,
@@ -18,6 +19,7 @@ class LoanActionButtons extends StatelessWidget {
     required this.index,
     required this.onDelete,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   @override
@@ -39,25 +41,39 @@ class LoanActionButtons extends StatelessWidget {
             break;
 
           case 'edit':
-            if (loan is Map<String, dynamic>) {
-              final updatedLoan = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditLoanPage(
-                    loan: LoanModel.fromJson(loan),
-                    token: token,
+            if (loan is Map<String, dynamic>)
+              try {
+                final updatedLoan = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditLoanPage(
+                        loan: LoanModel.fromJson(loan),
+                        token: token,
+                        onReloadParent: onReloadParent),
                   ),
-                ),
-              );
-              if (updatedLoan != null) {
-                onUpdate(updatedLoan);
+                );
+                if (updatedLoan != null) {
+                  onUpdate(updatedLoan);
+                  _showSnackBar(
+                    context,
+                    'Loan Updated Successfully!',
+                    Colors.green,
+                  );
+                }
+                if (onReloadParent != null) {
+                  // optional debug
+                  // print("Calling onReloadParent from InvestmentActionButtons after edit");
+                  await onReloadParent!();
+                }
+              }
+              catch (e) {
                 _showSnackBar(
                   context,
-                  'Loan Updated Successfully!',
-                  Colors.green,
+                  'Error while editing: ${e.toString()}',
+                  Colors.red,
                 );
               }
-            } else {
+            else {
               _showSnackBar(
                 context,
                 'Invalid loan data received.',
@@ -115,7 +131,7 @@ class LoanActionButtons extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              await _deleteLoan(context); 
+              await _deleteLoan(context);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
@@ -155,7 +171,7 @@ class LoanActionButtons extends StatelessWidget {
         id: id,
       );
 
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
 
       if (result["status"] == true) {
         onDelete();
@@ -172,7 +188,7 @@ class LoanActionButtons extends StatelessWidget {
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
       _showSnackBar(
         context,
         "Error deleting loan: $e",
@@ -180,7 +196,7 @@ class LoanActionButtons extends StatelessWidget {
       );
     }
   }
-  
+
   void _showSnackBar(BuildContext context, String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

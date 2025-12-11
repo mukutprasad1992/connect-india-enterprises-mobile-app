@@ -9,13 +9,12 @@ import '/services/admin_module_service_Api/vendor/updateVendor.dart';
 class NewVendorPage extends StatefulWidget {
   final String mode;
   final String? dbId;
-  final String token;
   final Map<String, dynamic> vendor;
   final Function(String dbId) onCompleted;
 
   const NewVendorPage({
     Key? key,
-    required this.token,
+
     required this.mode,
     required this.vendor,
     this.dbId,
@@ -51,12 +50,6 @@ class _NewVendorPageState extends State<NewVendorPage> {
     try {
       final ven = widget.vendor;
 
-      //print("🟩 Prefilling vendor data: $ven");
-
-      // ven.forEach((k, v) {
-      //   print("  $k => ${v.runtimeType} : $v");
-      // });
-
       dbId = widget.dbId ?? ven["id"]?.toString() ?? ven["_id"]?.toString() ?? "";
 
       _businessNameController.text = ven["businessName"]?.toString() ?? '';
@@ -65,11 +58,7 @@ class _NewVendorPageState extends State<NewVendorPage> {
       _phoneController.text = ven["mobileNo"]?.toString() ?? '';
       _vendorCodeController.text = ven["vendorCode"]?.toString() ?? '';
       _addressController.text = ven["address"]?.toString() ?? '';
-
-      //print(" Prefill success: ${_businessNameController.text}");
     } catch (e, s) {
-      //print(" Prefill error caught: $e");
-      //print(s);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Prefill error: $e"),
@@ -116,10 +105,6 @@ class _NewVendorPageState extends State<NewVendorPage> {
         "status": "Enable",
       };
 
-      print("🟦 Submitting vendor data:");
-      data.forEach((k, v) => print("  $k => ${v.runtimeType} : $v"));
-      print("🟩 dbId = $dbId (${dbId.runtimeType})");
-
       Map<String, dynamic> result;
 
       if (widget.mode == "add") {
@@ -160,7 +145,6 @@ class _NewVendorPageState extends State<NewVendorPage> {
           vendorCode: data["vendorCode"],
           address: data["address"],
           status: data["status"]!,
-          token: widget.token,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,8 +162,6 @@ class _NewVendorPageState extends State<NewVendorPage> {
         Navigator.pop(context, dbId);
       });
     } catch (e, s) {
-      print("❌ Submit error: $e");
-      print(s);
       _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -270,7 +252,7 @@ class _NewVendorPageState extends State<NewVendorPage> {
                       ? "Submit"
                       : "Update",
               style: const TextStyle(
-                  color: Color.fromARGB(255, 31, 19, 19), fontWeight: FontWeight.w600),
+                  color: Colors.white ,fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor:

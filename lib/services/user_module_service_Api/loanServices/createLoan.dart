@@ -66,8 +66,6 @@ class CreateLoanService {
         body: jsonEncode(bodyData),
       );
 
-      //print(" [CreateServiceType] Raw Response => ${response.body}");
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonResponse = jsonDecode(response.body);
         if (jsonResponse['status'] != true) {

@@ -8,12 +8,12 @@ import 'widgets/vendorSummaryCard.dart';
 import 'widgets/vendor_Searchbar.dart';
 
 class VendorTablePage extends StatefulWidget {
-  final String token;
+
   final Map<String, dynamic>? vendor;
   final String? dbId;
   const VendorTablePage({
     super.key,
-    required this.token,
+
     this.vendor,
     this.dbId,
   });
@@ -24,8 +24,8 @@ class VendorTablePage extends StatefulWidget {
 
 class _VendorTablePageState extends State<VendorTablePage> {
   final TextEditingController searchController = TextEditingController();
-  List<Vendor> vendorData = [];
-  List<Vendor> filteredData = [];
+  List<VendorModel> vendorData = [];
+  List<VendorModel> filteredData = [];
   bool isLoading = false;
 
   @override
@@ -40,15 +40,7 @@ class _VendorTablePageState extends State<VendorTablePage> {
   Future<void> _loadVendorsFromApi() async {
     setState(() => isLoading = true);
     try {
-      final token = widget.token.isNotEmpty
-          ? widget.token
-          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
-
-      if (token == null) {
-        _redirectToLogin();
-        return;
-      }
-      final vendors = await VendorApi.fetchVendorsData();
+      final vendors = await GetAllVendorApi.getAllvendor();
       for (var v in vendors) {}
       setState(() {
         vendorData = vendors;
@@ -69,11 +61,11 @@ class _VendorTablePageState extends State<VendorTablePage> {
     }
   }
 
-  void _redirectToLogin() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, "/login");
-    }
-  }
+  // void _redirectToLogin() {
+  //   if (mounted) {
+  //     Navigator.pushReplacementNamed(context, "/login");
+  //   }
+  // }
 
   void _filterData() {
     String query = searchController.text.toLowerCase();
@@ -89,14 +81,14 @@ class _VendorTablePageState extends State<VendorTablePage> {
       }).toList();
     });
   }
-  void _updateVendor(int index, Vendor updatedVendor) {
+  void _updateVendor(int index, VendorModel updatedVendor) {
     setState(() {
       vendorData[index] = updatedVendor;
       _filterData();
     });
   }
 
-  void _toggleVendorBlockStatus(int index, Vendor updatedVendor) {
+  void _toggleVendorBlockStatus(int index, VendorModel updatedVendor) {
     setState(() {
       vendorData[index] = updatedVendor;
       _filterData();
@@ -128,7 +120,7 @@ class _VendorTablePageState extends State<VendorTablePage> {
                       onSearchResult: (filteredList) {
                         setState(() {
                           filteredData = filteredList
-                              .map<Vendor>((row) => Vendor.fromJson(row))
+                              .map<VendorModel>((row) => VendorModel.fromJson(row))
                               .toList();
                         });
                       },
@@ -161,12 +153,12 @@ class _VendorTablePageState extends State<VendorTablePage> {
                                   return VendorSummaryCard(
                                     row: vendor.toJson(),
                                     index: index,
-                                    token: widget.token,
+                                    
                                     onUpdate: (i, updated) => _updateVendor(
-                                        i, Vendor.fromJson(updated)),
+                                        i, VendorModel.fromJson(updated)),
                                     onBlockToggle: (i, updated) =>
                                         _toggleVendorBlockStatus(
-                                            i, Vendor.fromJson(updated)),
+                                            i, VendorModel.fromJson(updated)),
                                     setLoading: (val) {
                                       setState(() {
                                         isLoading = val;
@@ -194,7 +186,7 @@ class _VendorTablePageState extends State<VendorTablePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => NewVendorPage(
-                            token: widget.token,
+                           
                             mode: "add",
                             vendor: {},
                             onCompleted: (dbId) {

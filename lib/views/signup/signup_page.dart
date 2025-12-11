@@ -78,27 +78,6 @@ class _SignupPageState extends State<SignupPage> {
                     fontSize: 13,
                   ),
                   decoration: _inputDecoration("Enter your email"),
-                  // hintText: "Enter your email",
-                  // isDense: true,
-                  // contentPadding:
-                  //     EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-                  // enabledBorder: OutlineInputBorder(
-                  //   borderRadius: BorderRadius.circular(6),
-                  //   borderSide: BorderSide(color: Colors.grey.shade400),
-                  // ),
-                  // focusedBorder: OutlineInputBorder(
-                  //   borderRadius: BorderRadius.circular(6),
-                  //   borderSide: const BorderSide(color: Colors.deepPurple),
-                  // ),
-                  // errorBorder: OutlineInputBorder(
-                  //   borderRadius: BorderRadius.circular(6),
-                  //   borderSide: const BorderSide(color: Colors.deepPurple),
-                  // ),
-                  // focusedErrorBorder: OutlineInputBorder(
-                  //   borderRadius: BorderRadius.circular(6),
-                  //   borderSide: const BorderSide(color: Colors.deepPurple),
-                  // ),
-                  //),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Email is required';
                     if (!controller.emailRegExp.hasMatch(v))
@@ -106,6 +85,7 @@ class _SignupPageState extends State<SignupPage> {
                     return null;
                   },
                   onSaved: (v) => controller.email = v!.trim(),
+                  
                 ),
                 const SizedBox(height: 15),
 
@@ -138,11 +118,6 @@ class _SignupPageState extends State<SignupPage> {
                     LengthLimitingTextInputFormatter(10),
                   ],
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  // style: const TextStyle(
-                  //   fontFamily: 'Manrope',
-                  //   fontWeight: FontWeight.w600,
-                  //   fontSize: 13,
-                  // ),
                   decoration:
                       _inputDecoration("Enter your phone number").copyWith(
                     prefixIcon: const Padding(
@@ -158,26 +133,6 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
                     ),
-                    // hintText: "Enter your phone number",
-                    // isDense: true,
-                    // contentPadding: const EdgeInsets.symmetric(
-                    //     horizontal: 13, vertical: 10),
-                    // enabledBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: BorderSide(color: Colors.grey.shade400),
-                    // ),
-                    // focusedBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // errorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // focusedErrorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty)
@@ -214,31 +169,7 @@ class _SignupPageState extends State<SignupPage> {
                 TextFormField(
                   obscureText: controller.obscurePassword,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  // style: const TextStyle(
-                  //     fontFamily: 'Manrope',
-                  //     fontWeight: FontWeight.w600,
-                  //     fontSize: 13),
                   decoration: _inputDecoration("Enter your password").copyWith(
-                    // hintText: "Enter your password",
-                    // isDense: true,
-                    // contentPadding: const EdgeInsets.symmetric(
-                    //     horizontal: 13, vertical: 10),
-                    // enabledBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: BorderSide(color: Colors.grey.shade400),
-                    // ),
-                    // focusedBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // errorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // focusedErrorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.obscurePassword
@@ -291,27 +222,7 @@ class _SignupPageState extends State<SignupPage> {
                   //   fontSize: 13
                   // ),
                   decoration:
-                      _inputDecoration("Re-enter your password").copyWith(
-                    // hintText: "Re-enter your password",
-                    // isDense: true,
-                    // contentPadding: const EdgeInsets.symmetric(
-                    //     horizontal: 13, vertical: 10),
-                    // enabledBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: BorderSide(color: Colors.grey.shade400),
-                    // ),
-                    // focusedBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // errorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
-                    // focusedErrorBorder: OutlineInputBorder(
-                    //   borderRadius: BorderRadius.circular(6),
-                    //   borderSide: const BorderSide(color: Colors.deepPurple),
-                    // ),
+                    _inputDecoration("Re-enter your password").copyWith(
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.obscureConfirm
@@ -347,7 +258,7 @@ class _SignupPageState extends State<SignupPage> {
                             setState(() => _isLoading = true);
 
                             await controller.submitForm(
-                                context, () => setState(() {}));
+                              context, () => setState(() {}));
 
                             setState(() => _isLoading = false);
                           },

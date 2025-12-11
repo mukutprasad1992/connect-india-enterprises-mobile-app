@@ -46,7 +46,7 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
   bool _isLoading = false;
   String? dbId;
   String? selectedVendor;
-  List<Vendor> vendorList = [];
+  List<VendorModel> vendorList = [];
   String? selectedCustomer;
   List<VendorCustomerModel> customerList = [];
 
@@ -55,22 +55,15 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
 
   DateTime? _validityFrom;
   DateTime? _validityTo;
-  //  @override
-  // void initState() {
-  //   super.initState();
-  //   _loadVendors();
-  // }
 
   Future<void> _loadVendors() async {
     try {
-      List<Vendor> vendors = await VendorApi.fetchVendorsData();
+      List<VendorModel> vendors = await GetAllVendorApi.getAllvendor();
       setState(() {
         vendorList = vendors;
         isLoadingVendors = false;
       });
-    } catch (e) {
-      //print('Error loading vendors: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _loadCustomers(String vendorId) async {
@@ -87,7 +80,6 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
         customerList = customers;
       });
     } catch (e) {
-      //print('Error loading customers: $e');
     } finally {
       setState(() {
         isLoadingCustomers = false;
@@ -318,29 +310,7 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
     );
   }
 
-  // Widget _buildDropdownField({
-  //   required String label,
-  //   required IconData icon,
-  //   required String? value,
-  //   required List<DropdownMenuItem<String>> items,
-  //   required Function(String?) onChanged,
-  //   String? Function(String?)? validator,
-  //   bool isLoading = false,
-  // }) {
-  //   return isLoading
-  //       ? const Center(child: CircularProgressIndicator())
-  //       : DropdownButtonFormField<String>(
-  //           decoration: InputDecoration(
-  //             labelText: label,
-  //             prefixIcon: Icon(icon),
-  //             border: const OutlineInputBorder(),
-  //           ),
-  //           value: value,
-  //           items: items,
-  //           onChanged: onChanged,
-  //           validator: validator,
-  //         );
-  // }
+ 
 
   Widget _buildButtons() {
     return Row(
@@ -436,16 +406,12 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
               child: Column(
                 children: [
                   DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Vendor',
-                      prefixIcon: Icon(Icons.store),
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: _inputDecoration('Vendor', Icons.store, required: true),
                     value: selectedVendor,
                     items: vendorList.map((vendor) {
                       return DropdownMenuItem<String>(
                         value: vendor.id.toString(),
-                        child: Text(vendor.businessName),
+                        child: Text(vendor.businessName,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400),),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -464,38 +430,27 @@ class _GenerateEditVoucherPageState extends State<GenerateEditVoucherPage> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  // _buildTextField(
-                  //   label: 'Customer Name',
-                  //   icon: Icons.person,
-                  //   controller: customerId,
-                  //   keyboardType: TextInputType.number,
-                  //   validator: VoucherController.validatecustomerName,
-                  // ),
-                  // 🔽 Customer Dropdown (dependent)
                   isLoadingCustomers
-                      ? const CircularProgressIndicator()
-                      : DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Customer Name',
-                            prefixIcon: Icon(Icons.person),
-                            border: OutlineInputBorder(),
-                          ),
-                          value: selectedCustomer,
-                          items: customerList.map((customer) {
-                            return DropdownMenuItem<String>(
-                              value: customer.id.toString(),
-                              child: Text(customer.name ?? 'N/A'),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCustomer = value;
-                            });
-                          },
-                          validator: (value) =>
-                              value == null ? 'Please select a customer' : null,
-                        ),
+                  ? const CircularProgressIndicator()
+                  : DropdownButtonFormField<String>(
+                      decoration: _inputDecoration('Customer Name', Icons.person, required: true),
+                      value: selectedCustomer,
+                      items: customerList.map((customer) {
+                      return DropdownMenuItem<String>(
+                        value: customer.id.toString(),
+                        child: Text(customer.name ?? 'N/A',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400),),
+                      );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCustomer = value;
+                        });
+                      },
+                      validator: (value) =>
+                      value == null ? 'Please select a customer' : null,
+                    ),
                   const SizedBox(height: 18),
+
                   _buildTextField(
                     label: 'Amount',
                     icon: Icons.attach_money,

@@ -7,8 +7,7 @@ import '../../../../services/admin_module_service_Api/Inquiry/getAllServiceTypeI
 import '/models/inquiryModel.dart';
 
 class InqueryTablePage extends StatefulWidget {
-  final String token;
-  const InqueryTablePage({super.key, required this.token});
+  const InqueryTablePage({super.key});
 
   @override
   State<InqueryTablePage> createState() => _InqueryTablePageState();
@@ -35,16 +34,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token =
-          widget.token.isNotEmpty ? widget.token : prefs.getString("KEYTOKEN");
-
-      if (token == null || token.isEmpty) {
-        _redirectToLogin();
-        return;
-      }
-
-      final response = await InquiryService.getAllServiceTypes(token: token);
+      final response = await InquiryService.getAllServiceTypes();
       final data = response["data"];
 
       List<InquiryModel> loadedData = [];
@@ -98,11 +88,11 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
   }
 
 
-  void _redirectToLogin() {
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, "/login");
-    }
-  }
+  // void _redirectToLogin() {
+  //   if (mounted) {
+  //     Navigator.pushReplacementNamed(context, "/login");
+  //   }
+  // }
 
 
   void _filterInquiries(String query) {
@@ -115,7 +105,8 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
           (item.id ?? '').toLowerCase().contains(query) ||
           (item.panNumber ?? '').toLowerCase().contains(query) ||
           (item.status ?? '').toLowerCase().contains(query)||
-          (item.serviceId ?? '').toLowerCase().contains(query);
+            (item.serviceId ?? '').toLowerCase().contains(query) ||
+            (item.email ?? '').toLowerCase().contains(query);
 
       }).toList();
     });
@@ -180,7 +171,7 @@ class _InqueryTablePageState extends State<InqueryTablePage> {
                                 itemBuilder: (context, index) {
                                   final row = filteredData[index];
                                   return InquirySummaryCard(
-                                    token: widget.token,
+                                    
                                     row: row,
                                     onStatusChanged: _onStatusChanged,
                                     setLoading: _setLoading,

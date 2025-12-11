@@ -15,15 +15,11 @@ class UpdateVoucherStatus {
     required String status,
     
   }) async {
-    print("<--------id------->$id");
     final url = Uri.parse('$baseUrl/voucher/updateVoucherStatusById/$id');
     final Map<String, dynamic> body = {"status": status.trim()};
 
-    print("<-----body------>$body");
-
     try {
       final token = await getKeyToken();
-      print("<-----token------>$token");
       final response = await http.put(
         url,
         headers: {
@@ -32,10 +28,6 @@ class UpdateVoucherStatus {
         },
         body: jsonEncode(body),
       );
-
-      //print("🔹 Response Code: ${response.statusCode}");
-      //print("🔹 Response Body: ${response.body}");
-      print("<-----response------>$response");
       if (response.statusCode == 401) {
         return {
           "status": false,

@@ -19,11 +19,12 @@ class CustomBottomNavBar extends StatelessWidget {
       backgroundColor: Colors.white,
       selectedItemColor: Colors.red[800],
       unselectedItemColor: Colors.grey,
+
+      iconSize: 20, 
+      selectedFontSize: 11, 
+      unselectedFontSize: 10, 
+
       items: const [
-        BottomNavigationBarItem(
-          icon: Tooltip(message: 'Dashboard', child: Icon(Icons.dashboard_rounded)),
-          label: 'Dashboard',
-        ),
         BottomNavigationBarItem(
           icon: Tooltip(message: 'Customer', child: Icon(Icons.support_agent_rounded)),
           label: 'Customer',
@@ -37,3 +38,4 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 }
+

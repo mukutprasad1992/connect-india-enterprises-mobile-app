@@ -1,4 +1,4 @@
-class Vendor {
+class VendorModel {
   final int id;
   final String email;
   final String mobileNo;
@@ -9,7 +9,7 @@ class Vendor {
   final String status;
   final DateTime createdAt;
 
-  Vendor({
+  VendorModel({
     required this.id,
     required this.email,
     required this.mobileNo,
@@ -21,8 +21,8 @@ class Vendor {
     required this.createdAt,
   });
 
-  factory Vendor.fromJson(Map<String, dynamic> json) {
-    return Vendor(
+  factory VendorModel.fromJson(Map<String, dynamic> json) {
+    return VendorModel(
       id: json['id'],
       email: json['email'] ?? '',
       mobileNo: json['mobileNo'] ?? '',

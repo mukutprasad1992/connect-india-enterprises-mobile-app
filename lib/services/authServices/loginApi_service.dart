@@ -26,7 +26,6 @@ class ApiService {
         };
       }
     } catch (e) {
-      //print("Login error: $e");
       return {
         "status": false,
         "message": "Unable to connect to server",

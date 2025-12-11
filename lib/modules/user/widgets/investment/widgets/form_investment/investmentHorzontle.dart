@@ -18,6 +18,7 @@ class StepperFormPage extends StatefulWidget {
   final String token;
   final InvestmentModel? investment;
   final String submit;
+  final Function()? onAnySectionSaved;
 
   StepperFormPage({
     super.key,
@@ -25,6 +26,7 @@ class StepperFormPage extends StatefulWidget {
     required this.mode,
     this.investment,
     required this.token,
+    this.onAnySectionSaved,
   });
 
   @override
@@ -65,6 +67,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
   final _nomineeMobileController = TextEditingController();
   final _nomineeRelationController = TextEditingController();
   final _incomeController = TextEditingController();
+  
 
   int _currentStep = 1;
   int _viewStep = 1;
@@ -255,8 +258,8 @@ class _StepperFormPageState extends State<StepperFormPage> {
         );
 
         if (res['status'] == true) {
-          DBId =
-              res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
+          widget.onAnySectionSaved?.call();
+          DBId =  res['data']?['_id']?.toString() ?? res['data']?['id']?.toString();
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -321,9 +324,10 @@ class _StepperFormPageState extends State<StepperFormPage> {
                   ? itrFile!
                   : "Null",
         );
-        //debugPrint("Building UI → AadharFile📤: $aadharFile");
+
 
         if (res['status'] == true) {
+          widget.onAnySectionSaved?.call();
           String message = "";
           switch (section) {
             
@@ -360,7 +364,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
         return DBId;
       }
     } catch (e) {
-      //debugPrint(" Error updating section [$section]: $e");
       _showError("Failed to save $section: ${e.toString()}");
       return DBId;
     }
@@ -392,6 +395,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
           );
 
           if (res['status'] == true) {
+            widget.onAnySectionSaved?.call();
             completedSteps.add(_currentStep);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

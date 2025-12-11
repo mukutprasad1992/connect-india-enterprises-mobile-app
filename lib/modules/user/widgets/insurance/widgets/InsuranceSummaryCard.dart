@@ -7,6 +7,7 @@ class InsuranceSummaryCard extends StatelessWidget {
   final String token;
   final ValueChanged<Map<String, dynamic>> onUpdate;
   final VoidCallback onDelete;
+  final Future<void> Function()? onReloadParent;
 
   const InsuranceSummaryCard({
     super.key,
@@ -15,6 +16,7 @@ class InsuranceSummaryCard extends StatelessWidget {
     required this.index,
     required this.onDelete,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   IconData _getStatusIcon(String status) {
@@ -94,6 +96,7 @@ class InsuranceSummaryCard extends StatelessWidget {
                         index: index,
                         onUpdate: onUpdate,
                         onDelete: onDelete,
+                        onReloadParent:onReloadParent,
                       ),
                     ],
                   ),

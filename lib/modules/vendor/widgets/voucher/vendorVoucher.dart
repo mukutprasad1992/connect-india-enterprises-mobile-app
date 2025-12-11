@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/modules/vendor/widgets/voucher/widgets/voucher_customerSearch.dart';
 import '/models/vendor_module/vendor_voucherModel.dart';
 import '/services/vendor_module_service_Api/VendorCustomer_Voucher/getAllVoucherByVendor.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
+
+
 
 class VendorVoucherpage extends StatefulWidget {
   final String Id;
@@ -13,7 +16,6 @@ class VendorVoucherpage extends StatefulWidget {
 }
 
 class _VendorVoucherpageState extends State<VendorVoucherpage> {
-  final TextEditingController searchController = TextEditingController();
   List<VoucherModel> voucherData = [];
   List<VoucherModel> filteredData = [];
   bool isLoading = false;
@@ -22,50 +24,30 @@ class _VendorVoucherpageState extends State<VendorVoucherpage> {
   void initState() {
     super.initState();
     fetchVouchers();
-    searchController.addListener(_filterVouchers);
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
   }
 
   Future<void> fetchVouchers() async {
     setState(() => isLoading = true);
+
     try {
       final vouchers = await GetAllVoucher.getAllVoucherByVendor();
+
       setState(() {
         voucherData = vouchers;
         filteredData = List.from(vouchers);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  void _filterVouchers() {
-    final query = searchController.text.toLowerCase();
-    setState(() {
-      filteredData = voucherData.where((v) {
-        return v.amount!.toLowerCase().contains(query) ||
-            v.customerName!.toLowerCase().contains(query) ||
-            v.customerEmail!.toLowerCase().contains(query) ||
-            v.status!.toLowerCase().contains(query);
-      }).toList();
-    });
-  }
-
-  void _clearSearch() {
-    searchController.clear();
-    FocusScope.of(context).unfocus();
-    setState(() {
-      filteredData = List.from(voucherData);
-    });
-  }
+  /// Convert VoucherModel → Map (for Search widget only)
+  List<Map<String, dynamic>> get voucherDataMap =>
+      voucherData.map((v) => v.toJson()).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -78,44 +60,44 @@ class _VendorVoucherpageState extends State<VendorVoucherpage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // 🔍 Integrated Search Bar
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: _clearSearch,
-                                )
-                              : null,
-                          hintText: 'Search customers...',
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                        ),
-                      ),
-                    ),
-                  ],
+                // 🔍 SEARCH WIDGET (SEPARATE FILE)
+                VoucherCustomerSearch(
+                  voucherData: voucherDataMap,
+
+                  /// When search finishes filtering
+                  onSearchResult: (list) {
+                    setState(() {
+                      filteredData = list
+                          .map((map) => VoucherModel.fromJson(map))
+                          .toList();
+                    });
+                  },
+
+                  /// If you want to track text changes
+                  onChanged: (txt) {},
+
+                  /// For onChange inside TextField
+                  onSearchChanged: (value) {},
+
+                  /// Mic button pressed callback
+                  onMicPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Mic Pressed")),
+                    );
+                  },
                 ),
+
                 const SizedBox(height: 10),
 
-                // 🧾 List/Grid of Vouchers
+                // LIST / GRID VIEW
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: fetchVouchers,
                     child: filteredData.isEmpty
-                        ? const Center(child: Text('No Voucher Data Found'))
+                        ? const Center(child: Text("No Voucher Data Found"))
                         : GridView.builder(
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: isWide ? 2 : 1,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
@@ -136,7 +118,7 @@ class _VendorVoucherpageState extends State<VendorVoucherpage> {
             ),
           ),
 
-          // ⏳ Loader
+          // Loader
           if (isLoading)
             const Positioned.fill(
               child: ColoredBox(
@@ -150,8 +132,7 @@ class _VendorVoucherpageState extends State<VendorVoucherpage> {
   }
 }
 
-// 🧩 Voucher Summary Card Widget
-
+// ------------- CARD WIDGET -------------------
 
 class VoucherCustomerSummaryCard extends StatelessWidget {
   final Map<String, dynamic> row;
@@ -174,7 +155,6 @@ class VoucherCustomerSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row with Name + Menu
             Row(
               children: [
                 Expanded(
@@ -192,19 +172,15 @@ class VoucherCustomerSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Info Rows with colors
             _infoRow('Amount', row['amount'] ?? '', Colors.teal),
             _infoRow('Customer Email', row['customerEmail'] ?? '', Colors.green),
-            //_infoRow('Customer Pincode', row['customerPincode'] ?? '', Colors.orange),
             _infoRow('Status', row['status'] ?? 'Null', Colors.orange),
-
           ],
         ),
       ),
     );
   }
 
-  /// Colored information row
   Widget _infoRow(String label, String value, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -235,9 +211,7 @@ class VoucherCustomerSummaryCard extends StatelessWidget {
   }
 }
 
-
-
-// view section
+// ---------------- PDF VIEW BUTTON --------------------
 
 class VoucherActionButtons extends StatelessWidget {
   final Map<String, dynamic> row;
@@ -249,49 +223,13 @@ class VoucherActionButtons extends StatelessWidget {
     required this.index,
   });
 
-  Future<void> _openPdf(BuildContext context) async {
-    final pdfUrl = row['pdfURL'];
-
-    // CASE 1: No PDF
-    if (pdfUrl == null || pdfUrl.toString().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No PDF available for this voucher."),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    // CASE 2: Try to open PDF
-    final Uri uri = Uri.parse(pdfUrl.toString());
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-
-      // Show success message only *after* launch attempt
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("PDF opened successfully!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Could not open PDF: $pdfUrl"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert),
       onSelected: (value) async {
         if (value == 'view') {
-          _openPdf(context);
+          openPdf(context, row['pdfURL'] ?? '');
         }
       },
       itemBuilder: (context) => [
@@ -307,5 +245,36 @@ class VoucherActionButtons extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> openPdf(BuildContext context, String pdfUrl) async {
+    if (pdfUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("No PDF available for this voucher."),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final Uri uri = Uri.parse(pdfUrl);
+
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Could not open PDF in browser or app."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error opening PDF: $e")),
+      );
+    }
   }
 }

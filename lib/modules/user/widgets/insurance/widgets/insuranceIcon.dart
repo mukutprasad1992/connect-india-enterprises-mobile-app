@@ -12,6 +12,7 @@ class InsuranceActionButtons extends StatelessWidget {
   final VoidCallback onDelete;
   final ValueChanged<Map<String, dynamic>> onUpdate;
   final String token;
+  final Future<void> Function()? onReloadParent;
 
   const InsuranceActionButtons({
     super.key,
@@ -20,6 +21,7 @@ class InsuranceActionButtons extends StatelessWidget {
     required this.index,
     required this.onDelete,
     required this.onUpdate,
+    this.onReloadParent,
   });
 
   @override
@@ -41,25 +43,39 @@ class InsuranceActionButtons extends StatelessWidget {
             break;
 
           case 'edit':
-            if (insurance is Map<String, dynamic>) {
-              final updatedInsurance = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditInsurancePage(
-                    insurance: InsuranceModel.fromJson(insurance),
-                    token: token,
+            if (insurance is Map<String, dynamic>)
+              try {
+                final updatedInsurance = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditInsurancePage(
+                      insurance: InsuranceModel.fromJson(insurance),
+                      token: token,
+                      onReloadParent: onReloadParent,
+                    ),
                   ),
-                ),
-              );
-              if (updatedInsurance != null) {
-                onUpdate(updatedInsurance);
+                );
+                if (updatedInsurance != null) {
+                  onUpdate(updatedInsurance);
+                  _showSnackBar(
+                    context,
+                    'Insurance Updated Successfully!',
+                    Colors.green,
+                  );
+                }
+                if (onReloadParent != null) {
+                  // optional debug
+                  // print("Calling onReloadParent from InvestmentActionButtons after edit");
+                  await onReloadParent!();
+                }
+              } catch (e) {
                 _showSnackBar(
                   context,
-                  'Insurance Updated Successfully!',
-                  Colors.green,
+                  'Error while editing: ${e.toString()}',
+                  Colors.red,
                 );
-              }
-            } else {
+            }
+            else {
               _showSnackBar(
                 context,
                 'Invalid insurance data received.',
@@ -175,7 +191,7 @@ class InsuranceActionButtons extends StatelessWidget {
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
       _showSnackBar(
         context,
         "Error deleting insurance: $e",

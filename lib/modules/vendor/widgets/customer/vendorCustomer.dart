@@ -93,7 +93,11 @@ class _VendorCustomerPageState extends State<VendorCustomerPage> {
                           .toList();
                     });
                   },
-                  onMicPressed: () {},
+                  onMicPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Mic Pressed")),
+                    );
+                  },
                   onSearchChanged: (searchText) {},
                 ),
                 const SizedBox(height: 10),

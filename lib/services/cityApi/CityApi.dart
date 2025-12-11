@@ -36,11 +36,9 @@ class CityApi {
         AuthController.checkLoginStatus(context);
         return [];
       } else {
-        debugPrint("⚠️ City API error: ${response.statusCode} ${response.body}");
         return [];
       }
     } catch (e) {
-      debugPrint("⚠️ Error fetching cities: $e");
       return [];
     }
   }
