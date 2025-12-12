@@ -59,10 +59,10 @@ class _VoucherSearchBarState extends State<VoucherSearchBar> {
     _focusNode.requestFocus();
   }
 
-  void _handleMicResult(String text) {
-    _searchController.text = text;
-    _filterData(text);
-  }
+  // void _handleMicResult(String text) {
+  //   _searchController.text = text;
+  //   _filterData(text);
+  // }
 
   @override
   void dispose() {

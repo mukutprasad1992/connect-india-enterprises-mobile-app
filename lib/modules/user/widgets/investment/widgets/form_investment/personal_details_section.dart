@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/investmentController/InvesrmentformController.dart';
 //import '/consts/appColors.dart';
-import '../../../../../../services/user_module_service_Api/investmentServices/updateServiceType.dart' as updateApi;
+import '/services/user_module_service_Api/investmentServices/updateServiceType.dart' as updateApi;
 import '/models/citymodel.dart';
 //import '/modules/user/widgets/investment/widgets/investment_models/citymodel.dart';
 

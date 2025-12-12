@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import '../../../../../../services/user_module_service_Api/insuranceServices/updateInsurance.dart' as updateApi;
+// import 'package:intl/intl.dart';
+import '/services/user_module_service_Api/insuranceServices/updateInsurance.dart' as updateApi;
 
 class NomineeDetailsSection extends StatefulWidget {
   final GlobalKey<FormState> formKey;

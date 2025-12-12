@@ -60,11 +60,11 @@ class _VoucherTablePageState extends State<VoucherTablePage> {
     final query = searchController.text.toLowerCase();
     setState(() {
       filteredData = voucherData.where((v) {
-        return (v.customerName ?? '').toLowerCase().contains(query) ||
+        return (v.customerName).toLowerCase().contains(query) ||
             (v.vendorBusinessName ?? '').toLowerCase().contains(query) ||
             (v.status ?? '').toLowerCase().contains(query) ||
-            (v.voucherCode ?? '').toLowerCase().contains(query) ||
-            (v.amount ?? '').toLowerCase().contains(query);
+            (v.voucherCode).toLowerCase().contains(query) ||
+            (v.amount).toLowerCase().contains(query);
       }).toList();
     });
   }

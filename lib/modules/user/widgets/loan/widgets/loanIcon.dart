@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'Viewloan.dart';
 import 'add_edit_pages/edit_loan_page.dart';
 import '/models/loanModel.dart';
-import '../../../../../services/user_module_service_Api/loanServices/deleteLoan.dart';
+import '/services/user_module_service_Api/loanServices/deleteLoan.dart';
 
 class LoanActionButtons extends StatelessWidget {
   final Map<String, dynamic> loan;
@@ -41,42 +41,34 @@ class LoanActionButtons extends StatelessWidget {
             break;
 
           case 'edit':
-            if (loan is Map<String, dynamic>)
-              try {
-                final updatedLoan = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditLoanPage(
-                        loan: LoanModel.fromJson(loan),
-                        token: token,
-                        onReloadParent: onReloadParent),
-                  ),
-                );
-                if (updatedLoan != null) {
-                  onUpdate(updatedLoan);
-                  _showSnackBar(
-                    context,
-                    'Loan Updated Successfully!',
-                    Colors.green,
-                  );
-                }
-                if (onReloadParent != null) {
-                  // optional debug
-                  // print("Calling onReloadParent from InvestmentActionButtons after edit");
-                  await onReloadParent!();
-                }
-              }
-              catch (e) {
+            try {
+              final updatedLoan = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditLoanPage(
+                      loan: LoanModel.fromJson(loan),
+                      token: token,
+                      onReloadParent: onReloadParent),
+                ),
+              );
+              if (updatedLoan != null) {
+                onUpdate(updatedLoan);
                 _showSnackBar(
                   context,
-                  'Error while editing: ${e.toString()}',
-                  Colors.red,
+                  'Loan Updated Successfully!',
+                  Colors.green,
                 );
               }
-            else {
+              if (onReloadParent != null) {
+                // optional debug
+                // print("Calling onReloadParent from InvestmentActionButtons after edit");
+                await onReloadParent!();
+              }
+            }
+            catch (e) {
               _showSnackBar(
                 context,
-                'Invalid loan data received.',
+                'Error while editing: ${e.toString()}',
                 Colors.red,
               );
             }

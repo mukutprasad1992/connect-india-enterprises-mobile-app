@@ -87,7 +87,6 @@ class _StepperFormPageState extends State<StepperFormPage> {
 
   int _currentStep = 1;
   int _viewStep = 1;
-  int? _hoveredStep;
 
   @override
   void dispose() {
@@ -302,9 +301,9 @@ class _StepperFormPageState extends State<StepperFormPage> {
           //Contact  Details
 
           yearsOfCity: yearsOfCityController.text,
-          alternateNo: (alternateNoController.text ?? "").startsWith('+91')
+          alternateNo: (alternateNoController.text ).startsWith('+91')
               ? alternateNoController.text
-              : '+91${alternateNoController.text ?? ""}',
+              : '+91${alternateNoController.text}',
 
           landmark: landmarkController.text,
 
@@ -314,23 +313,23 @@ class _StepperFormPageState extends State<StepperFormPage> {
           companyExp: companyExpController.text,
           totalWorkExp: totalWorkExpController.text,
           officeAddress: officeAddressController.text,
-          officeMobile: (officeMobileController.text ?? "").startsWith('+91')
+          officeMobile: (officeMobileController.text).startsWith('+91')
               ? officeMobileController.text
-              : '+91${officeMobileController.text ?? ""}',
+              : '+91${officeMobileController.text}',
 
           // referenceDetails
 
           ref1Name: ref1NameController.text,
           ref1Address: ref1AddressController.text,
-          ref1Mobile: (ref1MobileController.text ?? "").startsWith('+91')
+          ref1Mobile: (ref1MobileController.text).startsWith('+91')
               ? ref1MobileController.text
-              : '+91${ref1MobileController.text ?? ""}',
+              : '+91${ref1MobileController.text}',
 
           ref2Name: ref2NameController.text,
           ref2Address: ref2AddressController.text,
-          ref2Mobile: (ref2MobileController.text ?? "").startsWith('+91')
+          ref2Mobile: (ref2MobileController.text).startsWith('+91')
               ? ref2MobileController.text
-              : '+91${ref2MobileController.text ?? ""}',
+              : '+91${ref2MobileController.text}',
 
           // documents
 
@@ -969,7 +968,7 @@ class _StepperFormPageState extends State<StepperFormPage> {
             const SizedBox(width: 12),
             if (isUploaded)
               TextButton(
-                onPressed: () => _viewFile(fileUrl!),
+                onPressed: () => _viewFile(fileUrl),
                 style: TextButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

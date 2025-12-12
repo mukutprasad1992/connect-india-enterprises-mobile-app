@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:myapp/services/googleSignupApi.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import '/controllers/loginController.dart';
 import '/views/signup/signup_page.dart';
 import 'forgotPassword.dart';
@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       // Step 3: Send id_token to backend API
-      final result = await GoogleLoginService.googleLogin(idToken);
+      await GoogleLoginService.googleLogin(idToken);
 
       // Step 4: Navigate / show success
       ScaffoldMessenger.of(context).showSnackBar(

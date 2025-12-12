@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/consts/appColors.dart';
 import '/services/cityApi/CityApi.dart';
-import '../../../../../../services/user_module_service_Api/insuranceServices/createInsurance.dart';
-import '../../../../../../services/user_module_service_Api/insuranceServices/updateInsurance.dart'
+import '/services/user_module_service_Api/insuranceServices/createInsurance.dart';
+import '/services/user_module_service_Api/insuranceServices/updateInsurance.dart'
     as updateApi;
 import '/models/insuranceModel.dart';
 import '/models/citymodel.dart';

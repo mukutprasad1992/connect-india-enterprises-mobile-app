@@ -68,7 +68,6 @@ class InquirySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final statusColor = _getStatusColor(row.status ?? '');
     final statusIcon = _getStatusIcon(row.status ?? '');
 

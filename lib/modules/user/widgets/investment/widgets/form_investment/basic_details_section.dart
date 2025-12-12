@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/investmentController/InvesrmentformController.dart';
-import '/consts/appColors.dart';
-import '../../../../../../services/user_module_service_Api/investmentServices/createServiceType.dart';
-import '../../../../../../services/user_module_service_Api/investmentServices/updateServiceType.dart' as updateApi;
+// import '/consts/appColors.dart';
+import '/services/user_module_service_Api/investmentServices/createServiceType.dart';
+import '/services/user_module_service_Api/investmentServices/updateServiceType.dart' as updateApi;
 
 class BasicDetailsSection extends StatefulWidget {
   final TextEditingController aadharController;

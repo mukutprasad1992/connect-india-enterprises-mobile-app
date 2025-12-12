@@ -58,7 +58,7 @@ class _NewVendorPageState extends State<NewVendorPage> {
       _phoneController.text = ven["mobileNo"]?.toString() ?? '';
       _vendorCodeController.text = ven["vendorCode"]?.toString() ?? '';
       _addressController.text = ven["address"]?.toString() ?? '';
-    } catch (e, s) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Prefill error: $e"),
@@ -161,7 +161,7 @@ class _NewVendorPageState extends State<NewVendorPage> {
       Future.delayed(const Duration(milliseconds: 400), () {
         Navigator.pop(context, dbId);
       });
-    } catch (e, s) {
+    } catch (e) {
       _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);

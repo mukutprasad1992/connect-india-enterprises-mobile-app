@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../../../services/user_module_service_Api/documentServices/uploadDocumentApi.dart';
-import '../../../../../../services/user_module_service_Api/loanServices/updateLoan.dart';
+import '/services/user_module_service_Api/documentServices/uploadDocumentApi.dart';
+import '/services/user_module_service_Api/loanServices/updateLoan.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 

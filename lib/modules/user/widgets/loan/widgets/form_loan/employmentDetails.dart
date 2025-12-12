@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/controllers/usercontroller/loanController/LoanFormController.dart';
-import '../../../../../../services/user_module_service_Api/loanServices/updateLoan.dart' as updateApi;
+import '/services/user_module_service_Api/loanServices/updateLoan.dart' as updateApi;
 
 class Employmentdetails extends StatefulWidget {
   final GlobalKey<FormState> formKey;

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/views/login/login_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/authServices/registerApi.dart';
-import '/services/authServices/loginApi_service.dart';
-import '/controllers/authController.dart';
-import '/consts/appConstants.dart';
 
 class SignupController {
   final formKey = GlobalKey<FormState>();
@@ -106,7 +102,7 @@ Future<void> submitForm(BuildContext context, Function refreshUI) async {
     print('Register response: $registerResponse');
 
     // 6. Handle response
-    if (registerResponse != null && registerResponse['status'] == true) {
+    if (registerResponse['status'] == true) {
       // success -> show message and redirect to Login page (no auto-login)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -128,7 +124,7 @@ Future<void> submitForm(BuildContext context, Function refreshUI) async {
     } else {
       // registration failed -> show server message and stop
       final msg =
-          (registerResponse != null && registerResponse['message'] != null)
+          (registerResponse['message'] != null)
               ? registerResponse['message'].toString()
               : 'Registration failed';
       ScaffoldMessenger.of(context).showSnackBar(

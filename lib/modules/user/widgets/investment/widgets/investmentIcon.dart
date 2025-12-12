@@ -74,55 +74,46 @@ class InvestmentActionButtons extends StatelessWidget {
           //   break;
 
           case 'edit':
-            if (investment is Map<String, dynamic>) {
-              try {
-                // Wait for edit page result (it should return updated Map on successful save)
-                final Map<String, dynamic>? updatedInvestment =
-                  await Navigator.push<Map<String, dynamic>?>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditInvestmentPage(
-                      investment: InvestmentModel.fromJson(investment),
-                      token: token,
-                      onReloadParent:onReloadParent, 
-                    ),
+            try {
+              // Wait for edit page result (it should return updated Map on successful save)
+              final Map<String, dynamic>? updatedInvestment =
+                await Navigator.push<Map<String, dynamic>?>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditInvestmentPage(
+                    investment: InvestmentModel.fromJson(investment),
+                    token: token,
+                    onReloadParent:onReloadParent, 
                   ),
-                );
+                ),
+              );
 
-                // If edit returned updated data, update local item immediately
-                if (updatedInvestment != null) {
-                  onUpdate(updatedInvestment);
-                  _showSnackBar(
-                    context,
-                    'Investment Updated Successfully!',
-                    Colors.green,
-                  );
-                }
-
-                // ALWAYS attempt to reload parent from server to ensure fresh data.
-                // This covers the case where user pressed Back without returning updated data.
-                if (onReloadParent != null) {
-                  // optional debug
-                  // print("Calling onReloadParent from InvestmentActionButtons after edit");
-                  await onReloadParent!();
-                }
-              } 
-              catch (e) {
+              // If edit returned updated data, update local item immediately
+              if (updatedInvestment != null) {
+                onUpdate(updatedInvestment);
                 _showSnackBar(
                   context,
-                  'Error while editing: ${e.toString()}',
-                  Colors.red,
+                  'Investment Updated Successfully!',
+                  Colors.green,
                 );
               }
+
+              // ALWAYS attempt to reload parent from server to ensure fresh data.
+              // This covers the case where user pressed Back without returning updated data.
+              if (onReloadParent != null) {
+                // optional debug
+                // print("Calling onReloadParent from InvestmentActionButtons after edit");
+                await onReloadParent!();
+              }
             } 
-            else {
+            catch (e) {
               _showSnackBar(
                 context,
-                'Invalid investment data received.',
+                'Error while editing: ${e.toString()}',
                 Colors.red,
               );
             }
-            break;
+                      break;
 
           case 'delete':
             if (investment['id'] != null) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'appColors.dart';
-import 'app_fonts.dart';
+//import 'app_fonts.dart';
 
 class AppTextStyles {
   static const TextStyle heading = TextStyle(

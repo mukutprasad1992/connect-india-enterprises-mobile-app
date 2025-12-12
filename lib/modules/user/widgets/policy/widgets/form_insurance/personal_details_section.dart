@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../../services/user_module_service_Api/insuranceServices/updateInsurance.dart' as updateApi;
+import '/services/user_module_service_Api/insuranceServices/updateInsurance.dart' as updateApi;
 import '/models/citymodel.dart';
 
 class PersonalDetailsSection extends StatefulWidget {

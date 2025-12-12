@@ -41,6 +41,7 @@ class _VendorTablePageState extends State<VendorTablePage> {
     setState(() => isLoading = true);
     try {
       final vendors = await GetAllVendorApi.getAllvendor();
+      // ignore: unused_local_variable
       for (var v in vendors) {}
       setState(() {
         vendorData = vendors;

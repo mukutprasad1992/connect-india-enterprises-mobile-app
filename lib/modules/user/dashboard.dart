@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/route_manager.dart';
+// import 'package:get/route_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/investment/investment.dart';
