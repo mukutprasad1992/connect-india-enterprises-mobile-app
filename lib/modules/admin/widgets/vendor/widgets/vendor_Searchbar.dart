@@ -44,7 +44,8 @@ class _VendorSearchBarState extends State<VendorSearchBar> {
   void _filterData() {
     final query = _searchController.text.toLowerCase();
     final filtered = widget.vendorData.where((row) {
-      return row.values.any((val) => val.toLowerCase().contains(query));
+      return row.values.any((val) =>
+          val.toString().toLowerCase().contains(query)); // safe toString()
     }).toList();
 
     widget.onSearchResult(filtered);
@@ -68,10 +69,14 @@ class _VendorSearchBarState extends State<VendorSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final availableWidth = MediaQuery.of(context).size.width;
+    // compact width when not focused; expands when focused
+    final compactWidth = 200.0;
+    final targetWidth = _isFocused ? availableWidth * 0.93 : compactWidth;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        double availableWidth = constraints.maxWidth;
-        double inputWidth = _isFocused ? availableWidth * 0.9 : 200;
         return Row(
           children: [
             if (!_isFocused)
@@ -80,91 +85,126 @@ class _VendorSearchBarState extends State<VendorSearchBar> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Vendor',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: inputWidth.clamp(150.0, availableWidth),
-              height: _isFocused ? 42 : 34,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black),
-                boxShadow: _isFocused
-                    ? [
-                        const BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+            // Use Flexible so AnimatedContainer width doesn't conflict with Row
+            Flexible(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutCubic,
+                width: targetWidth.clamp(150.0, constraints.maxWidth),
+                height: _isFocused ? 40 : 36,
+                decoration: BoxDecoration(
+                  color: _isFocused ? Colors.white : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color:
+                        _isFocused ? theme.colorScheme.primary : Colors.black12,
+                    width: _isFocused ? 1.4 : 1.2,
+                  ),
+                  boxShadow: _isFocused
+                      ? [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                      : null,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    // Compact prefix area (search icon or back arrow)
+                    GestureDetector(
+                      onTap: () {
+                        if (_isFocused) {
+                          _focusNode.unfocus();
+                          _searchController.clear();
+                          widget.onSearchChanged('');
+                          setState(() {});
+                        } else {
+                          // focus when tapping search icon
+                          _focusNode.requestFocus();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        child: Icon(
+                          _isFocused ? Icons.arrow_back : Icons.search,
+                          size: 20,
                         ),
-                      ]
-                    : [],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),   
-                child: TextField(
-                    controller: _searchController,
-                    focusNode: _focusNode,
-                    onChanged: widget.onSearchChanged,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      ),
+                    ),
+
+                    // Input (fills remaining space)
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _focusNode,
+                        onChanged: widget.onSearchChanged,
+                        cursorHeight: 20,
+                        style:
+                          theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          hintText: 'Search Vendor by email, mobileNo',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
                             color: Colors.grey,
-                            height: _isFocused ? 1.4 : 2.0,
+                            height: 1.0,
                           ),
-                      prefixIcon: _isFocused
-                          ? IconButton(
-                              icon: const Icon(Icons.arrow_back),
-                              onPressed: () {
-                                _focusNode.unfocus();
-                                _searchController.clear();
-                                widget.onSearchChanged('');
-                                setState(() {});
-                              },
-                            )
-                          : const Icon(Icons.search),
-                      suffixIcon: Row(
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0, 
+                            horizontal: 8,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    // Suffix area (mic/logo OR clear)
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 36, maxWidth: 110),
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (_searchController.text.isEmpty) ...[
                             IconButton(
                               icon: const Icon(Icons.mic, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
                               onPressed: widget.onMicPressed,
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Image.asset(
-                                'assets/images/tosmall_logo.png',
+                              padding: const EdgeInsets.only(right: 6),
+                              child: SizedBox(
                                 width: 18,
                                 height: 18,
+                                child: Image.asset(
+                                  'assets/images/tosmall_logo.png',
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ),
-                          ],
-                          if (_searchController.text.isNotEmpty)
+                          ] else ...[
                             IconButton(
                               icon: const Icon(Icons.clear, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
                               onPressed: _clearSearch,
                             ),
+                          ],
                         ],
                       ),
-                      isDense: true,
-                      contentPadding: _isFocused
-                          ? const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 12)
-                          : const EdgeInsets.only(top: 18, left: 12),
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                
-                      // ⚠ Fix applied here
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                    )
-                  ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

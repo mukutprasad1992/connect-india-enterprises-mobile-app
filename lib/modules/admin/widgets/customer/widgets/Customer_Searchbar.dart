@@ -81,11 +81,13 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final availableWidth = MediaQuery.of(context).size.width;
+    final compactWidth = 200.0;
+    final targetWidth = _isFocused ? availableWidth * 0.93 : compactWidth;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        double availableWidth = constraints.maxWidth;
-        double inputWidth = _isFocused ? availableWidth * 0.9 : 200;
-
         return Row(
           children: [
             if (!_isFocused)
@@ -94,92 +96,123 @@ class _CustomerSearchBarState extends State<CustomerSearchBar> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Customer',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
 
-            // 🔍 Animated Search Bar
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: inputWidth.clamp(150.0, availableWidth),
-              height: _isFocused ? 42 : 34,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black),
-                boxShadow: _isFocused
-                    ? [
-                        const BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _focusNode,
-                  onChanged: widget.onSearchChanged,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
-                          height: _isFocused ? 1.4 : 2.0,
-                        ),
-
-                    prefixIcon: _isFocused
-                        ? IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              _focusNode.unfocus();
-                              _clearSearch();
-                            },
+            // Animated, responsive search bar (design-matched)
+            Flexible(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutCubic,
+                width: targetWidth.clamp(150.0, constraints.maxWidth),
+                height: _isFocused ? 44 : 36,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: _isFocused ? Colors.white : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color:
+                        _isFocused ? theme.colorScheme.primary : Colors.black26,
+                    width: _isFocused ? 1.4 : 1.0,
+                  ),
+                  boxShadow: _isFocused
+                      ? [
+                          const BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
                           )
-                        : const Icon(Icons.search),
-
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_searchController.text.isEmpty) ...[
-                          IconButton(
-                            icon: const Icon(Icons.mic, size: 18),
-                            onPressed: widget.onMicPressed,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Image.asset(
-                              'assets/images/tosmall_logo.png',
-                              width: 18,
-                              height: 18,
-                            ),
-                          ),
-                        ],
-                        if (_searchController.text.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: _clearSearch,
-                          ),
-                      ],
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    // Prefix: search icon or back arrow (tappable)
+                    GestureDetector(
+                      onTap: () {
+                        if (_isFocused) {
+                          _focusNode.unfocus();
+                          _clearSearch();
+                        } else {
+                          _focusNode.requestFocus();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          _isFocused ? Icons.arrow_back : Icons.search,
+                          size: 20,
+                        ),
+                      ),
                     ),
 
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 12),
+                    // Text field
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _focusNode,
+                        onChanged: widget.onSearchChanged,
+                        cursorHeight: 20,
+                        style:theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                        textAlignVertical: TextAlignVertical.center, 
+                        decoration: InputDecoration(
+                          hintText: 'Search Customer By Name,Email',
+                          hintStyle: TextStyle(
+                            fontSize: 14, 
+                            color: Colors.grey,
+                            height:1.0, 
+                          ),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                            horizontal: 8,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
 
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-
-                    // ✔ REAL FIX – REMOVE ALL INNER BORDERS
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                  ),
+                    // Suffix: mic + logo when empty, clear when typing
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 36, maxWidth: 110),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchController.text.isEmpty) ...[
+                            IconButton(
+                              icon: const Icon(Icons.mic, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
+                              onPressed: widget.onMicPressed,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: Image.asset(
+                                  'assets/images/tosmall_logo.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
+                              onPressed: _clearSearch,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

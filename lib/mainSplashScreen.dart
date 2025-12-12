@@ -138,7 +138,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     TextButton(
                       onPressed: () {
                         final isLast =
-                            currentIndex == onboardingData.length - 1;
+                          currentIndex == onboardingData.length - 1;
                         if (isLast) {
                           _completeOnboarding();
                         } else {

@@ -36,35 +36,35 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
     });
 
     _focusNode.addListener(() {
-      setState(() {
-        _isFocused = _focusNode.hasFocus;
-      });
+      setState(() => _isFocused = _focusNode.hasFocus);
     });
   }
 
   void _filterData() {
     final query = _searchController.text.toLowerCase();
 
-    final filtered = widget.inquiryData.where((inquiry) {
+    final filtered = widget.inquiryData.where((inq) {
       final values = [
-        inquiry.id?.toString() ?? '',
-        inquiry.email ?? '',
-        inquiry.mobile ?? '',
-        inquiry.investmentType ?? '',
-        inquiry.amount ?? '',
-        inquiry.aadharNumber ?? '',
-        inquiry.panNumber ?? '',
-        inquiry.income ?? '',
-        inquiry.occupation ?? '',
-        inquiry.nomineeRelation ?? '',
-        inquiry.nomineeId ?? '',
-        inquiry.nomineeMobile ?? '',
-        inquiry.status ?? '',
-        inquiry.placeOfBirth?['city'] ?? '',
-        inquiry.placeOfBirth?['state'] ?? '',
+        inq.id?.toString() ?? '',
+        inq.email ?? '',
+        inq.mobile ?? '',
+        inq.investmentType ?? '',
+        inq.amount ?? '',
+        inq.aadharNumber ?? '',
+        inq.panNumber ?? '',
+        inq.income ?? '',
+        inq.occupation ?? '',
+        inq.nomineeRelation ?? '',
+        inq.nomineeId ?? '',
+        inq.nomineeMobile ?? '',
+        inq.status ?? '',
+        inq.placeOfBirth?['city'] ?? '',
+        inq.placeOfBirth?['state'] ?? '',
       ];
 
-      return values.any((val) => val.toLowerCase().contains(query));
+      return values.any(
+        (v) => v.toLowerCase().contains(query),
+      );
     }).toList();
 
     widget.onSearchResult(filtered);
@@ -88,102 +88,135 @@ class _InquerySearchBarState extends State<InquerySearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final availableWidth = MediaQuery.of(context).size.width;
+    final compactWidth = 200.0;
+    final targetWidth = _isFocused ? availableWidth * 0.93 : compactWidth;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        double availableWidth = constraints.maxWidth;
-        double inputWidth = _isFocused ? availableWidth * 0.9 : 200;
-
         return Row(
           children: [
             if (!_isFocused)
               Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Inquiry',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                child: Text(
+                  'Inquiry',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: inputWidth.clamp(150.0, availableWidth),
-              height: _isFocused ? 42 : 34,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black),
-                boxShadow: _isFocused
-                    ? [
-                        const BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _focusNode,
-                  onChanged: widget.onSearchChanged,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
-                          height: _isFocused ? 1.4 : 2.0,
-                        ),
-                    prefixIcon: _isFocused
-                        ? IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              _focusNode.unfocus();
-                              _searchController.clear();
-                              widget.onSearchChanged('');
-                              setState(() {});
-                            },
-                          )
-                        : const Icon(Icons.search),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_searchController.text.isEmpty) ...[
-                          IconButton(
-                            icon: const Icon(Icons.mic, size: 18),
-                            onPressed: widget.onMicPressed,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Image.asset(
-                              'assets/images/tosmall_logo.png',
-                              width: 18,
-                              height: 18,
-                            ),
-                          ),
-                        ],
-                        if (_searchController.text.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: _clearSearch,
-                          ),
-                      ],
-                    ),
-                    isDense: true,
-                    contentPadding: _isFocused
-                        ? const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 12)
-                        : const EdgeInsets.only(top: 18, left: 12),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
+
+            /// ✨ Modern Search Bar (Same as Vendor Search Bar)
+            Flexible(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 260),
+                curve: Curves.easeOutCubic,
+                width: targetWidth.clamp(150.0, constraints.maxWidth),
+                height: _isFocused ? 44 : 36,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: _isFocused ? Colors.white : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color:
+                        _isFocused ? theme.colorScheme.primary : Colors.black26,
+                    width: _isFocused ? 1.4 : 1,
                   ),
+                  boxShadow: _isFocused
+                      ? [
+                          const BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          )
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    /// 🔙 Prefix Icon (search or back)
+                    GestureDetector(
+                      onTap: () {
+                        if (_isFocused) {
+                          _focusNode.unfocus();
+                          _searchController.clear();
+                          widget.onSearchChanged('');
+                          setState(() {});
+                        } else {
+                          _focusNode.requestFocus();
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Icon(
+                          _isFocused ? Icons.arrow_back : Icons.search,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+
+                    /// ✏ Text Field
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _focusNode,
+                        onChanged: widget.onSearchChanged,
+                        cursorHeight: 20,
+                        style:
+                            theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          hintText: 'Search Inquiry By Email, Name,Status',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            height: 1.0,
+                          ),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0, 
+                            horizontal: 8,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+
+                    /// 🎤 Mic / Logo / Clear
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(minWidth: 36, maxWidth: 110),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchController.text.isEmpty) ...[
+                            IconButton(
+                              icon: const Icon(Icons.mic, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
+                              onPressed: widget.onMicPressed,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Image.asset(
+                                'assets/images/tosmall_logo.png',
+                                width: 18,
+                                height: 18,
+                              ),
+                            ),
+                          ] else ...[
+                            IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              padding: const EdgeInsets.all(8),
+                              constraints: const BoxConstraints(),
+                              onPressed: _clearSearch,
+                            )
+                          ]
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
