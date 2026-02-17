@@ -1,0 +1,33 @@
+import 'package:flutter/material.dart';
+//import '/modules/user/widgets/investment/widgets/form_investment/investment_form_page.dart';
+//import '/modules/user/widgets/investment/widgets/investment_models/Investment_model.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentHorzontle.dart';
+import '/models/investmentModel.dart';
+
+class EditInvestmentPage extends StatefulWidget {
+  final InvestmentModel investment;
+  final String token;
+  final VoidCallback? onReloadParent;
+
+  const EditInvestmentPage({
+    super.key,
+    required this.investment,
+    required this.token,
+    this.onReloadParent,
+  });
+
+  @override
+  State<EditInvestmentPage> createState() => _EditInvestmentPageState();
+} 
+
+class _EditInvestmentPageState extends State<EditInvestmentPage> {
+  @override
+  Widget build(BuildContext context) {
+    return StepperFormPage(
+      mode: "edit",
+      investment: widget.investment,
+      token: widget.token,
+      submit: widget.investment.submit.toString(),
+    );
+  }
+}

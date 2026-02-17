@@ -1,0 +1,309 @@
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'widgets/InvestmentSummaryCard.dart';
+import 'widgets/InvestmentSearchBar.dart';
+import '/models/investmentModel.dart';
+import '../../../../services/user_module_service_Api/investmentServices/getdatabyserviceid.dart';
+import '/modules/user/widgets/investment/widgets/form_investment/investmentType.dart';
+
+class InvestmentPage extends StatefulWidget {
+  final String token;
+  const InvestmentPage({super.key, required this.token});
+
+  @override
+  State<InvestmentPage> createState() => _InvestmentPageState();
+}
+
+class _InvestmentPageState extends State<InvestmentPage> {
+  final TextEditingController _searchController = TextEditingController();
+  List<InvestmentModel> investmentData = [];
+  List<InvestmentModel> filteredData = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInvestmentsFromApi();
+    _searchController.addListener(_applySearchFilter);
+  }
+
+  /// Fetch investments from API with saved token
+  Future<void> _fetchInvestmentsFromApi() async {
+    setState(() => isLoading = true);
+
+    try {
+      final token = widget.token.isNotEmpty
+          ? widget.token
+          : (await SharedPreferences.getInstance()).getString("KEYTOKEN");
+
+      if (token == null) {
+        _redirectToLogin();
+        return;
+      }
+
+      const serviceId = "1";
+      final response = await ServiceTypeApi.getServiceTypeByServiceId(
+        serviceId: serviceId,
+        token: token,
+      );
+
+      final data = response["data"];
+      List<InvestmentModel> loadedData = [];
+
+      if (data is List) {
+        loadedData = data
+            .map((json) =>
+                InvestmentModel.fromJson(Map<String, dynamic>.from(json)))
+            .toList();
+      } else if (data is Map) {
+        loadedData = [
+          InvestmentModel.fromJson(Map<String, dynamic>.from(data))
+        ];
+      }
+
+      setState(() {
+        investmentData = loadedData;
+        filteredData = List.from(loadedData);
+      });
+
+      await saveInvestments();
+    } catch (e) {
+      await _loadInvestments();
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> saveInvestments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final investmentJsonList =
+        investmentData.map((e) => jsonEncode(e.toJson())).toList();
+    await prefs.setStringList('investments', investmentJsonList);
+  }
+
+  /// Load investments from local storage
+  Future<void> _loadInvestments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final investmentJsonList = prefs.getStringList('investments') ?? [];
+    final loadedData = investmentJsonList
+        .map((jsonStr) => InvestmentModel.fromJson(jsonDecode(jsonStr)))
+        .toList();
+
+    setState(() {
+      investmentData = loadedData;
+      filteredData = List.from(investmentData);
+    });
+  }
+
+  void _redirectToLogin() {
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, "/login");
+    }
+  }
+
+  void _applySearchFilter() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredData = investmentData.where((investment) {
+        return investment.amount.toString().toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
+  /// Add new investment
+  void addNewInvestment(InvestmentModel newInvestment) {
+    setState(() {
+      investmentData.insert(0, newInvestment);
+    });
+    saveInvestments();
+    _applySearchFilter();
+    _fetchInvestmentsFromApi();
+  }
+
+  /// Update investment
+  void _updateInvestment(int index, InvestmentModel updatedInvestment) {
+    setState(() {
+      investmentData[index] = updatedInvestment;
+    });
+    saveInvestments();
+    _applySearchFilter();
+    _fetchInvestmentsFromApi();
+  }
+
+  /// Delete investment
+  void _deleteInvestment(int index) {
+    setState(() {
+      investmentData.removeAt(index);
+    });
+    saveInvestments();
+    _applySearchFilter();
+    _fetchInvestmentsFromApi();
+  }
+
+  void submitNewInvestment(Map<String, dynamic> investmentData) {
+    final newInvestment = InvestmentModel.fromJson(investmentData);
+    addNewInvestment(newInvestment);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWideScreen = constraints.maxWidth > 600;
+
+          return Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Search Bar
+                    InvestmentSearchBar(
+                      investmentData: investmentData,
+                      onSearchResult: (filteredList) {
+                        setState(() {
+                          filteredData = filteredList;
+                        });
+                      },
+                      onMicPressed: () {},
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Investment list
+                    Expanded(
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : RefreshIndicator(
+                              onRefresh: _fetchInvestmentsFromApi,
+                              child: filteredData.isEmpty
+                                  ? const Center(
+                                      child:
+                                          Text('No investment data available.'))
+                                  : GridView.builder(
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: isWideScreen ? 2 : 1,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio:
+                                            isWideScreen ? 2.8 : 2.1,
+                                      ),
+                                      itemCount: filteredData.length,
+                                      itemBuilder: (context, index) {
+                                        final investment = filteredData[index];
+                                        return InvestmentSummaryCard(
+                                          row: investment.toJson(),
+                                          index: index,
+                                          token: widget.token,
+                                          onUpdate: (updatedInvestment) =>
+                                              _updateInvestment(
+                                                  index,
+                                                  InvestmentModel.fromJson(
+                                                      updatedInvestment)),
+                                          onDelete: () =>
+                                              _deleteInvestment(index),
+                                          //onReloadParent: _fetchInvestmentsFromApi,
+                                          onReloadParent: () async {
+                                            await _fetchInvestmentsFromApi();
+                                          },
+                                        );
+                                      },
+                                    ),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Floating Add Button
+              // Positioned(
+              //   bottom: 20,
+              //   left: 0,
+              //   right: 0,
+              //   child: Center(
+              //     child: ElevatedButton(
+              //       onPressed: () async {
+              //         showInvestmentTypeDialog(
+              //           context: context,
+              //           mode: "add",
+              //           token: widget.token,
+              //           submit: "1",
+              //           onSubmit: (investmentData) async {
+              //             setState(() => isLoading = true);
+              //             try {
+              //               submitNewInvestment(investmentData);
+              //               await _fetchInvestmentsFromApi();
+              //               await Future.delayed(const Duration(seconds: 1));
+              //             } finally {
+              //               setState(() => isLoading = false);
+              //             }
+              //             await _fetchInvestmentsFromApi();
+              //           },
+              //         );
+              //         _fetchInvestmentsFromApi();
+              //         // if (created == true) {
+              //         //   if (mounted) setState(() => isLoading = true);
+              //         //   await _fetchInvestmentsFromApi(); // <-- make sure this is actually called
+              //         //   if (mounted) setState(() => isLoading = false);
+              //         // }
+              //       },
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: Colors.deepPurple,
+              //         padding: const EdgeInsets.all(10),
+              //         shape: const CircleBorder(),
+              //       ),
+              //       child: const Icon(Icons.add, color: Colors.white, size: 24),
+              //     ),
+              //   ),
+              // )
+
+              Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Open the dialog + stepper and wait for its result (true = final submit success)
+                      final bool? created = await showInvestmentTypeDialog(
+                        context: context,
+                        mode: "add",
+                        token: widget.token,
+                        submit: "1",
+                        onSubmit: (investmentData) {
+                          // optional optimistic local insert
+                          submitNewInvestment(investmentData);
+                        },
+                        // This callback will be called by Stepper whenever any section is saved successfully
+                        onAnySectionSaved: () async {
+                          if (mounted) setState(() => isLoading = true);
+                          await _fetchInvestmentsFromApi();
+                          if (mounted) setState(() => isLoading = false);
+                        },
+                      );
+
+                      // If the Stepper reported final success (user submitted), ensure we refresh once more
+                      if (created == true) {
+                        if (mounted) setState(() => isLoading = true);
+                        await _fetchInvestmentsFromApi();
+                        if (mounted) setState(() => isLoading = false);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      padding: const EdgeInsets.all(10),
+                      shape: const CircleBorder(),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 24),
+                  ),
+                ),
+              )
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

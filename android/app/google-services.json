@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "1007258031441",
+    "project_id": "connect-india-enterprise-483ae",
+    "storage_bucket": "connect-india-enterprise-483ae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1007258031441:android:69c983783a77dc15d8af70",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1007258031441-mv2bo8niqpd9p2qup7ir9f98a43tqqg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapp",
+            "certificate_hash": "45aa308013d17d364cbe6efc13be873ce9753e26"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgErh8d-0no9Zv3dT8_OoqLl-fnNtTp0g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
